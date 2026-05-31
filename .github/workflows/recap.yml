@@ -1,0 +1,52 @@
+name: Stock Recap Reports
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 16:30 Asia/Shanghai on weekdays, after the A-share market close.
+    - cron: "30 8 * * 1-5"
+
+concurrency:
+  group: stock-recap-reports
+  cancel-in-progress: false
+
+jobs:
+  build-reports:
+    runs-on: ubuntu-latest
+    env:
+      TUSHARE_TOKEN: ${{ secrets.TUSHARE_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate scripts
+        run: |
+          python -m py_compile \
+            recap_agent/tushare_client.py \
+            recap_agent/topics/first_double.py \
+            recap_agent/topics/tenbagger_watch.py \
+            scripts/run_first_double.py \
+            scripts/run_tenbagger_watch.py
+
+      - name: Build first-double report
+        run: |
+          python scripts/run_first_double.py \
+            --min-pct-change 100 \
+            --max-pct-change 150
+
+      - name: Build tenbagger watch report
+        run: python scripts/run_tenbagger_watch.py
+
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: stock-recap-reports
+          path: reports/**
+          if-no-files-found: error
+          retention-days: 14
