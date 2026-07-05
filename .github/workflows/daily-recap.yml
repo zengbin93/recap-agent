@@ -1,0 +1,131 @@
+name: daily-recap
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # UTC 00:00 = 北京 08:00
+  workflow_dispatch:
+    inputs:
+      as_of_date:
+        description: "YYYY-MMDD，留空用今天（北京时区）"
+        required: false
+        default: ""
+      task:
+        description: "all / daily / weekly / monthly"
+        required: false
+        default: "all"
+      dry_run:
+        description: "true = 采集渲染但不推送飞书"
+        required: false
+        default: "false"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+# 定时任务重叠时排队，不互相取消
+concurrency:
+  group: recap-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  recap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      TZ: Asia/Shanghai
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安装项目与依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          # 数据采集运行时依赖；装不上不影响渲染/推送逻辑
+          pip install tushare pandas || echo "::warning::tushare/pandas 未装，采集将降级"
+
+      - name: 单元测试
+        run: python -m unittest discover -s tests
+
+      - name: 调度决策
+        id: sched
+        env:
+          # 用 env 中转 workflow_dispatch 输入，避免 run: 内直接插值带来的注入面
+          TASK: ${{ github.event.inputs.task || 'all' }}
+          AS_OF: ${{ github.event.inputs.as_of_date || '' }}
+        run: |
+          python -m recap_agent.schedule --task "$TASK" --as-of "$AS_OF" >> "$GITHUB_OUTPUT"
+
+      - name: 日复盘（daily）
+        id: daily
+        if: steps.sched.outputs.daily == 'true'
+        continue-on-error: true
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            复盘编排-daily。依次执行（任一步失败要报告但继续把后续能做的做完）：
+            1) python .claude/skills/recap-data-collect/scripts/collect.py --as-of-date ${{ steps.sched.outputs.as_of }} --output-dir data/daily
+            2) 阅读 data/daily/*.json，写当日 sections.json（核心结论 / 热点主题 / 风险提示）
+            3) python .claude/skills/recap-daily/scripts/run.py --task daily --date ${{ steps.sched.outputs.date_iso }} --sections sections.json
+            ${{ github.event.inputs.dry_run == 'true' && '4) dry_run 模式：跳过飞书推送。' || '4) python .claude/skills/feishu-card-push/scripts/push.py --task daily --card artifacts/cards/daily.json' }}
+        env:
+          TUSHARE_TOKEN: ${{ secrets.TUSHARE_TOKEN }}
+          FEISHU_WEBHOOKS: ${{ secrets.FEISHU_WEBHOOKS }}
+
+      - name: 周复盘（weekly）
+        id: weekly
+        if: steps.sched.outputs.weekly == 'true'
+        continue-on-error: true
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            复盘编排-weekly。依次执行：
+            1) python .claude/skills/recap-data-collect/scripts/collect.py --as-of-date ${{ steps.sched.outputs.as_of }} --output-dir data/weekly --datasets daily
+            2) 阅读本周数据，写周度 sections.json（本周主线 / 主题演化 / 周度风险）
+            3) python .claude/skills/recap-weekly/scripts/run.py --task weekly --date ${{ steps.sched.outputs.date_iso }} --sections sections.json
+            ${{ github.event.inputs.dry_run == 'true' && '4) dry_run 模式：跳过飞书推送。' || '4) python .claude/skills/feishu-card-push/scripts/push.py --task weekly --card artifacts/cards/weekly.json' }}
+        env:
+          TUSHARE_TOKEN: ${{ secrets.TUSHARE_TOKEN }}
+          FEISHU_WEBHOOKS: ${{ secrets.FEISHU_WEBHOOKS }}
+
+      - name: 月复盘（monthly）
+        id: monthly
+        if: steps.sched.outputs.monthly == 'true'
+        continue-on-error: true
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            复盘编排-monthly。依次执行：
+            1) python .claude/skills/recap-data-collect/scripts/collect.py --as-of-date ${{ steps.sched.outputs.as_of }} --output-dir data/monthly --datasets daily
+            2) 阅读本月数据，写月度 sections.json（结构性变化 / 资金风格 / 月度风险）
+            3) python .claude/skills/recap-monthly/scripts/run.py --task monthly --date ${{ steps.sched.outputs.date_iso }} --sections sections.json
+            ${{ github.event.inputs.dry_run == 'true' && '4) dry_run 模式：跳过飞书推送。' || '4) python .claude/skills/feishu-card-push/scripts/push.py --task monthly --card artifacts/cards/monthly.json' }}
+        env:
+          TUSHARE_TOKEN: ${{ secrets.TUSHARE_TOKEN }}
+          FEISHU_WEBHOOKS: ${{ secrets.FEISHU_WEBHOOKS }}
+
+      - name: 上传产物
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: recap-${{ steps.sched.outputs.as_of }}
+          path: |
+            reports/
+            artifacts/
+            data/
+
+      - name: 结果汇总
+        if: always()
+        run: |
+          {
+            echo "## 复盘结果 ${{ steps.sched.outputs.date_iso }}"
+            echo "- daily: ${{ steps.daily.outcome }}"
+            echo "- weekly: ${{ steps.weekly.outcome }}"
+            echo "- monthly: ${{ steps.monthly.outcome }}"
+          } >> "$GITHUB_STEP_SUMMARY"
