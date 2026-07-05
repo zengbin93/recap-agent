@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>SKZ-77 实现记录 · RecapAgent</title>
+<style>
+  :root { color-scheme: light; --ink:#1f2937; --muted:#5b6472; --line:#d7dde7; --panel:#f7f9fc; --accent:#2563eb; --accent-soft:#e8f0ff; --ok:#0f766e; --warn:#b45309; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif; line-height:1.65; color:var(--ink); }
+  main { max-width:980px; margin:0 auto; padding:36px 24px 72px; }
+  header { border-bottom:1px solid var(--line); padding-bottom:20px; margin-bottom:28px; }
+  h1 { margin:0 0 8px; font-size:30px; }
+  h2 { margin:32px 0 12px; font-size:21px; border-left:4px solid var(--accent); padding-left:12px; }
+  h3 { margin:20px 0 6px; font-size:16px; }
+  code, pre { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+  code { background:var(--accent-soft); padding:1px 5px; border-radius:4px; }
+  pre { background:#111827; color:#f9fafb; padding:16px; border-radius:8px; overflow:auto; }
+  pre code { background:transparent; padding:0; color:inherit; }
+  table { width:100%; border-collapse:collapse; margin:12px 0 20px; font-size:14px; }
+  th,td { border:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top; }
+  th { background:var(--panel); }
+  .meta { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:12px 16px; color:var(--muted); font-size:14px; }
+  .ok { color:var(--ok); font-weight:700; }
+  .warn { color:var(--warn); font-weight:700; }
+  a { color:var(--accent); }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>SKZ-77 实现记录：复盘工程化改造</h1>
+  <div class="meta">
+    Issue：<code>SKZ-77 / a17ca508-97a6-4736-a8ed-44a001b3ab31</code> ·
+    项目：RecapAgent 全球市场复盘 ·
+    实现分支：<code>glm/skz-77-implementation</code> ·
+    基准：定稿设计 <code>docs/design/SKZ-77-recap-agent-engineering-design.html</code>
+  </div>
+</header>
+
+<h2>1. 交付概述</h2>
+<p>按定稿设计落地复盘工程：5 个 Claude Code 项目级 skill + 可测试 Python 工具层 + GitHub Actions 每日 08:00（北京）编排 + 飞书卡片推送。
+工具层零运行时依赖（<code>urllib</code> / <code>unittest</code> / <code>hmac</code> 等 stdlib）；<code>tushare</code> / <code>pandas</code> 仅在数据采集时按需 import，单测在边界 mock，因此 CI 单测无需安装它们。</p>
+
+<h2>2. 文件清单</h2>
+<table>
+  <tr><th>路径</th><th>职责</th></tr>
+  <tr><td><code>recap_agent/feishu/webhooks.py</code></td><td>解析 <code>FEISHU_WEBHOOKS</code> JSON；daily 必填，weekly/monthly 缺省回退 daily；JSON 解析失败 / 字段缺失抛清晰 <code>ValueError</code></td></tr>
+  <tr><td><code>recap_agent/feishu/send.py</code></td><td>webhook URL 拼接（key 或完整 URL）+ 飞书官方 HMAC-SHA256 签名 + <code>urllib</code> 发送；网络/非 2xx 落结构化结果，不抛</td></tr>
+  <tr><td><code>recap_agent/data/cache.py</code></td><td>按 dataset+params 隔离；空结果不缓存；损坏/截断（<code>count</code> 不符）视为未命中；原子替换写入</td></tr>
+  <tr><td><code>recap_agent/data/tushare_client.py</code></td><td>重试 3 次（限流 / 网络 / 空结果），耗尽抛 <code>SkipDataset</code> 降级；不可重试错误（认证/参数）立即抛；对外只吐 <code>list[dict]</code></td></tr>
+  <tr><td><code>recap_agent/reports/{render,pipeline}.py</code></td><td>HTML 报告 + 飞书卡片渲染；daily/weekly/monthly 共用 pipeline</td></tr>
+  <tr><td><code>recap_agent/schedule.py</code></td><td>编排调度：daily 每天 / weekly 周一 / monthly 月初 1–3 号；可手动覆盖</td></tr>
+  <tr><td><code>.claude/skills/recap-data-collect</code></td><td>共享采集 skill（<code>collect.py</code> + <code>SKILL.md</code>）</td></tr>
+  <tr><td><code>.claude/skills/recap-{daily,weekly,monthly}</code></td><td>三个复盘 skill（<code>run.py</code> + <code>card.json</code> + <code>SKILL.md</code>）</td></tr>
+  <tr><td><code>.claude/skills/feishu-card-push</code></td><td>推送 skill（<code>push.py</code> + <code>SKILL.md</code>）</td></tr>
+  <tr><td><code>.github/workflows/daily-recap.yml</code></td><td>cron <code>0 0 * * *</code>（UTC=北京08:00）+ <code>workflow_dispatch</code>；三任务各 <code>continue-on-error</code> 隔离失败；artifact <code>if: always()</code></td></tr>
+  <tr><td><code>tests/</code></td><td>8 个测试模块，覆盖降级/回退/签名/缓存/调度/workflow 静态校验</td></tr>
+</table>
+
+<h2>3. 测试证据</h2>
+<pre><code>$ python -m unittest discover -s tests
+Ran 54 tests in 0.007s
+OK</code></pre>
+<p>覆盖的非 happy-path：daily 缺失 / 无 key 抛错、weekly/monthly 回退 daily、weekly 无 key 也回退、JSON 解析失败、顶层非对象、签名已知向量（<code>timestamp=1700000000, secret="abc"</code>）、空/损坏/截断缓存丢弃、限流 3 次后 <code>SkipDataset</code>、不可重试错误立即抛、workflow 静态校验（cron / secrets / continue-on-error / artifact / claude-code-action）。</p>
+
+<h2>4. 关键决策与取舍</h2>
+<h3>4.1 <code>FEISHU_WEBHOOKS</code> 单 JSON（覆盖设计文档的 <code>FEISHU_KEY*</code>）</h3>
+<p class="warn">偏离设计文档。</p>
+<p>设计文档原用 <code>FEISHU_KEY</code> + <code>FEISHU_KEY_{DAILY,WEEKLY,MONTHLY}</code> 多个 secret 加回退规则；验收人在审核要点里明确改为单个 <code>FEISHU_WEBHOOKS</code> JSON（daily 必填、weekly/monthly 缺省回退 daily）。本实现<span class="ok">以验收人最新指令为准</span>，更紧凑（一个 secret 搞定），签名也内化到每个任务对象的 <code>sign_secret</code> 字段。</p>
+
+<h3>4.2 零运行时依赖（stdlib 优先）</h3>
+<p>环境为干净的 Python 3.14。HTTP 用 <code>urllib</code>、测试用 <code>unittest</code>、签名用 <code>hmac</code>/<code>hashlib</code>/<code>base64</code>。<code>tushare</code>/<code>pandas</code> 在 <code>_default_fetcher</code> 内按需 import，对外只吐 <code>list[dict]</code>，单测在 fetcher 边界注入 fake，因此 <code>pip install -e .</code> 即可跑全部 54 个测试。</p>
+
+<h3>4.3 flat layout</h3>
+<p>包源码放在仓库根的 <code>recap_agent/</code>（而非 <code>src/recap_agent/</code>），让 <code>python -m unittest discover -s tests</code> 零配置即可 import，CI 少一步。</p>
+
+<h3>4.4 失败可见性落到 CI 层面</h3>
+<p>workflow 的 daily / weekly / monthly 三个 <code>anthropics/claude-code-action</code> step 各自 <code>continue-on-error: true</code>，单个任务失败不阻断同批其它任务；末尾 <code>if: always()</code> 上传 artifact 并把每个任务的 <code>outcome</code> 写入 Step Summary。</p>
+
+<h3>4.5 workflow 注入面</h3>
+<p><code>workflow_dispatch</code> 的 <code>task</code> / <code>as_of_date</code> 输入经 <code>env:</code> 中转进 <code>run:</code>，而非直接 <code>${{ }}</code> 插值；<code>--task</code> 并由 <code>argparse choices</code> 校验，收敛注入面。</p>
+
+<h2>5. PR</h2>
+<p>实现 PR：<code>glm/skz-77-implementation → main</code>（标题含 SKZ-77）。合并后 <code>.github/workflows/daily-recap.yml</code> 才会在默认分支生效、定时触发。</p>
+
+<h2>6. 后续</h2>
+<ul>
+  <li>合并后配置三个仓库 secret（<code>TUSHARE_TOKEN</code> / <code>FEISHU_WEBHOOKS</code> / <code>ANTHROPIC_API_KEY</code>），手动 <code>workflow_dispatch</code> 跑一次 dry_run 验证。</li>
+  <li>复盘观点质量（结论/热点/风险）由 Claude Code 在编排时基于数据生成，本实现只提供确定性脚手架与渲染。</li>
+</ul>
+</main>
+</body>
+</html>
