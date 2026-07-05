@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>SKZ-78 开发记录</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 40px; line-height: 1.65; color: #202124; }
+    code { background: #f1f3f4; padding: 2px 5px; border-radius: 4px; }
+    pre { background: #f8fafd; padding: 12px; overflow: auto; }
+  </style>
+</head>
+<body>
+  <h1>SKZ-78 开发记录</h1>
+  <p>Issue：SKZ-78，重开 SKZ-77 的 RecapAgent 工程化改造。</p>
+
+  <h2>接地记录</h2>
+  <ul>
+    <li>当前本地分支：<code>main</code>，远程：<code>https://github.com/zengbin93/recap-agent</code>。</li>
+    <li>当前 tracked 文件：<code>.gitignore</code>、<code>LICENSE</code>、<code>README.md</code>。</li>
+    <li>远程旧 PR：#1、#2、#3 均为 open；其中 #2/#3 属于 SKZ-77。本次不沿用旧 PR 实现或结论。</li>
+    <li>开发 worktree：<code>../recap-agent-skz-78</code>，分支：<code>codex/skz-78-engineering</code>。</li>
+  </ul>
+
+  <h2>TDD 记录</h2>
+  <p>先写 <code>tests/test_recap_engineering.py</code>，运行 <code>python3 -m unittest discover -s tests -v</code> 得到 6 个预期失败：核心模块和 workflow 均缺失。随后补实现并跑到绿色。</p>
+
+  <h2>交付内容</h2>
+  <ul>
+    <li>新增 <code>recap_agent</code> Python 包，包含数据采集、飞书推送、报告渲染和 CLI。</li>
+    <li>新增 5 个 skill 目录及对应脚本。</li>
+    <li>新增 GitHub Actions 定时和手动 dry run workflow。</li>
+    <li>README 记录 secrets 清单、飞书单群/多群配置、回退规则和本地 dry run。</li>
+  </ul>
+</body>
+</html>
+

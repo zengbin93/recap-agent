@@ -1,0 +1,14 @@
+[project]
+name = "recap-agent"
+version = "0.1.0"
+description = "LLM-driven global market recap engineering system"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+recap-agent = "recap_agent.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+

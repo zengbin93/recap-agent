@@ -1,0 +1,92 @@
+name: Daily Global Market Recap
+
+on:
+  schedule:
+    # 00:00 UTC = 08:00 Asia/Shanghai.
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "Recap task to run"
+        required: true
+        default: "daily"
+        type: choice
+        options:
+          - daily
+          - weekly
+          - monthly
+      dry_run:
+        description: "Generate artifacts without sending Feishu card"
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  recap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      TUSHARE_TOKEN: ${{ secrets.TUSHARE_TOKEN }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
+      FEISHU_WEBHOOK_SECRET: ${{ secrets.FEISHU_WEBHOOK_SECRET }}
+      FEISHU_WEBHOOKS_JSON: ${{ secrets.FEISHU_WEBHOOKS_JSON }}
+      FEISHU_DAILY_WEBHOOK_URL: ${{ secrets.FEISHU_DAILY_WEBHOOK_URL }}
+      FEISHU_DAILY_WEBHOOK_SECRET: ${{ secrets.FEISHU_DAILY_WEBHOOK_SECRET }}
+      FEISHU_WEEKLY_WEBHOOK_URL: ${{ secrets.FEISHU_WEEKLY_WEBHOOK_URL }}
+      FEISHU_WEEKLY_WEBHOOK_SECRET: ${{ secrets.FEISHU_WEEKLY_WEBHOOK_SECRET }}
+      FEISHU_MONTHLY_WEBHOOK_URL: ${{ secrets.FEISHU_MONTHLY_WEBHOOK_URL }}
+      FEISHU_MONTHLY_WEBHOOK_SECRET: ${{ secrets.FEISHU_MONTHLY_WEBHOOK_SECRET }}
+      RECAP_TASK: ${{ github.event.inputs.task || 'daily' }}
+      RECAP_DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install local package
+        run: python -m pip install -e .
+
+      - name: Preflight secrets
+        run: |
+          missing=0
+          for name in TUSHARE_TOKEN ANTHROPIC_API_KEY; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing required secret $name"
+              missing=1
+            fi
+          done
+          if [ -z "$FEISHU_WEBHOOK_URL" ] && [ -z "$FEISHU_WEBHOOKS_JSON" ] && [ -z "$FEISHU_DAILY_WEBHOOK_URL" ]; then
+            echo "::warning::No Feishu webhook secret configured; report generation can run but card push will be skipped."
+          fi
+          exit "$missing"
+
+      - name: Claude Code recap orchestration
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Use the repository recap skills to run the selected market recap task.
+            Execute the deterministic script exactly once:
+            python3 scripts/run_recap.py --task "$RECAP_TASK" --output-dir artifacts/reports $([ "$RECAP_DRY_RUN" = "true" ] && echo "--dry-run")
+            Leave generated HTML reports and Feishu card JSON under artifacts/reports.
+          claude_args: |
+            --allowedTools Bash
+
+      - name: Upload recap artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: recap-${{ env.RECAP_TASK }}-${{ github.run_id }}
+          path: |
+            artifacts/reports/**
+            artifacts/cache/**
+          if-no-files-found: warn
