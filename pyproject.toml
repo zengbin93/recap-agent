@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "recap-agent"
+version = "0.1.0"
+description = "全球市场复盘工程：skill 化复盘任务 + GitHub Actions 定时编排 + 飞书卡片推送"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "RecapAgent" }]
+dependencies = []
+
+[project.optional-dependencies]
+# 数据采集运行时才需要 tushare/pandas；纯逻辑与单测零依赖。
+data = ["tushare>=1.4", "pandas>=2.0"]
+
+[tool.setuptools.packages.find]
+include = ["recap_agent*"]
+exclude = ["tests*", ".claude*", "docs*", "configs*", "scripts*"]
