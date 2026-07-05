@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>在 GitHub Actions 中配置 Claude（claude-code-action@v1）</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 40px; line-height: 1.65; color: #202124; }
+    h1, h2, h3 { line-height: 1.25; }
+    code { background: #f1f3f4; padding: 2px 5px; border-radius: 4px; }
+    pre { background: #f8f9fa; border: 1px solid #dadce0; border-radius: 6px; padding: 14px 16px; overflow-x: auto; line-height: 1.5; }
+    pre code { background: none; padding: 0; }
+    table { border-collapse: collapse; width: 100%; margin: 8px 0; }
+    th, td { border: 1px solid #dadce0; padding: 8px 10px; text-align: left; vertical-align: top; }
+    .note { background: #fef7e0; border-left: 4px solid #f9ab00; padding: 10px 14px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>在 GitHub Actions 中配置 Claude</h1>
+  <p>本文档汇总 <code>anthropics/claude-code-action@v1</code> 的配置方法，覆盖：可配置项总览、官方 Anthropic 接入、GLM 等 Anthropic 兼容模型接入、以及定时任务（cron）三种落地场景。</p>
+
+  <h2>1. 可配置项总览</h2>
+  <p>v1 把 v0.x 一堆分散输入合并为 <code>prompt</code> + <code>claude_args</code> 两个核心入口，并按是否填写 <code>prompt</code> 自动判定模式：留空走 Tag 模式（响应评论里的 <code>@claude</code>），填写走 Agent 模式（自动化任务）。</p>
+
+  <h3>核心 with 输入</h3>
+  <table>
+    <tr><th>参数</th><th>说明</th><th>默认</th></tr>
+    <tr><td><code>prompt</code></td><td>给 Claude 的指令。留空=Tag 模式；填写=Agent 模式。</td><td>空</td></tr>
+    <tr><td><code>claude_args</code></td><td>直接透传给 Claude CLI 的参数（见下）。取代 v0.x 的 <code>max_turns</code>/<code>allowed_tools</code>/<code>model</code> 等。</td><td>空</td></tr>
+    <tr><td><code>track_progress</code></td><td>设 <code>true</code> 强制 Tag 模式并生成进度追踪评论，自动注入 PR/Issue 上下文。仅对特定 PR/Issue 事件生效，用错事件会报错。</td><td>false</td></tr>
+    <tr><td><code>trigger_phrase</code></td><td>触发关键词。</td><td>@claude</td></tr>
+    <tr><td><code>assignee_trigger</code></td><td>Issue 指派给某用户名时触发。</td><td>空</td></tr>
+    <tr><td><code>label_trigger</code></td><td>打上某标签时触发。</td><td>空</td></tr>
+    <tr><td><code>base_branch</code></td><td>新建分支的基础分支。</td><td>仓库默认分支</td></tr>
+    <tr><td><code>branch_prefix</code></td><td>Claude 创建分支的前缀。</td><td>claude/</td></tr>
+    <tr><td><code>use_sticky_comment</code></td><td>复用同一条评论更新，而非每次新建。</td><td>false</td></tr>
+    <tr><td><code>use_commit_signing</code></td><td>通过 GitHub API 提交并签名 commit。</td><td>false</td></tr>
+    <tr><td><code>allowed_bots</code></td><td>允许触发的 bot 用户名（逗号分隔，<code>*</code>=全部）。</td><td>空</td></tr>
+    <tr><td><code>github_token</code></td><td>自定义 GitHub token。</td><td>自动生成</td></tr>
+    <tr><td><code>settings</code></td><td>Claude Code settings JSON 字符串或文件路径。</td><td>空</td></tr>
+    <tr><td><code>path_to_claude_code_executable</code></td><td>自定义 Claude Code 可执行文件路径。</td><td>空</td></tr>
+  </table>
+
+  <h3>claude_args 常用透传项</h3>
+  <table>
+    <tr><th>参数</th><th>说明</th></tr>
+    <tr><td><code>--model</code></td><td>指定模型（如 <code>claude-sonnet-5</code>、<code>opus</code>）。</td></tr>
+    <tr><td><code>--max-turns</code></td><td>最大对话轮数。</td></tr>
+    <tr><td><code>--system-prompt</code> / <code>--append-system-prompt</code></td><td>覆盖 / 追加系统提示。</td></tr>
+    <tr><td><code>--allowedTools</code> / <code>--disallowedTools</code></td><td>工具白名单 / 黑名单。</td></tr>
+    <tr><td><code>--mcp-config</code></td><td>MCP 服务器配置。</td></tr>
+    <tr><td><code>--json-schema</code></td><td>让 Claude 输出结构化 JSON，自动成为 Action output 供后续步骤使用。</td></tr>
+    <tr><td><code>--fallback-model</code></td><td>主模型不可用时的降级模型。</td></tr>
+  </table>
+  <p class="note">超时不再是 Action 输入，改用 job 级 <code>timeout-minutes</code>。</p>
+
+  <h2>2. 认证配置（三选一）</h2>
+  <table>
+    <tr><th>方式</th><th>配置</th></tr>
+    <tr><td>Anthropic API 直连</td><td><code>anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}</code></td></tr>
+    <tr><td>OAuth（Pro/Max 订阅）</td><td><code>claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}</code></td></tr>
+    <tr><td>Bedrock / Vertex（企业云）</td><td>环境变量 <code>CLAUDE_CODE_USE_BEDROCK: "1"</code> 或 <code>CLAUDE_CODE_USE_VERTEX: "1"</code>，配合 OIDC 免密</td></tr>
+  </table>
+
+  <h2>3. 接入 GLM 等 Anthropic 兼容模型</h2>
+  <p>GLM 提供 Anthropic 兼容接口，不改 Action 本身，只通过环境变量把底层 Claude Code 指向智谱端点。</p>
+  <p><strong>需要的 Secrets：</strong>仅一个 <code>GLM_API_KEY</code>（智谱开放平台申请的 API Key）。</p>
+  <pre><code>- uses: anthropics/claude-code-action@v1
+  env:
+    ANTHROPIC_BASE_URL: https://open.bigmodel.cn/api/anthropic
+    ANTHROPIC_AUTH_TOKEN: ${{ secrets.GLM_API_KEY }}
+    ANTHROPIC_MODEL: glm-4.6              # 换成平台上的准确模型标识
+    ANTHROPIC_SMALL_FAST_MODEL: glm-4.5-air   # 后台轻量调用用的小模型
+  with:
+    prompt: "审查这个 PR"
+    claude_args: |
+      --model glm-4.6</code></pre>
+  <p>要点：</p>
+  <ul>
+    <li><code>ANTHROPIC_BASE_URL</code> 指向智谱 Anthropic 协议兼容地址。</li>
+    <li>用 <code>ANTHROPIC_AUTH_TOKEN</code> 放 key，而非 <code>anthropic_api_key</code> 输入项。</li>
+    <li>模型名在 <code>ANTHROPIC_MODEL</code> 与 <code>--model</code> 保持一致，去平台确认准确标识。</li>
+    <li>指定 <code>ANTHROPIC_SMALL_FAST_MODEL</code>，避免后台轻量任务报错或浪费。</li>
+    <li>不要同时传 <code>anthropic_api_key</code> / <code>claude_code_oauth_token</code>，会与 base URL 鉴权冲突。</li>
+  </ul>
+
+  <h2>4. 定时执行任务（cron）</h2>
+  <p>定时任务用 GitHub 的 <code>schedule</code>（cron）触发，配合 Agent 模式（填 <code>prompt</code>）。</p>
+  <pre><code>name: Claude 定时任务
+on:
+  schedule:
+    - cron: "0 1 * * *"      # 每天 UTC 01:00（北京时间 09:00）
+  workflow_dispatch:          # 手动触发，方便测试
+
+jobs:
+  scheduled-task:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write         # 需改代码/提交时
+      issues: write           # 需建 issue 时
+      pull-requests: write    # 需开 PR 时
+    steps:
+      - uses: actions/checkout@v4
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            汇总昨天合并的所有 commit 和新开的 issue，
+            生成一份日报并创建成一个新的 GitHub issue。
+          claude_args: |
+            --model claude-sonnet-5
+            --max-turns 15</code></pre>
+  <p>要点：</p>
+  <ul>
+    <li>cron 为 5 段式 <strong>UTC</strong> 时间，北京时间需减 8 小时。</li>
+    <li>定时场景<strong>必须</strong>填 <code>prompt</code>（走 Agent 模式），否则无评论上下文。</li>
+    <li><code>permissions</code> 按需授予：只读分析 <code>contents: read</code>；提交/开 PR 加 <code>pull-requests: write</code>；建 issue 加 <code>issues: write</code>。</li>
+    <li>GitHub schedule 有延迟（高峰可能推迟十几分钟），且<strong>只有默认分支上的 workflow 才会定时触发</strong>。</li>
+    <li>若改用 GLM 跑定时任务：加上第 3 节的 <code>env</code>，去掉 <code>anthropic_api_key</code> 即可。</li>
+  </ul>
+
+  <h3>cron 常用写法</h3>
+  <table>
+    <tr><th>表达式</th><th>含义</th></tr>
+    <tr><td><code>0 1 * * *</code></td><td>每天一次</td></tr>
+    <tr><td><code>0 1 * * 1</code></td><td>每周一</td></tr>
+    <tr><td><code>0 */6 * * *</code></td><td>每 6 小时</td></tr>
+  </table>
+
+  <h2>Secrets 速查</h2>
+  <table>
+    <tr><th>场景</th><th>需要的 Secret</th></tr>
+    <tr><td>官方 Anthropic API</td><td><code>ANTHROPIC_API_KEY</code></td></tr>
+    <tr><td>Claude 订阅 OAuth</td><td><code>CLAUDE_CODE_OAUTH_TOKEN</code></td></tr>
+    <tr><td>GLM（Anthropic 兼容）</td><td><code>GLM_API_KEY</code></td></tr>
+  </table>
+  <p>添加位置：GitHub 仓库 → Settings → Secrets and variables → Actions。</p>
+</body>
+</html>
