@@ -1,0 +1,16 @@
+{
+  "config": {"wide_screen_mode": true},
+  "header": {
+    "title": {"tag": "plain_text", "content": "全球市场月复盘 <DATE>"},
+    "template": "purple"
+  },
+  "elements": [
+    {
+      "tag": "div",
+      "text": {
+        "tag": "lark_md",
+        "content": "**结构性变化**\n- ...\n\n**资金 / 风格**\n- ...\n\n**月度风险**\n- ..."
+      }
+    }
+  ]
+}

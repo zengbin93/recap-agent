@@ -1,0 +1,16 @@
+{
+  "config": {"wide_screen_mode": true},
+  "header": {
+    "title": {"tag": "plain_text", "content": "全球市场日复盘 <DATE>"},
+    "template": "green"
+  },
+  "elements": [
+    {
+      "tag": "div",
+      "text": {
+        "tag": "lark_md",
+        "content": "**核心结论**\n- ...\n\n**热点主题**\n- ...\n\n**风险提示**\n- ..."
+      }
+    }
+  ]
+}

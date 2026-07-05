@@ -1,0 +1,16 @@
+{
+  "config": {"wide_screen_mode": true},
+  "header": {
+    "title": {"tag": "plain_text", "content": "全球市场周复盘 <DATE>"},
+    "template": "blue"
+  },
+  "elements": [
+    {
+      "tag": "div",
+      "text": {
+        "tag": "lark_md",
+        "content": "**本周主线**\n- ...\n\n**延续 / 衰退主题**\n- ...\n\n**周度风险**\n- ..."
+      }
+    }
+  ]
+}

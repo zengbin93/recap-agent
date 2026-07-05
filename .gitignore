@@ -1,3 +1,13 @@
+# Claude Code 本地状态（skills/ 是产品的一部分，入库；其余不入库）
+.claude/settings.local.json
+.claude/worktrees/
+
+# 运行产物（仅仓库根目录，不影响源码包 recap_agent/）
+/data/
+/reports/
+/artifacts/
+.env
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
