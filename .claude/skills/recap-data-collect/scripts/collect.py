@@ -38,17 +38,25 @@ def main(argv=None) -> int:
     manifest = {"as_of_date": args.as_of_date, "datasets": {}, "skipped": []}
     for ds in [d.strip() for d in args.datasets.split(",") if d.strip()]:
         params = {"trade_date": args.as_of_date}
-        try:
-            rows = fetch_dataset(ds, args.token, params)
-        except SkipDataset as exc:
-            print(f"WARN: 跳过 {ds}: {exc}", file=sys.stderr)
-            manifest["skipped"].append({"dataset": ds, "reason": str(exc)})
-            continue
-        cache.put(ds, rows, trade_date=args.as_of_date)
+        rows = cache.get(ds, trade_date=args.as_of_date)
+        source = "cache"
+        if rows is None:
+            source = "tushare"
+            try:
+                rows = fetch_dataset(ds, args.token, params)
+            except SkipDataset as exc:
+                print(f"WARN: 跳过 {ds}: {exc}", file=sys.stderr)
+                manifest["skipped"].append({"dataset": ds, "reason": str(exc)})
+                continue
+            cache.put(ds, rows, trade_date=args.as_of_date)
         out_file = output / f"{ds}.json"
         out_file.write_text(json.dumps(rows, ensure_ascii=False), encoding="utf-8")
-        manifest["datasets"][ds] = {"rows": len(rows), "file": out_file.name}
-        print(f"OK: {ds}  {len(rows)} 行  →  {out_file.name}")
+        manifest["datasets"][ds] = {
+            "rows": len(rows),
+            "file": out_file.name,
+            "source": source,
+        }
+        print(f"OK: {ds}  {len(rows)} 行  [{source}] →  {out_file.name}")
 
     (output / "manifest.json").write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8"
