@@ -170,6 +170,50 @@ class RecapEngineeringTests(unittest.TestCase):
             self.assertIn("--dry-run", proc.stdout)
             self.assertIn("--output-dir", proc.stdout)
 
+    def test_tushare_recap_reports_skill_wraps_pr_topics(self):
+        skill_dir = ROOT / "skills" / "tushare-recap-reports"
+        script = skill_dir / "scripts" / "run.py"
+
+        self.assertTrue((skill_dir / "SKILL.md").exists())
+        self.assertTrue(script.exists())
+        self.assertFalse((ROOT / "scripts" / "run_first_double.py").exists())
+        self.assertFalse((ROOT / "scripts" / "run_tenbagger_watch.py").exists())
+
+        proc = subprocess.run(
+            [sys.executable, str(script), "--help"],
+            cwd=ROOT,
+            check=True,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+
+        self.assertIn("first-double", proc.stdout)
+        self.assertIn("tenbagger-watch", proc.stdout)
+        self.assertIn("full-chain", proc.stdout)
+
+        first_double = subprocess.run(
+            [sys.executable, str(script), "first-double", "--help"],
+            cwd=ROOT,
+            check=True,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        self.assertIn("--lookback-days", first_double.stdout)
+        self.assertIn("--min-pct-change", first_double.stdout)
+
+        watch = subprocess.run(
+            [sys.executable, str(script), "tenbagger-watch", "--help"],
+            cwd=ROOT,
+            check=True,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        self.assertIn("--source-report", watch.stdout)
+        self.assertIn("--limit", watch.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()
