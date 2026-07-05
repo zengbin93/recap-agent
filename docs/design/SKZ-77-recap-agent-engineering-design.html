@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SKZ-77 复盘工程化改造设计方案</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #1f2937;
+        --muted: #5b6472;
+        --line: #d7dde7;
+        --panel: #f7f9fc;
+        --accent: #2563eb;
+        --accent-soft: #e8f0ff;
+        --ok: #0f766e;
+        --warn: #b45309;
+      }
+
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.65;
+        color: var(--ink);
+        background: #ffffff;
+      }
+
+      main {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 40px 24px 64px;
+      }
+
+      header {
+        border-bottom: 1px solid var(--line);
+        padding-bottom: 24px;
+        margin-bottom: 32px;
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: 34px;
+        line-height: 1.2;
+      }
+
+      h2 {
+        margin: 40px 0 14px;
+        font-size: 24px;
+        border-left: 4px solid var(--accent);
+        padding-left: 12px;
+      }
+
+      h3 {
+        margin: 24px 0 8px;
+        font-size: 18px;
+      }
+
+      p {
+        margin: 10px 0;
+      }
+
+      ul,
+      ol {
+        padding-left: 24px;
+      }
+
+      li {
+        margin: 6px 0;
+      }
+
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        background: var(--accent-soft);
+        padding: 1px 5px;
+        border-radius: 4px;
+      }
+
+      pre {
+        overflow: auto;
+        background: #111827;
+        color: #f9fafb;
+        padding: 18px;
+        border-radius: 8px;
+        line-height: 1.5;
+      }
+
+      pre code {
+        background: transparent;
+        padding: 0;
+        color: inherit;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 16px 0 24px;
+        font-size: 14px;
+      }
+
+      th,
+      td {
+        border: 1px solid var(--line);
+        padding: 10px 12px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: var(--panel);
+      }
+
+      .meta,
+      .note {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 14px 16px;
+      }
+
+      .tag {
+        display: inline-block;
+        margin-right: 8px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .ok {
+        color: var(--ok);
+        font-weight: 700;
+      }
+
+      .warn {
+        color: var(--warn);
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="meta">
+          <span class="tag">Issue SKZ-77</span>
+          <span class="tag">RecapAgent 全球市场复盘</span>
+          <span class="tag">设计方案</span>
+        </p>
+        <h1>复盘任务 Skill 化、定时编排与飞书卡片推送设计</h1>
+        <p>
+          本文档记录从零搭建复盘工程体系的设计方案。当前仓库只包含基础
+          README、LICENSE 和 gitignore，因此本方案按新项目组织，而不是按存量重构处理。
+        </p>
+      </header>
+
+      <section>
+        <h2>1. 目标与边界</h2>
+        <p>
+          目标是把全球市场复盘建设成一套由 Claude Code 驱动、按日定时运行、按任务拆分
+          skill、并通过飞书卡片分发结果的工程化系统。
+        </p>
+        <ul>
+          <li>每个复盘任务是一个独立 skill，聚焦单一问题：日复盘、周复盘、月复盘。</li>
+          <li>共享数据采集能力独立成 skill，但只做复盘工程内的数据契约、缓存和质量检查。</li>
+          <li>已有 <code>tushare</code> skill 作为数据研究和接口选择能力复用，不在仓库内重造。</li>
+          <li>GitHub Actions 每天北京时间 08:00 触发，由 Claude Code 编排全量复盘任务。</li>
+          <li>每个复盘任务生成自己的飞书卡片，通过 GitHub Secrets 中的飞书机器人 key 推送。</li>
+        </ul>
+        <p class="note">
+          本阶段只落设计文档。实现阶段需另起 git worktree，先写 TDD，再实现代码、CI 和推送能力。
+        </p>
+      </section>
+
+      <section>
+        <h2>2. 推荐架构</h2>
+        <p>
+          推荐采用“项目级 Claude skills + 共享 Python 工具层 + GitHub Actions 调用 Claude Code”的结构。
+          skill 负责把复盘任务表达清楚，Python 工具层负责可测试、可复用、确定性的工程能力。
+        </p>
+
+        <pre><code>.claude/skills/
+  market-data-collector/
+    SKILL.md
+    scripts/collect.py
+    references/data-contract.md
+  daily-market-recap/
+    SKILL.md
+    scripts/run.py
+    templates/card.json
+    templates/report.html
+  weekly-market-recap/
+    SKILL.md
+    scripts/run.py
+    templates/card.json
+    templates/report.html
+  monthly-market-recap/
+    SKILL.md
+    scripts/run.py
+    templates/card.json
+    templates/report.html
+.github/workflows/daily-recap.yml
+configs/recap.yml
+src/recap_agent/
+  data/contracts.py
+  data/cache.py
+  reports/render.py
+  feishu/cards.py
+  feishu/send.py
+tests/
+docs/design/
+docs/development/</code></pre>
+
+        <h3>设计取舍</h3>
+        <ul>
+          <li>
+            <span class="ok">选择多 skill：</span>日、周、月复盘的判断口径不同，拆开能降低上下文污染，
+            也便于后续单独迭代和调度。
+          </li>
+          <li>
+            <span class="ok">保留共享工具层：</span>飞书发送、HTML 渲染、数据 schema、缓存不应散落在 skill
+            文本里，应该落在可测试代码中。
+          </li>
+          <li>
+            <span class="warn">不重写 tushare skill：</span>项目内只做复盘工程封装，避免复制已有自然语言数据研究能力。
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>3. Skill 拆分清单</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Skill</th>
+              <th>职责</th>
+              <th>输入</th>
+              <th>输出</th>
+              <th>复用边界</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>market-data-collector</code></td>
+              <td>共享数据采集、标准化、缓存和质量检查。</td>
+              <td><code>task_type</code>、<code>as_of_date</code>、时间范围、市场范围、数据集清单、输出目录。</td>
+              <td>标准化 JSON/CSV/parquet、<code>manifest.json</code>、数据质量告警。</td>
+              <td>复用已有 <code>tushare</code> skill 的接口选择与数据口径；不生成观点、HTML 或飞书卡片。</td>
+            </tr>
+            <tr>
+              <td><code>daily-market-recap</code></td>
+              <td>每日市场复盘，回答最近一个交易日发生了什么。</td>
+              <td>交易日、市场范围、数据目录、推送目标。</td>
+              <td>日报 HTML、日报卡片 JSON、短 Markdown 摘要。</td>
+              <td>只处理日频视角，不承担周/月趋势归因。</td>
+            </tr>
+            <tr>
+              <td><code>weekly-market-recap</code></td>
+              <td>周度市场复盘，回答本周主线如何演化。</td>
+              <td>周区间、最近 5 个交易日数据、主题配置、推送目标。</td>
+              <td>周报 HTML、周报卡片 JSON、主题/行业/风格变化摘要。</td>
+              <td>只做周度归纳，不替代每日异动追踪。</td>
+            </tr>
+            <tr>
+              <td><code>monthly-market-recap</code></td>
+              <td>月度市场复盘，回答本月市场结构、宏观和资金风格如何变化。</td>
+              <td>自然月或指定月区间、指数/行业/月度宏观数据、推送目标。</td>
+              <td>月报 HTML、月报卡片 JSON、结构性变化摘要。</td>
+              <td>只做月度结构判断，不承担日内或单周热点解释。</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>4. 数据流</h2>
+        <ol>
+          <li>GitHub Actions 在北京时间 08:00 触发，或由人工使用 <code>workflow_dispatch</code> 手动触发。</li>
+          <li>Claude Code 读取配置和日期参数，先调用 <code>market-data-collector</code> 建立本次复盘数据包。</li>
+          <li>日复盘每次执行；周复盘按配置在周末或周一执行；月复盘按配置在月末或下月首个交易日执行。</li>
+          <li>各复盘 skill 读取共享数据包，生成 HTML 报告、卡片 JSON 和摘要。</li>
+          <li>飞书发送层读取对应 secret，把每个任务的卡片发到目标群。</li>
+          <li>GitHub Actions 上传 <code>reports/</code> 与 <code>artifacts/</code>，用于审计和排查。</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>5. GitHub Actions 定时编排</h2>
+        <p>
+          工作流文件为 <code>.github/workflows/daily-recap.yml</code>。定时表达式使用 UTC 时间：
+          <code>0 0 * * *</code>，对应北京时间每天 08:00。
+        </p>
+        <pre><code>on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+    inputs:
+      as_of_date:
+        required: false
+      task:
+        required: false
+        default: all
+      dry_run:
+        required: false
+        default: "false"</code></pre>
+        <p>Job 设计：</p>
+        <ul>
+          <li>checkout 仓库。</li>
+          <li>安装 Python 依赖和项目包。</li>
+          <li>准备 Claude Code 运行环境与项目级 skills。</li>
+          <li>调用 <code>anthropics/claude-code-action@v1</code>，通过 prompt 要求 Claude Code 顺序编排复盘任务。</li>
+          <li>上传 HTML 报告和中间产物。</li>
+          <li>失败时生成 failure card，并在非 dry run 模式下推送飞书。</li>
+        </ul>
+        <p>
+          工作流应配置 <code>concurrency</code>，避免定时任务重叠；同时设置超时，防止数据源或模型调用异常导致任务挂起。
+        </p>
+      </section>
+
+      <section>
+        <h2>6. 飞书卡片推送</h2>
+        <p>
+          卡片生成和发送分离。每个复盘 skill 只产出自己的卡片 JSON；统一发送层负责读取 secret、构造 webhook URL、
+          签名和异常处理。
+        </p>
+        <ul>
+          <li>默认 webhook：<code>https://open.feishu.cn/open-apis/bot/v2/hook/{FEISHU_KEY}</code>。</li>
+          <li>多群扩展：优先读取 <code>FEISHU_KEY_DAILY</code>、<code>FEISHU_KEY_WEEKLY</code>、<code>FEISHU_KEY_MONTHLY</code>。</li>
+          <li>回退规则：任务专用 key 不存在时回退到 <code>FEISHU_KEY</code>。</li>
+          <li>签名规则：如果配置 <code>FEISHU_SIGN_SECRET</code>，发送层统一添加 timestamp/sign。</li>
+          <li>卡片内容：标题、日期范围、3-5 条核心结论、热点主题、风险提示、报告链接或 artifact 信息。</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>7. Secrets 清单与 README 落点</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Secret</th>
+              <th>必需性</th>
+              <th>用途</th>
+              <th>README 说明位置</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>TUSHARE_TOKEN</code></td>
+              <td>必需</td>
+              <td>Tushare 数据认证，供已有 tushare skill 和 Python tushare 包使用。</td>
+              <td>Configuration / Data source</td>
+            </tr>
+            <tr>
+              <td><code>FEISHU_KEY</code></td>
+              <td>必需</td>
+              <td>默认飞书群机器人 key。</td>
+              <td>Configuration / Feishu bot</td>
+            </tr>
+            <tr>
+              <td><code>ANTHROPIC_API_KEY</code></td>
+              <td>必需</td>
+              <td>GitHub Actions 中运行 Claude Code。</td>
+              <td>Configuration / Claude Code</td>
+            </tr>
+            <tr>
+              <td><code>FEISHU_KEY_DAILY</code></td>
+              <td>可选</td>
+              <td>日报专用群机器人 key。</td>
+              <td>Configuration / Feishu bot</td>
+            </tr>
+            <tr>
+              <td><code>FEISHU_KEY_WEEKLY</code></td>
+              <td>可选</td>
+              <td>周报专用群机器人 key。</td>
+              <td>Configuration / Feishu bot</td>
+            </tr>
+            <tr>
+              <td><code>FEISHU_KEY_MONTHLY</code></td>
+              <td>可选</td>
+              <td>月报专用群机器人 key。</td>
+              <td>Configuration / Feishu bot</td>
+            </tr>
+            <tr>
+              <td><code>FEISHU_SIGN_SECRET</code></td>
+              <td>可选</td>
+              <td>飞书机器人启用签名校验时使用。</td>
+              <td>Configuration / Feishu bot</td>
+            </tr>
+            <tr>
+              <td><code>REPORT_BASE_URL</code></td>
+              <td>可选</td>
+              <td>HTML 报告发布到 Pages 或对象存储时，用于生成卡片链接。</td>
+              <td>Configuration / Report hosting</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          README 应新增 <code>Configuration</code>、<code>Operations</code>、<code>Local dry run</code>
+          三个章节，并提供 <code>.env.example</code>，只列变量名和说明，不提交真实密钥。
+        </p>
+      </section>
+
+      <section>
+        <h2>8. 测试与验收策略</h2>
+        <ul>
+          <li>数据契约测试：验证 <code>manifest.json</code>、标准化行情数据和质量告警字段。</li>
+          <li>卡片 payload 测试：验证日/周/月卡片包含必需字段，且不泄露 secret。</li>
+          <li>飞书发送测试：验证 webhook URL 拼接、任务专用 key 回退、签名逻辑和 dry run 行为。</li>
+          <li>HTML 渲染测试：验证报告文件可生成、标题和核心段落存在。</li>
+          <li>Workflow 静态校验：验证 cron、手动输入、必需 secrets 和 artifact 上传步骤存在。</li>
+        </ul>
+        <p>
+          实现阶段应先写失败测试，再用最小实现让测试通过。此文档只定义设计，不替代后续 TDD 过程。
+        </p>
+      </section>
+
+      <section>
+        <h2>9. 后续实施顺序</h2>
+        <ol>
+          <li>细节审核通过后，由终审确认方案。</li>
+          <li>终审通过后创建独立实现 worktree。</li>
+          <li>补齐项目骨架、公共 Python 工具层和测试框架。</li>
+          <li>按 TDD 顺序实现数据契约、卡片生成、飞书发送、HTML 渲染。</li>
+          <li>新增 Claude skills 和 GitHub Actions workflow。</li>
+          <li>更新 README 与 <code>.env.example</code>。</li>
+          <li>在 <code>docs/development/</code> 记录带 issue 信息的开发过程 HTML。</li>
+          <li>验证通过后提交 PR，等待人工或其他智能体验收。</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>10. 待确认决策</h2>
+        <ul>
+          <li>周复盘触发日：默认按周一 08:00 复盘上一自然周，还是周五收盘后复盘本周。</li>
+          <li>月复盘触发日：默认下月首个交易日，还是自然月最后一天。</li>
+          <li>报告链接承载：先只使用 GitHub Actions artifact，还是同步发布到 GitHub Pages。</li>
+          <li>飞书群路由：是否一开始就配置日/周/月三个群，还是先共用 <code>FEISHU_KEY</code>。</li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>
