@@ -8,6 +8,7 @@ RecapAgent 是一套由大模型驱动的全球市场复盘工程体系。仓库
 - `skills/recap-daily`: 只负责日复盘 HTML 报告和飞书卡片生成。
 - `skills/recap-weekly`: 只负责周复盘 HTML 报告和飞书卡片生成。
 - `skills/recap-monthly`: 只负责月复盘 HTML 报告和飞书卡片生成。
+- `skills/tushare-recap-reports`: PR #1 的 Tushare 课题复盘 skill，封装“半年翻倍股票池”和“十倍潜力跟踪池”报告链路。
 - `skills/feishu-card-push`: 统一处理飞书 webhook、签名、dry run 和发送结果。
 
 ## GitHub Actions
@@ -70,6 +71,14 @@ python3 scripts/run_recap.py --task daily --output-dir artifacts/reports --dry-r
 ```bash
 python3 scripts/run_recap.py --task daily --output-dir artifacts/reports --dry-run
 ```
+
+运行 PR #1 迁移后的 Tushare 课题 skill：
+
+```bash
+python3 skills/tushare-recap-reports/scripts/run.py full-chain
+```
+
+默认输出到 `artifacts/reports/tushare-recap-reports`，Tushare API 缓存放在 `artifacts/cache/tushare`。
 
 运行测试：
 
