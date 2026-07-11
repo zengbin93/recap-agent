@@ -23,6 +23,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write  # claude-code-action 需要 OIDC token
 
 jobs:
   recap:
