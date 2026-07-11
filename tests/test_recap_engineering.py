@@ -30,12 +30,36 @@ class FlakyGateway:
         self.calls += 1
         if self.calls == 1:
             raise RuntimeError("temporary tushare outage")
-        return [{"ts_code": "000001.SZ", "close": 10.5, "table": table, "params": params}]
+        return [
+            {"ts_code": "000001.SZ", "close": 10.5, "table": table, "params": params}
+        ]
 
 
 class FailingGateway:
     def query(self, table, params):
         raise RuntimeError("tushare unavailable")
+
+
+class CalendarGateway:
+    def query(self, table, params):
+        if table == "trade_cal":
+            return [
+                {"cal_date": "20260708", "is_open": "1"},
+                {"cal_date": "20260709", "is_open": "1"},
+                {"cal_date": "20260710", "is_open": "1"},
+            ]
+        return []
+
+
+class RecapGateway:
+    def query(self, table, params):
+        if table == "trade_cal":
+            return [{"cal_date": "20260710", "is_open": "1"}]
+        if table == "index_daily":
+            return [{"ts_code": "000001.SH", "name": "上证指数", "pct_chg": 1.2}]
+        if table == "moneyflow_ind_ths":
+            return [{"ts_code": "885001.TI", "name": "人工智能", "pct_change": 2.5}]
+        return [{"name": table, "pct_chg": -0.5}]
 
 
 class RecapEngineeringTests(unittest.TestCase):
@@ -50,8 +74,12 @@ class RecapEngineeringTests(unittest.TestCase):
                 sleep=lambda _seconds: None,
             )
 
-            first = collector.fetch_table("daily", {"trade_date": "20260705"}, retries=2)
-            second = collector.fetch_table("daily", {"trade_date": "20260705"}, retries=2)
+            first = collector.fetch_table(
+                "daily", {"trade_date": "20260705"}, retries=2
+            )
+            second = collector.fetch_table(
+                "daily", {"trade_date": "20260705"}, retries=2
+            )
 
         self.assertEqual(first.rows[0]["ts_code"], "000001.SZ")
         self.assertEqual(first.source, "tushare")
@@ -65,9 +93,13 @@ class RecapEngineeringTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             fallback_dir = pathlib.Path(tmpdir) / "fallback"
             fallback_dir.mkdir(parents=True)
-            fallback_name = data.cache_file_name("moneyflow", {"trade_date": "20260705"})
+            fallback_name = data.cache_file_name(
+                "moneyflow", {"trade_date": "20260705"}
+            )
             fallback_rows = [{"sector": "AI", "net_mf_amount": 1234}]
-            (fallback_dir / fallback_name).write_text(json.dumps(fallback_rows), encoding="utf-8")
+            (fallback_dir / fallback_name).write_text(
+                json.dumps(fallback_rows), encoding="utf-8"
+            )
 
             collector = data.TushareDataCollector(
                 gateway=FailingGateway(),
@@ -76,7 +108,9 @@ class RecapEngineeringTests(unittest.TestCase):
                 sleep=lambda _seconds: None,
             )
 
-            result = collector.fetch_table("moneyflow", {"trade_date": "20260705"}, retries=1)
+            result = collector.fetch_table(
+                "moneyflow", {"trade_date": "20260705"}, retries=1
+            )
 
         self.assertEqual(result.rows, fallback_rows)
         self.assertEqual(result.source, "fallback")
@@ -93,9 +127,13 @@ class RecapEngineeringTests(unittest.TestCase):
 
         config = feishu.FeishuConfig.from_env(env)
         target = config.resolve("daily")
-        payload = feishu.build_signed_payload({"msg_type": "interactive"}, "daily-secret", timestamp=1700000000)
+        payload = feishu.build_signed_payload(
+            {"msg_type": "interactive"}, "daily-secret", timestamp=1700000000
+        )
         expected_sign = base64.b64encode(
-            hmac.new(b"1700000000\ndaily-secret", b"", digestmod=hashlib.sha256).digest()
+            hmac.new(
+                b"1700000000\ndaily-secret", b"", digestmod=hashlib.sha256
+            ).digest()
         ).decode("utf-8")
 
         self.assertEqual(target.url, "https://example.invalid/daily")
@@ -114,8 +152,12 @@ class RecapEngineeringTests(unittest.TestCase):
 
         with mock.patch("recap_agent.feishu.request.urlopen") as urlopen:
             urlopen.return_value.__enter__.return_value.status = 200
-            urlopen.return_value.__enter__.return_value.read.return_value = b'{"StatusCode":0}'
-            real = feishu.FeishuSender(dry_run=False).send(target, {"msg_type": "interactive"})
+            urlopen.return_value.__enter__.return_value.read.return_value = (
+                b'{"StatusCode":0}'
+            )
+            real = feishu.FeishuSender(dry_run=False).send(
+                target, {"msg_type": "interactive"}
+            )
 
         self.assertFalse(real.dry_run)
         self.assertEqual(real.status_code, 200)
@@ -131,13 +173,101 @@ class RecapEngineeringTests(unittest.TestCase):
                 "indices": [{"name": "沪深300", "close": 3500}],
             },
             generated_at="2026-07-05T08:00:00+08:00",
+            period={"task": "daily", "start_date": "20260705", "end_date": "20260705"},
+            sources={"hot_sectors": {"source": "fixture", "warning": None}},
         )
 
         self.assertIn("<!doctype html>", result.html.lower())
         self.assertIn("全球市场日报", result.html)
         self.assertIn("AI", result.html)
+        self.assertEqual(result.snapshot["summary"]["trend"], "偏强")
+        self.assertEqual(
+            result.snapshot["datasets"]["hot_sectors"]["source"], "fixture"
+        )
         self.assertEqual(result.card["msg_type"], "interactive")
         self.assertIn("全球市场日报", json.dumps(result.card, ensure_ascii=False))
+
+    def test_market_period_bounds_requests_and_latest_trade_date(self):
+        data = import_required("recap_agent.data")
+
+        weekly = data.build_market_period("weekly", "20260710")
+        monthly = data.build_market_period("monthly", "20260710")
+        self.assertEqual((weekly.start_date, weekly.end_date), ("20260706", "20260710"))
+        self.assertEqual(
+            (monthly.start_date, monthly.end_date), ("20260701", "20260710")
+        )
+        self.assertEqual(
+            data.default_market_requests("weekly", "20260710")["indices"][1],
+            {"start_date": "20260706", "end_date": "20260710"},
+        )
+        self.assertEqual(
+            data.default_market_requests("daily", "20260710")["indices"][1],
+            {"trade_date": "20260710"},
+        )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            collector = data.TushareDataCollector(
+                gateway=CalendarGateway(),
+                cache_dir=pathlib.Path(tmpdir) / "cache",
+                fallback_dir=pathlib.Path(tmpdir) / "fallback",
+                sleep=lambda _seconds: None,
+            )
+            self.assertEqual(
+                data.resolve_latest_trade_date(collector, "20260710"), "20260710"
+            )
+            self.assertEqual(
+                data.resolve_latest_trade_date(collector, "20260709"), "20260709"
+            )
+
+    def test_report_files_include_structured_snapshot(self):
+        reports = import_required("recap_agent.reports")
+        with tempfile.TemporaryDirectory() as tmpdir:
+            result = reports.render_recap_report(
+                task="daily",
+                title="全球市场日报",
+                datasets={"indices": [{"name": "指数", "pct_chg": -1.2}]},
+                generated_at="2026-07-10T08:00:00+08:00",
+                period={
+                    "task": "daily",
+                    "start_date": "20260710",
+                    "end_date": "20260710",
+                },
+                sources={"indices": {"source": "cache", "warning": "stale"}},
+            )
+            files = reports.write_report_files(result, tmpdir, "daily")
+            snapshot = json.loads(
+                pathlib.Path(files["snapshot"]).read_text(encoding="utf-8")
+            )
+
+        self.assertEqual(snapshot["summary"]["trend"], "偏弱")
+        self.assertEqual(snapshot["datasets"]["indices"]["warning"], "stale")
+        self.assertIn("snapshot", files)
+
+    def test_cli_task_resolves_period_and_writes_snapshot(self):
+        cli = import_required("recap_agent.cli")
+        data = import_required("recap_agent.data")
+        with tempfile.TemporaryDirectory() as tmpdir:
+            collector = data.TushareDataCollector(
+                gateway=RecapGateway(),
+                cache_dir=pathlib.Path(tmpdir) / "cache",
+                fallback_dir=pathlib.Path(tmpdir) / "fallback",
+                sleep=lambda _seconds: None,
+            )
+            with mock.patch.object(cli, "TushareDataCollector", return_value=collector):
+                result = cli.run_task(
+                    "weekly", tmpdir, dry_run=True, trade_date="20260710"
+                )
+
+            snapshot_path = pathlib.Path(result["files"]["snapshot"])
+            snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
+            snapshot_exists = snapshot_path.exists()
+
+        self.assertEqual(
+            result["period"],
+            {"task": "weekly", "start_date": "20260706", "end_date": "20260710"},
+        )
+        self.assertEqual(snapshot["summary"]["trend"], "偏强")
+        self.assertTrue(snapshot_exists)
 
     def test_daily_workflow_has_beijing_8am_cron_manual_dry_run_and_artifacts(self):
         workflow = ROOT / ".github" / "workflows" / "daily-recap.yml"

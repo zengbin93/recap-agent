@@ -6,12 +6,12 @@ import os
 import pathlib
 import time
 from dataclasses import dataclass
+from datetime import date, timedelta
 from typing import Any, Callable, Mapping, Protocol
 
 
 class Gateway(Protocol):
-    def query(self, table: str, params: Mapping[str, Any]) -> list[dict[str, Any]]:
-        ...
+    def query(self, table: str, params: Mapping[str, Any]) -> list[dict[str, Any]]: ...
 
 
 @dataclass(frozen=True)
@@ -21,8 +21,47 @@ class DatasetResult:
     warning: str | None = None
 
 
+@dataclass(frozen=True)
+class MarketPeriod:
+    """The explicit calendar window represented by a recap report."""
+
+    task: str
+    start_date: str
+    end_date: str
+
+
+def _parse_date(value: str) -> date:
+    normalized = value.replace("-", "")
+    if len(normalized) != 8 or not normalized.isdigit():
+        raise ValueError(f"invalid date {value!r}; expected YYYYMMDD")
+    return date(int(normalized[:4]), int(normalized[4:6]), int(normalized[6:]))
+
+
+def _format_date(value: date) -> str:
+    return value.strftime("%Y%m%d")
+
+
+def build_market_period(task: str, end_date: str) -> MarketPeriod:
+    """Build a daily, week-to-date, or month-to-date window."""
+
+    if task not in {"daily", "weekly", "monthly"}:
+        raise ValueError(f"unsupported recap task: {task}")
+    end = _parse_date(end_date)
+    if task == "daily":
+        start = end
+    elif task == "weekly":
+        start = end - timedelta(days=end.weekday())
+    else:
+        start = end.replace(day=1)
+    return MarketPeriod(
+        task=task, start_date=_format_date(start), end_date=_format_date(end)
+    )
+
+
 def cache_file_name(table: str, params: Mapping[str, Any]) -> str:
-    payload = json.dumps({"table": table, "params": params}, sort_keys=True, ensure_ascii=True)
+    payload = json.dumps(
+        {"table": table, "params": params}, sort_keys=True, ensure_ascii=True
+    )
     digest = hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
     return f"{table}-{digest}.json"
 
@@ -92,7 +131,9 @@ class TushareDataCollector:
             return DatasetResult(rows=rows, source="fallback", warning=str(last_error))
         raise RuntimeError(f"failed to fetch {table}: {last_error}") from last_error
 
-    def _read_cache(self, path: pathlib.Path, ttl_seconds: int) -> list[dict[str, Any]] | None:
+    def _read_cache(
+        self, path: pathlib.Path, ttl_seconds: int
+    ) -> list[dict[str, Any]] | None:
         if not path.exists():
             return None
         age = time.time() - path.stat().st_mtime
@@ -102,11 +143,20 @@ class TushareDataCollector:
 
     def _write_json(self, path: pathlib.Path, rows: list[dict[str, Any]]) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(rows, ensure_ascii=False, indent=2), encoding="utf-8")
+        path.write_text(
+            json.dumps(rows, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
 
 
-def default_market_requests(task: str, trade_date: str | None = None) -> dict[str, tuple[str, dict[str, Any]]]:
-    params = {"trade_date": trade_date} if trade_date else {}
+def default_market_requests(
+    task: str, trade_date: str | None = None
+) -> dict[str, tuple[str, dict[str, Any]]]:
+    period = build_market_period(task, trade_date or _format_date(date.today()))
+    params = (
+        {"trade_date": period.end_date}
+        if task == "daily"
+        else {"start_date": period.start_date, "end_date": period.end_date}
+    )
     common = {
         "indices": ("index_daily", params),
         "hot_sectors": ("moneyflow_ind_ths", params),
@@ -117,3 +167,27 @@ def default_market_requests(task: str, trade_date: str | None = None) -> dict[st
         return {**common, "monthly_fund_flow": ("fund_flow", params)}
     return common
 
+
+def resolve_latest_trade_date(
+    collector: TushareDataCollector,
+    requested_date: str | None = None,
+) -> str:
+    """Resolve the latest open SSE date at or before the requested date."""
+
+    target = _parse_date(requested_date) if requested_date else date.today()
+    result = collector.fetch_table(
+        "trade_cal",
+        {"exchange": "SSE", "end_date": _format_date(target), "is_open": "1"},
+        ttl_seconds=60 * 60 * 24,
+    )
+    target_text = _format_date(target)
+    open_dates = [
+        str(row.get("cal_date"))
+        for row in result.rows
+        if str(row.get("is_open")) == "1"
+        and row.get("cal_date")
+        and str(row["cal_date"]) <= target_text
+    ]
+    if not open_dates:
+        raise RuntimeError(f"no open trading date at or before {_format_date(target)}")
+    return max(open_dates)

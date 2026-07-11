@@ -2,9 +2,15 @@ from __future__ import annotations
 
 import argparse
 import json
+from dataclasses import asdict
 from datetime import datetime, timezone
 
-from .data import TushareDataCollector, default_market_requests
+from .data import (
+    TushareDataCollector,
+    build_market_period,
+    default_market_requests,
+    resolve_latest_trade_date,
+)
 from .feishu import FeishuConfig, FeishuSender
 from .reports import render_recap_report, write_report_files
 
@@ -16,11 +22,15 @@ TASK_TITLES = {
 }
 
 
-def run_task(task: str, output_dir: str, dry_run: bool, trade_date: str | None = None) -> dict[str, object]:
+def run_task(
+    task: str, output_dir: str, dry_run: bool, trade_date: str | None = None
+) -> dict[str, object]:
     collector = TushareDataCollector()
+    end_trade_date = resolve_latest_trade_date(collector, trade_date)
+    period = build_market_period(task, end_trade_date)
     datasets = {}
     sources = {}
-    for name, (table, params) in default_market_requests(task, trade_date).items():
+    for name, (table, params) in default_market_requests(task, end_trade_date).items():
         result = collector.fetch_table(table, params)
         datasets[name] = result.rows
         sources[name] = {"source": result.source, "warning": result.warning}
@@ -29,7 +39,11 @@ def run_task(task: str, output_dir: str, dry_run: bool, trade_date: str | None =
         task=task,
         title=TASK_TITLES[task],
         datasets=datasets,
-        generated_at=datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds"),
+        generated_at=datetime.now(timezone.utc)
+        .astimezone()
+        .isoformat(timespec="seconds"),
+        period=asdict(period),
+        sources=sources,
     )
     files = write_report_files(report, output_dir, task)
 
@@ -40,7 +54,14 @@ def run_task(task: str, output_dir: str, dry_run: bool, trade_date: str | None =
     except ValueError as exc:
         push_result = {"skipped": True, "reason": str(exc)}
 
-    return {"task": task, "files": files, "sources": sources, "feishu": push_result}
+    return {
+        "task": task,
+        "period": asdict(period),
+        "files": files,
+        "sources": sources,
+        "snapshot": report.snapshot,
+        "feishu": push_result,
+    }
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -57,4 +78,3 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
