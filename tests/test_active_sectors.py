@@ -203,6 +203,21 @@ class ActiveSectorsTests(unittest.TestCase):
         kept_all = run.load_sector_index(client, ["N"], exclude_broad=False)
         self.assertEqual(len(kept_all), 2)
 
+    def test_build_feishu_card(self):
+        client = make_client()
+        report = run.build_report(
+            client, trade_date="20260710", top_n=100, min_count=3, recent_days=5,
+            sector_types=["N", "I"], rep_stocks=5, throttle=0.0,
+        )
+        card = run.build_feishu_card(report, top=10)
+        self.assertEqual(card["msg_type"], "interactive")
+        self.assertIn("20260710", card["card"]["header"]["title"]["content"])
+        body = card["card"]["elements"][2]["text"]["content"]
+        self.assertIn("人工智能", body)
+        # 卡片应可被 feishu 发送模块直接序列化
+        import json as _json
+        self.assertIn("interactive", _json.dumps(card, ensure_ascii=False))
+
 
 if __name__ == "__main__":
     unittest.main()

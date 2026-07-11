@@ -47,6 +47,19 @@ python3 skills/recap-active-sectors/scripts/run.py \
 > 默认剔除「融资融券、深股通/沪股通、沪深300/中证500 样本股」等宽基指数成分与
 > 交易属性类板块——它们几乎覆盖所有大盘股、命中数天然最高，但不代表当日热点。
 
-默认输出目录：`artifacts/reports/recap-active-sectors`（`latest.{html,csv,json}`）。
-默认缓存目录：`artifacts/cache/tushare`。个股→板块倒排索引按板块缓存，成分变化慢，
-当日多次运行可直接命中缓存。
+默认输出目录：`artifacts/reports/recap-active-sectors`（`latest.{html,csv,json}` +
+飞书卡片 `latest-card.json`）。默认缓存目录：`artifacts/cache/tushare`。个股→板块倒排
+索引按板块缓存，成分变化慢，当日多次运行可直接命中缓存。
+
+## 推送到飞书
+
+生成的 `latest-card.json` 是飞书 interactive card，直接交给 `feishu-card-push`：
+
+```bash
+python3 skills/feishu-card-push/scripts/push.py --task daily \
+  --card artifacts/reports/recap-active-sectors/latest-card.json --dry-run
+```
+
+Webhook 配置见 `feishu-card-push`（`FEISHU_WEBHOOK_URL` / `FEISHU_DAILY_WEBHOOK_URL`
+/ `FEISHU_WEBHOOKS_JSON`）。每日自动复盘已接入 `.github/workflows/daily-recap.yml`
+的 `daily` 任务：跑 active-sectors 后，若配置了 webhook 即推送该卡片。

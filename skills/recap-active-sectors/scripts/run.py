@@ -691,6 +691,59 @@ def render_html(report: ActiveSectorsReport) -> str:
 """
 
 
+def build_feishu_card(report: ActiveSectorsReport, *, top: int = 10) -> dict[str, Any]:
+    """Render the report into a Feishu interactive card payload.
+
+    Shape matches ``recap_agent.reports`` / ``feishu-card-push`` (``msg_type``
+    ``interactive`` with a ``card`` body), so it can be pushed as-is.
+    """
+    def arrow(v: float) -> str:
+        return "🔺" if v > 0 else ("🔻" if v < 0 else "▪️")
+
+    lines: list[str] = []
+    for s in report.sectors[:top]:
+        reps = "、".join(r.name for r in s.representatives[:3]) or "—"
+        quote = (
+            f"今日 {arrow(s.today_pct)}{fmt_pct(s.today_pct)} / {report.recent_days}日 {fmt_pct(s.recent_pct)}"
+            if s.quote_available
+            else "行情不可用"
+        )
+        lines.append(
+            f"**{s.rank}. {s.name}**（{s.type_label}·命中 {s.hit_count}）\n{quote}｜代表：{reps}"
+        )
+    body = "\n\n".join(lines) or "今日无满足阈值的活跃板块。"
+    overview = (
+        f"**交易日**：{report.trade_date}　**成交额榜**：前 {report.top_n}\n"
+        f"**活跃阈值**：≥ {report.min_count} 次　**活跃板块**：{report.active_sector_count} 个"
+        f"（展示前 {min(top, report.active_sector_count)}）"
+    )
+    return {
+        "msg_type": "interactive",
+        "card": {
+            "config": {"wide_screen_mode": True},
+            "header": {
+                "template": "blue",
+                "title": {"tag": "plain_text", "content": f"成交活跃板块复盘 · {report.trade_date}"},
+            },
+            "elements": [
+                {"tag": "div", "text": {"tag": "lark_md", "content": overview}},
+                {"tag": "hr"},
+                {"tag": "div", "text": {"tag": "lark_md", "content": body}},
+                {"tag": "hr"},
+                {
+                    "tag": "note",
+                    "elements": [
+                        {
+                            "tag": "lark_md",
+                            "content": "活跃板块 = 成交额榜前 N 个股在同花顺概念/行业上的命中次数达阈值（已剔宽基）。数据来自 Tushare，仅供复盘研究，不构成投资建议。",
+                        }
+                    ],
+                },
+            ],
+        },
+    }
+
+
 def output_paths(base_dir: Path) -> tuple[Path, Path, Path]:
     return base_dir / "latest.html", base_dir / "latest.csv", base_dir / "latest.json"
 
@@ -713,16 +766,20 @@ def run(args: argparse.Namespace) -> dict[str, str]:
         progress=print if args.progress else None,
     )
     html_path, csv_path, json_path = output_paths(args.output_dir)
+    card_path = args.output_dir / "latest-card.json"
     html_path.parent.mkdir(parents=True, exist_ok=True)
     html_path.write_text(render_html(report), encoding="utf-8")
     write_csv_report(report, csv_path)
     write_json_report(report, json_path)
+    card = build_feishu_card(report, top=args.card_top)
+    card_path.write_text(json.dumps(card, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return {
         "trade_date": report.trade_date,
         "active_sectors": str(report.active_sector_count),
         "html": str(html_path),
         "csv": str(csv_path),
         "json": str(json_path),
+        "card": str(card_path),
     }
 
 
@@ -740,6 +797,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--rep-stocks", type=int, default=5, help="每个板块代表成分股数量上限")
     parser.add_argument("--max-sectors", type=int, default=40, help="最多输出的活跃板块数（按命中数取前 N，0 为不限）")
     parser.add_argument("--include-broad", action="store_true", help="保留宽基指数/互联互通/交易属性类板块（默认剔除）")
+    parser.add_argument("--card-top", type=int, default=10, help="飞书卡片展示的活跃板块数量")
     parser.add_argument("--throttle", type=float, default=0.0, help="ths_member 调用间隔秒数（限频用）")
     parser.add_argument("--progress", action="store_true", help="打印进度")
     parser.set_defaults(func=run)
