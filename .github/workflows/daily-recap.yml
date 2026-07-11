@@ -31,6 +31,7 @@ jobs:
     env:
       TUSHARE_TOKEN: ${{ secrets.TUSHARE_TOKEN }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      ANTHROPIC_BASE_URL: ${{ secrets.ANTHROPIC_BASE_URL }}
       FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
       FEISHU_WEBHOOK_SECRET: ${{ secrets.FEISHU_WEBHOOK_SECRET }}
       FEISHU_WEBHOOKS_JSON: ${{ secrets.FEISHU_WEBHOOKS_JSON }}
@@ -81,18 +82,21 @@ jobs:
           claude_args: |
             --allowedTools Bash
 
-      - name: Active sectors recap
+      - name: Active sectors recap (Claude-driven)
         if: env.RECAP_TASK == 'daily'
-        run: |
-          python3 skills/recap-active-sectors/scripts/run.py \
-            --output-dir artifacts/reports/recap-active-sectors --throttle 0.1
-          if [ -n "$FEISHU_WEBHOOK_URL" ] || [ -n "$FEISHU_DAILY_WEBHOOK_URL" ] || [ -n "$FEISHU_WEBHOOKS_JSON" ]; then
-            python3 skills/feishu-card-push/scripts/push.py --task daily \
-              --card artifacts/reports/recap-active-sectors/latest-card.json \
-              $([ "$RECAP_DRY_RUN" = "true" ] && echo "--dry-run")
-          else
-            echo "::warning::No Feishu webhook configured; skipped active-sectors card push."
-          fi
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Use the recap-active-sectors skill to build today's active-sectors recap and push its Feishu card.
+            Run these commands (dry-run flag comes from RECAP_DRY_RUN):
+            1. python3 skills/recap-active-sectors/scripts/run.py --output-dir artifacts/reports/recap-active-sectors --throttle 0.1
+            2. If a Feishu webhook is configured ($FEISHU_WEBHOOK_URL or $FEISHU_DAILY_WEBHOOK_URL or $FEISHU_WEBHOOKS_JSON is non-empty), push the card:
+               python3 skills/feishu-card-push/scripts/push.py --task daily --card artifacts/reports/recap-active-sectors/latest-card.json $([ "$RECAP_DRY_RUN" = "true" ] && echo "--dry-run")
+               Otherwise skip the push and note it.
+            Leave the generated HTML/CSV/JSON and card under artifacts/reports/recap-active-sectors.
+          claude_args: |
+            --allowedTools Bash
 
       - name: Upload recap artifacts
         if: always()
