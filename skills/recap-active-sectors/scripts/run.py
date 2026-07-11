@@ -691,31 +691,75 @@ def render_html(report: ActiveSectorsReport) -> str:
 """
 
 
+def _color_pct(value: float) -> str:
+    """涨红跌绿（A股习惯），带方向箭头，用飞书 lark_md font color。"""
+    if value > 0:
+        return f"<font color='red'>▲ {value:.2f}%</font>"
+    if value < 0:
+        return f"<font color='green'>▼ {abs(value):.2f}%</font>"
+    return f"<font color='grey'>— {value:.2f}%</font>"
+
+
+def _sector_row(s: "ActiveSector", recent_days: int, shaded: bool) -> dict[str, Any]:
+    """一个板块 = 一行两列 column_set：左侧板块/代表股，右侧今日/近N日涨跌。"""
+    reps = " · ".join(r.name for r in s.representatives[:3]) or "—"
+    left = (
+        f"**{s.rank}. {s.name}**　<font color='grey'>{s.type_label} · 命中 {s.hit_count}</font>\n"
+        f"<font color='grey'>代表</font> {reps}"
+    )
+    right = (
+        f"今日 {_color_pct(s.today_pct)}\n{recent_days}日 {_color_pct(s.recent_pct)}"
+        if s.quote_available
+        else "<font color='grey'>行情不可用</font>"
+    )
+    column = lambda weight, content: {
+        "tag": "column",
+        "width": "weighted",
+        "weight": weight,
+        "vertical_align": "top",
+        "elements": [{"tag": "div", "text": {"tag": "lark_md", "content": content}}],
+    }
+    row: dict[str, Any] = {
+        "tag": "column_set",
+        "flex_mode": "none",
+        "columns": [column(62, left), column(38, right)],
+    }
+    if shaded:
+        row["background_style"] = "grey"
+    return row
+
+
 def build_feishu_card(report: ActiveSectorsReport, *, top: int = 10) -> dict[str, Any]:
     """Render the report into a Feishu interactive card payload.
 
     Shape matches ``recap_agent.reports`` / ``feishu-card-push`` (``msg_type``
     ``interactive`` with a ``card`` body), so it can be pushed as-is.
     """
-    def arrow(v: float) -> str:
-        return "🔺" if v > 0 else ("🔻" if v < 0 else "▪️")
+    shown = min(top, report.active_sector_count)
+    overview = {
+        "tag": "div",
+        "fields": [
+            {"is_short": True, "text": {"tag": "lark_md", "content": f"📅 **交易日**\n{report.trade_date}"}},
+            {"is_short": True, "text": {"tag": "lark_md", "content": f"💰 **成交额榜**\n前 {report.top_n}"}},
+            {"is_short": True, "text": {"tag": "lark_md", "content": f"🎯 **活跃阈值**\n≥ {report.min_count} 次"}},
+            {"is_short": True, "text": {"tag": "lark_md", "content": f"🔥 **活跃板块**\n{report.active_sector_count} 个（展示前 {shown}）"}},
+        ],
+    }
+    rows = [_sector_row(s, report.recent_days, shaded=(i % 2 == 1)) for i, s in enumerate(report.sectors[:top])]
+    if not rows:
+        rows = [{"tag": "div", "text": {"tag": "lark_md", "content": "今日无满足阈值的活跃板块。"}}]
 
-    lines: list[str] = []
-    for s in report.sectors[:top]:
-        reps = "、".join(r.name for r in s.representatives[:3]) or "—"
-        quote = (
-            f"今日 {arrow(s.today_pct)}{fmt_pct(s.today_pct)} / {report.recent_days}日 {fmt_pct(s.recent_pct)}"
-            if s.quote_available
-            else "行情不可用"
-        )
-        lines.append(
-            f"**{s.rank}. {s.name}**（{s.type_label}·命中 {s.hit_count}）\n{quote}｜代表：{reps}"
-        )
-    body = "\n\n".join(lines) or "今日无满足阈值的活跃板块。"
-    overview = (
-        f"**交易日**：{report.trade_date}　**成交额榜**：前 {report.top_n}\n"
-        f"**活跃阈值**：≥ {report.min_count} 次　**活跃板块**：{report.active_sector_count} 个"
-        f"（展示前 {min(top, report.active_sector_count)}）"
+    elements: list[dict[str, Any]] = [overview, {"tag": "hr"}, *rows, {"tag": "hr"}]
+    elements.append(
+        {
+            "tag": "note",
+            "elements": [
+                {
+                    "tag": "lark_md",
+                    "content": "活跃板块 = 成交额榜前 N 个股在同花顺概念/行业上的命中次数达阈值（已剔宽基）。数据来自 Tushare，仅供复盘研究，不构成投资建议。",
+                }
+            ],
+        }
     )
     return {
         "msg_type": "interactive",
@@ -723,23 +767,9 @@ def build_feishu_card(report: ActiveSectorsReport, *, top: int = 10) -> dict[str
             "config": {"wide_screen_mode": True},
             "header": {
                 "template": "blue",
-                "title": {"tag": "plain_text", "content": f"成交活跃板块复盘 · {report.trade_date}"},
+                "title": {"tag": "plain_text", "content": f"📊 成交活跃板块复盘 · {report.trade_date}"},
             },
-            "elements": [
-                {"tag": "div", "text": {"tag": "lark_md", "content": overview}},
-                {"tag": "hr"},
-                {"tag": "div", "text": {"tag": "lark_md", "content": body}},
-                {"tag": "hr"},
-                {
-                    "tag": "note",
-                    "elements": [
-                        {
-                            "tag": "lark_md",
-                            "content": "活跃板块 = 成交额榜前 N 个股在同花顺概念/行业上的命中次数达阈值（已剔宽基）。数据来自 Tushare，仅供复盘研究，不构成投资建议。",
-                        }
-                    ],
-                },
-            ],
+            "elements": elements,
         },
     }
 

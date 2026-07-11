@@ -212,11 +212,11 @@ class ActiveSectorsTests(unittest.TestCase):
         card = run.build_feishu_card(report, top=10)
         self.assertEqual(card["msg_type"], "interactive")
         self.assertIn("20260710", card["card"]["header"]["title"]["content"])
-        body = card["card"]["elements"][2]["text"]["content"]
-        self.assertIn("人工智能", body)
-        # 卡片应可被 feishu 发送模块直接序列化
         import json as _json
-        self.assertIn("interactive", _json.dumps(card, ensure_ascii=False))
+        blob = _json.dumps(card, ensure_ascii=False)
+        self.assertIn("人工智能", blob)
+        self.assertIn("column_set", blob)  # 分栏布局
+        self.assertIn("<font color='red'>", blob)  # 涨跌上色（人工智能今日 +2.5%）
 
 
 if __name__ == "__main__":
