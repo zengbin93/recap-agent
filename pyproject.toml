@@ -8,6 +8,10 @@ dependencies = []
 [project.scripts]
 recap-agent = "recap_agent.cli:main"
 
+[tool.setuptools]
+# skills/ 下是独立脚本目录，非包；只打包 recap_agent，避免 flat-layout 多包歧义。
+packages = ["recap_agent"]
+
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
