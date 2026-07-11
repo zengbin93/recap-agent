@@ -38,9 +38,14 @@ python3 skills/recap-active-sectors/scripts/run.py \
 
 - `--trade-date`：默认取最近开市日。
 - `--top-n`：成交额榜取前 N（默认 100）。
-- `--min-count`：板块判活跃的最少命中次数（默认 3）。
+- `--min-count`：板块判活跃的最少命中次数（默认 5）。
+- `--max-sectors`：最多输出的活跃板块数，按命中数取前 N（默认 40，`0` 为不限）。
 - `--sector-types`：`N` 概念、`I` 行业，逗号分隔（默认 `N,I`）。
+- `--include-broad`：保留宽基指数/互联互通/交易属性类板块（默认剔除，见下）。
 - `--throttle`：`ths_member` 全量扫描的调用间隔秒数，用于规避分钟级限频。
+
+> 默认剔除「融资融券、深股通/沪股通、沪深300/中证500 样本股」等宽基指数成分与
+> 交易属性类板块——它们几乎覆盖所有大盘股、命中数天然最高，但不代表当日热点。
 
 默认输出目录：`artifacts/reports/recap-active-sectors`（`latest.{html,csv,json}`）。
 默认缓存目录：`artifacts/cache/tushare`。个股→板块倒排索引按板块缓存，成分变化慢，

@@ -41,6 +41,22 @@ DATE_FMT = "%Y%m%d"
 # 同花顺板块类型：N 概念指数、I 行业指数（其余如 R 地域、S 特色默认不纳入）。
 SECTOR_TYPE_LABELS = {"N": "概念", "I": "行业", "R": "地域", "S": "特色", "T": "同花顺主题"}
 
+# 宽基指数成分 / 互联互通 / 交易属性类板块——几乎覆盖所有大盘股，命中数天然很高，
+# 但不代表当日热点，属噪音，默认从活跃板块中剔除（名称子串匹配）。
+BROAD_SECTOR_KEYWORDS = (
+    "融资融券", "两融", "转融券", "标的证券",
+    "深股通", "沪股通", "陆股通", "港股通", "互联互通",
+    "样本股", "成份股", "成分股",
+    "沪深300", "中证500", "中证1000", "中证100", "中证800", "上证50", "上证180",
+    "上证380", "创业板指", "创业板50", "科创50", "科创100", "深证100", "MSCI",
+    "富时", "标普", "QFII", "AH股", "AB股", "预盈预增", "预亏预减",
+)
+
+
+def is_broad_sector(name: str) -> bool:
+    text = name or ""
+    return any(kw in text for kw in BROAD_SECTOR_KEYWORDS)
+
 
 class TushareError(RuntimeError):
     pass
@@ -300,7 +316,9 @@ def load_top_amount_stocks(
 # --------------------------------------------------------------------------- #
 # Step 2 — stock -> THS sector inverted index
 # --------------------------------------------------------------------------- #
-def load_sector_index(client: TushareClient, sector_types: list[str]) -> list[dict[str, Any]]:
+def load_sector_index(
+    client: TushareClient, sector_types: list[str], *, exclude_broad: bool = True
+) -> list[dict[str, Any]]:
     sectors: list[dict[str, Any]] = []
     for stype in sector_types:
         rows = client.query(
@@ -311,7 +329,9 @@ def load_sector_index(client: TushareClient, sector_types: list[str]) -> list[di
         )
         for row in rows:
             row["type"] = row.get("type") or stype
-        sectors.extend(rows)
+            if exclude_broad and is_broad_sector(str(row.get("name") or "")):
+                continue
+            sectors.append(row)
     return sectors
 
 
@@ -495,6 +515,8 @@ def build_report(
     sector_types: list[str],
     rep_stocks: int,
     throttle: float,
+    exclude_broad: bool = True,
+    max_sectors: int | None = None,
     progress: Callable[[str], None] | None = None,
 ) -> ActiveSectorsReport:
     resolved_date = resolve_trade_date(client, trade_date)
@@ -508,13 +530,15 @@ def build_report(
     if progress:
         progress(f"top stocks={len(top_stocks)}")
 
-    sector_index = load_sector_index(client, sector_types)
+    sector_index = load_sector_index(client, sector_types, exclude_broad=exclude_broad)
     if progress:
         progress(f"sector index={len(sector_index)}")
     membership = build_membership(
         client, sector_index, trade_date=resolved_date, throttle=throttle, progress=progress
     )
     active = aggregate_active_sectors(top_stocks, membership, min_count=min_count)
+    if max_sectors is not None and max_sectors > 0:
+        active = active[:max_sectors]
     if progress:
         progress(f"active sectors={len(active)}")
 
@@ -684,6 +708,8 @@ def run(args: argparse.Namespace) -> dict[str, str]:
         sector_types=sector_types,
         rep_stocks=args.rep_stocks,
         throttle=args.throttle,
+        exclude_broad=not args.include_broad,
+        max_sectors=args.max_sectors,
         progress=print if args.progress else None,
     )
     html_path, csv_path, json_path = output_paths(args.output_dir)
@@ -708,10 +734,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--no-cache", action="store_true", help="禁用本地缓存")
     parser.add_argument("--trade-date", default=None, help="交易日 YYYYMMDD；默认最近开市日")
     parser.add_argument("--top-n", type=int, default=100, help="成交额榜取前 N 只")
-    parser.add_argument("--min-count", type=int, default=3, help="板块被判定为活跃的最少命中次数")
+    parser.add_argument("--min-count", type=int, default=5, help="板块被判定为活跃的最少命中次数")
     parser.add_argument("--recent-days", type=int, default=5, help="近 N 个交易日区间")
     parser.add_argument("--sector-types", default="N,I", help="板块类型，逗号分隔：N 概念 / I 行业")
     parser.add_argument("--rep-stocks", type=int, default=5, help="每个板块代表成分股数量上限")
+    parser.add_argument("--max-sectors", type=int, default=40, help="最多输出的活跃板块数（按命中数取前 N，0 为不限）")
+    parser.add_argument("--include-broad", action="store_true", help="保留宽基指数/互联互通/交易属性类板块（默认剔除）")
     parser.add_argument("--throttle", type=float, default=0.0, help="ths_member 调用间隔秒数（限频用）")
     parser.add_argument("--progress", action="store_true", help="打印进度")
     parser.set_defaults(func=run)

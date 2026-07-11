@@ -186,6 +186,23 @@ class ActiveSectorsTests(unittest.TestCase):
             self.assertIn("人工智能", text)
             self.assertIn("hit_count", text)
 
+    def test_broad_sector_filtered(self):
+        self.assertTrue(run.is_broad_sector("融资融券"))
+        self.assertTrue(run.is_broad_sector("沪深300样本股"))
+        self.assertTrue(run.is_broad_sector("深股通"))
+        self.assertFalse(run.is_broad_sector("半导体"))
+        tables = {
+            "ths_index": lambda p: [
+                {"ts_code": "1.TI", "name": "融资融券", "type": "N"},
+                {"ts_code": "2.TI", "name": "人工智能", "type": "N"},
+            ]
+        }
+        client = FakeClient(tables)
+        kept = run.load_sector_index(client, ["N"], exclude_broad=True)
+        self.assertEqual([r["name"] for r in kept], ["人工智能"])
+        kept_all = run.load_sector_index(client, ["N"], exclude_broad=False)
+        self.assertEqual(len(kept_all), 2)
+
 
 if __name__ == "__main__":
     unittest.main()
