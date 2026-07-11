@@ -81,6 +81,19 @@ jobs:
           claude_args: |
             --allowedTools Bash
 
+      - name: Active sectors recap
+        if: env.RECAP_TASK == 'daily'
+        run: |
+          python3 skills/recap-active-sectors/scripts/run.py \
+            --output-dir artifacts/reports/recap-active-sectors --throttle 0.1
+          if [ -n "$FEISHU_WEBHOOK_URL" ] || [ -n "$FEISHU_DAILY_WEBHOOK_URL" ] || [ -n "$FEISHU_WEBHOOKS_JSON" ]; then
+            python3 skills/feishu-card-push/scripts/push.py --task daily \
+              --card artifacts/reports/recap-active-sectors/latest-card.json \
+              $([ "$RECAP_DRY_RUN" = "true" ] && echo "--dry-run")
+          else
+            echo "::warning::No Feishu webhook configured; skipped active-sectors card push."
+          fi
+
       - name: Upload recap artifacts
         if: always()
         uses: actions/upload-artifact@v4
