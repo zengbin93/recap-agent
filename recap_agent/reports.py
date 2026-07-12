@@ -32,7 +32,11 @@ def render_recap_report(
         period=period,
         sources=sources,
     )
-    sections = "\n".join(_render_table(name, rows) for name, rows in datasets.items())
+    sections = "\n".join(
+        _render_table(name, rows)
+        for name, rows in datasets.items()
+        if name != "a_share_daily"
+    )
     period_text = _period_text(snapshot)
     source_text = _source_text(snapshot)
     html_doc = f"""<!doctype html>
@@ -102,9 +106,11 @@ def build_market_snapshot(
 ) -> dict[str, Any]:
     """Build a small, deterministic evidence object for reports and later LLM use."""
 
+    breadth_rows = datasets.get("a_share_daily", [])
+    signal_datasets = {"a_share_daily": breadth_rows} if breadth_rows else {}
     movers = []
     positive_rows = negative_rows = flat_rows = 0
-    for dataset_name, rows in datasets.items():
+    for dataset_name, rows in signal_datasets.items():
         for row in rows:
             pct_change = _pct_change(row)
             if pct_change is None:
@@ -126,8 +132,11 @@ def build_market_snapshot(
     movers.sort(key=lambda item: item["pct_change"], reverse=True)
     gainers = [item for item in movers if item["pct_change"] > 0]
     losers = [item for item in movers if item["pct_change"] < 0]
-    if positive_rows == negative_rows:
-        trend = "分化" if positive_rows else "暂无涨跌数据"
+    stock_count = positive_rows + negative_rows + flat_rows
+    if not stock_count:
+        trend = "数据不足"
+    elif positive_rows == negative_rows:
+        trend = "分化"
     elif positive_rows > negative_rows:
         trend = "偏强"
     else:
@@ -136,8 +145,10 @@ def build_market_snapshot(
     source_meta = {
         name: {
             "rows": len(rows),
+            "label": _dataset_label(name),
             "source": (sources or {}).get(name, {}).get("source"),
             "warning": (sources or {}).get(name, {}).get("warning"),
+            "raw_rows": (sources or {}).get(name, {}).get("raw_rows", len(rows)),
         }
         for name, rows in datasets.items()
     }
@@ -151,6 +162,8 @@ def build_market_snapshot(
             "positive_rows": positive_rows,
             "negative_rows": negative_rows,
             "flat_rows": flat_rows,
+            "stock_count": stock_count,
+            "breadth_basis": "a_share_daily" if stock_count else None,
             "total_rows": sum(len(rows) for rows in datasets.values()),
         },
         "top_gainers": gainers[:5],
@@ -192,6 +205,16 @@ def _row_label(row: Mapping[str, Any]) -> str:
     return "未命名"
 
 
+def _dataset_label(name: str) -> str:
+    return {
+        "indices": "主要指数",
+        "hot_sectors": "板块资金流",
+        "a_share_daily": "A股日行情",
+        "weekly_moneyflow": "周资金流",
+        "monthly_fund_flow": "月基金流向",
+    }.get(name, name)
+
+
 def _period_text(snapshot: Mapping[str, Any]) -> str:
     period = snapshot.get("period") or {}
     start = period.get("start_date")
@@ -206,7 +229,12 @@ def _source_text(snapshot: Mapping[str, Any]) -> str:
     for name, meta in (snapshot.get("datasets") or {}).items():
         source = meta.get("source") or "unknown"
         warning = f" ({meta['warning']})" if meta.get("warning") else ""
-        sources.append(f"{name}: {source}{warning}")
+        raw_rows = meta.get("raw_rows", meta.get("rows", 0))
+        rows = meta.get("rows", 0)
+        raw_note = f"，原始返回 {raw_rows} 条" if raw_rows != rows else ""
+        sources.append(
+            f"{meta.get('label') or name}: {rows} 条，来源 {source}{raw_note}{warning}"
+        )
     return "数据源：" + "；".join(sources) if sources else "数据源：暂无"
 
 
@@ -229,13 +257,13 @@ def _render_snapshot_summary(snapshot: Mapping[str, Any]) -> str:
     return f"""
   <section class="summary">
     <div class="summary-card"><span>市场状态</span><strong>{html.escape(summary["trend"])}</strong></div>
-    <div class="summary-card"><span>上涨条目</span><strong>{summary["positive_rows"]}</strong></div>
-    <div class="summary-card"><span>下跌条目</span><strong>{summary["negative_rows"]}</strong></div>
-    <div class="summary-card"><span>数据条目</span><strong>{summary["total_rows"]}</strong></div>
+    <div class="summary-card"><span>A股样本</span><strong>{summary["stock_count"]}</strong></div>
+    <div class="summary-card"><span>A股上涨</span><strong>{summary["positive_rows"]}</strong></div>
+    <div class="summary-card"><span>A股下跌</span><strong>{summary["negative_rows"]}</strong></div>
   </section>
   <section class="movers">
     <strong>规则化摘要</strong>
-    <ul><li>涨幅靠前：<ul>{gainers}</ul></li><li>跌幅靠前：<ul>{losers}</ul></li></ul>
+    <ul><li>A股涨幅靠前：<ul>{gainers}</ul></li><li>A股跌幅靠前：<ul>{losers}</ul></li></ul>
   </section>
 """
 
@@ -244,12 +272,15 @@ def _card_summary(snapshot: Mapping[str, Any]) -> str:
     summary = snapshot["summary"]
     lines = [
         f"- 市场状态: {summary['trend']}",
-        f"- 上涨/下跌/平盘: {summary['positive_rows']}/{summary['negative_rows']}/{summary['flat_rows']}",
+        f"- A股上涨/下跌/平盘: {summary['positive_rows']}/{summary['negative_rows']}/{summary['flat_rows']}",
+        f"- A股样本: {summary['stock_count']}",
     ]
     for name, meta in snapshot["datasets"].items():
         warning = f"，警告: {meta['warning']}" if meta.get("warning") else ""
+        raw_rows = meta.get("raw_rows", meta["rows"])
+        raw_note = f"，原始返回 {raw_rows} 条" if raw_rows != meta["rows"] else ""
         lines.append(
-            f"- {name}: {meta['rows']} rows，来源 {meta.get('source') or 'unknown'}{warning}"
+            f"- {meta.get('label') or name}: {meta['rows']} 条，来源 {meta.get('source') or 'unknown'}{raw_note}{warning}"
         )
     return "\n".join(lines) or "暂无数据"
 

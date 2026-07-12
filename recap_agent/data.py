@@ -30,6 +30,28 @@ class MarketPeriod:
     end_date: str
 
 
+BENCHMARK_INDEX_CODES = frozenset(
+    {
+        "000001.SH",  # 上证指数
+        "000016.SH",  # 上证50
+        "000300.SH",  # 沪深300
+        "000688.SH",  # 科创50
+        "000852.SH",  # 中证1000
+        "000905.SH",  # 中证500
+        "399001.SZ",  # 深证成指
+        "399006.SZ",  # 创业板指
+    }
+)
+
+
+def filter_recap_dataset(name: str, rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Keep the recap-facing dataset bounded to the entities it claims to show."""
+
+    if name != "indices":
+        return rows
+    return [row for row in rows if str(row.get("ts_code")) in BENCHMARK_INDEX_CODES]
+
+
 def _parse_date(value: str) -> date:
     normalized = value.replace("-", "")
     if len(normalized) != 8 or not normalized.isdigit():
@@ -161,6 +183,8 @@ def default_market_requests(
         "indices": ("index_daily", params),
         "hot_sectors": ("moneyflow_ind_ths", params),
     }
+    if task == "daily":
+        return {**common, "a_share_daily": ("daily", params)}
     if task == "weekly":
         return {**common, "weekly_moneyflow": ("moneyflow", params)}
     if task == "monthly":

@@ -9,6 +9,7 @@ from .data import (
     TushareDataCollector,
     build_market_period,
     default_market_requests,
+    filter_recap_dataset,
     resolve_latest_trade_date,
 )
 from .feishu import FeishuConfig, FeishuSender
@@ -32,8 +33,12 @@ def run_task(
     sources = {}
     for name, (table, params) in default_market_requests(task, end_trade_date).items():
         result = collector.fetch_table(table, params)
-        datasets[name] = result.rows
-        sources[name] = {"source": result.source, "warning": result.warning}
+        datasets[name] = filter_recap_dataset(name, result.rows)
+        sources[name] = {
+            "source": result.source,
+            "warning": result.warning,
+            "raw_rows": len(result.rows),
+        }
 
     report = render_recap_report(
         task=task,

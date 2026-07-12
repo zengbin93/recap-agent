@@ -29,7 +29,7 @@ python3 scripts/run_recap.py --task daily --output-dir artifacts/reports --dry-r
 - `*-feishu-card.json`：可直接发送的飞书 interactive card payload。
 - `*-snapshot.json`：结构化证据快照，包含明确的起止日期、数据源、警告、涨跌条目和摘要统计，供后续大模型总结或历史对比使用。
 
-报告日期会先通过 Tushare `trade_cal` 解析为最近有效交易日。日报只查询该交易日；周报使用当周周一至报告日；月报使用当月月初至报告日，避免在未指定日期时查询无边界的历史数据。
+报告日期会先通过 Tushare `trade_cal` 解析为最近有效交易日。日报只查询该交易日；周报使用当周周一至报告日；月报使用当月月初至报告日，避免在未指定日期时查询无边界的历史数据。日报的市场状态只使用 Tushare `daily` 的 A 股行情计算涨跌家数；指数只展示主要基准指数，板块数量也单独标注，不再把不同类型的原始行数混成“股票数量”。
 
 ## Required Secrets
 

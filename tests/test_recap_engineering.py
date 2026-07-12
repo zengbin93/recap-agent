@@ -56,9 +56,18 @@ class RecapGateway:
         if table == "trade_cal":
             return [{"cal_date": "20260710", "is_open": "1"}]
         if table == "index_daily":
-            return [{"ts_code": "000001.SH", "name": "上证指数", "pct_chg": 1.2}]
+            return [
+                {"ts_code": "000001.SH", "name": "上证指数", "pct_chg": 1.2},
+                {"ts_code": "999999.SZ", "name": "其他指数", "pct_chg": 3.0},
+            ]
         if table == "moneyflow_ind_ths":
             return [{"ts_code": "885001.TI", "name": "人工智能", "pct_change": 2.5}]
+        if table == "daily":
+            return [
+                {"ts_code": "000001.SZ", "pct_chg": 1.2},
+                {"ts_code": "000002.SZ", "pct_chg": -0.5},
+                {"ts_code": "000003.SZ", "pct_chg": 0.0},
+            ]
         return [{"name": table, "pct_chg": -0.5}]
 
 
@@ -171,6 +180,11 @@ class RecapEngineeringTests(unittest.TestCase):
             datasets={
                 "hot_sectors": [{"name": "AI", "change_pct": 2.3}],
                 "indices": [{"name": "沪深300", "close": 3500}],
+                "a_share_daily": [
+                    {"ts_code": "000001.SZ", "pct_chg": 1.2},
+                    {"ts_code": "000002.SZ", "pct_chg": -0.5},
+                    {"ts_code": "000003.SZ", "pct_chg": 0.0},
+                ],
             },
             generated_at="2026-07-05T08:00:00+08:00",
             period={"task": "daily", "start_date": "20260705", "end_date": "20260705"},
@@ -180,7 +194,8 @@ class RecapEngineeringTests(unittest.TestCase):
         self.assertIn("<!doctype html>", result.html.lower())
         self.assertIn("全球市场日报", result.html)
         self.assertIn("AI", result.html)
-        self.assertEqual(result.snapshot["summary"]["trend"], "偏强")
+        self.assertEqual(result.snapshot["summary"]["trend"], "分化")
+        self.assertEqual(result.snapshot["summary"]["stock_count"], 3)
         self.assertEqual(
             result.snapshot["datasets"]["hot_sectors"]["source"], "fixture"
         )
@@ -204,6 +219,21 @@ class RecapEngineeringTests(unittest.TestCase):
             data.default_market_requests("daily", "20260710")["indices"][1],
             {"trade_date": "20260710"},
         )
+        self.assertIn(
+            "a_share_daily", data.default_market_requests("daily", "20260710")
+        )
+        self.assertEqual(
+            len(
+                data.filter_recap_dataset(
+                    "indices",
+                    [
+                        {"ts_code": "000300.SH"},
+                        {"ts_code": "999999.SZ"},
+                    ],
+                )
+            ),
+            1,
+        )
 
         with tempfile.TemporaryDirectory() as tmpdir:
             collector = data.TushareDataCollector(
@@ -225,14 +255,20 @@ class RecapEngineeringTests(unittest.TestCase):
             result = reports.render_recap_report(
                 task="daily",
                 title="全球市场日报",
-                datasets={"indices": [{"name": "指数", "pct_chg": -1.2}]},
+                datasets={
+                    "indices": [{"name": "指数", "pct_chg": -1.2}],
+                    "a_share_daily": [{"ts_code": "000001.SZ", "pct_chg": -1.2}],
+                },
                 generated_at="2026-07-10T08:00:00+08:00",
                 period={
                     "task": "daily",
                     "start_date": "20260710",
                     "end_date": "20260710",
                 },
-                sources={"indices": {"source": "cache", "warning": "stale"}},
+                sources={
+                    "indices": {"source": "cache", "warning": "stale"},
+                    "a_share_daily": {"source": "tushare", "warning": None},
+                },
             )
             files = reports.write_report_files(result, tmpdir, "daily")
             snapshot = json.loads(
@@ -255,7 +291,7 @@ class RecapEngineeringTests(unittest.TestCase):
             )
             with mock.patch.object(cli, "TushareDataCollector", return_value=collector):
                 result = cli.run_task(
-                    "weekly", tmpdir, dry_run=True, trade_date="20260710"
+                    "daily", tmpdir, dry_run=True, trade_date="20260710"
                 )
 
             snapshot_path = pathlib.Path(result["files"]["snapshot"])
@@ -264,9 +300,12 @@ class RecapEngineeringTests(unittest.TestCase):
 
         self.assertEqual(
             result["period"],
-            {"task": "weekly", "start_date": "20260706", "end_date": "20260710"},
+            {"task": "daily", "start_date": "20260710", "end_date": "20260710"},
         )
-        self.assertEqual(snapshot["summary"]["trend"], "偏强")
+        self.assertEqual(snapshot["summary"]["trend"], "分化")
+        self.assertEqual(snapshot["summary"]["stock_count"], 3)
+        self.assertEqual(snapshot["datasets"]["indices"]["rows"], 1)
+        self.assertEqual(snapshot["datasets"]["indices"]["raw_rows"], 2)
         self.assertTrue(snapshot_exists)
 
     def test_daily_workflow_has_beijing_8am_cron_manual_dry_run_and_artifacts(self):
