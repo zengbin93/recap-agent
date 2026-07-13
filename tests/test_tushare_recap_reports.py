@@ -1,3 +1,4 @@
+import json
 import tempfile
 import unittest
 from datetime import date
@@ -194,6 +195,52 @@ class TushareRecapReportsTests(unittest.TestCase):
         self.assertTrue(
             any(call[0] == "daily" and "ts_code" in call[1] for call in client.calls)
         )
+
+    def test_feishu_card_contains_recap_summary_and_quality_warning(self):
+        card = run.build_feishu_card(
+            {
+                "start_trade_date": "20260101",
+                "end_trade_date": "20260710",
+                "price_mode": "qfq",
+                "min_trading_days": 80,
+                "stock_count": 5000,
+                "candidate_count": 12,
+                "data_warnings": ["复权覆盖率不足"],
+                "candidates": [
+                    {
+                        "rank": 1,
+                        "name": "Alpha",
+                        "ts_code": "600000.SH",
+                        "pct_change": 120,
+                        "industry": "软件服务",
+                    }
+                ],
+            },
+            {
+                "watch_count": 5,
+                "core_count": 1,
+                "scoring_version": run.SCORING_VERSION,
+                "data_warnings": [],
+                "candidates": [
+                    {
+                        "rank": 1,
+                        "name": "Alpha",
+                        "ts_code": "600000.SH",
+                        "tier": "A 核心跟踪",
+                        "score": 101,
+                        "industry": "软件服务",
+                    }
+                ],
+            },
+        )
+
+        self.assertEqual(card["msg_type"], "interactive")
+        self.assertEqual(
+            card["card"]["header"]["title"]["content"], "过去半年潜力股复盘"
+        )
+        content = json.dumps(card, ensure_ascii=False)
+        self.assertIn("复权覆盖率不足", content)
+        self.assertIn("Alpha", content)
 
 
 if __name__ == "__main__":

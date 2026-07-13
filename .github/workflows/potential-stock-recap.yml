@@ -28,6 +28,13 @@ jobs:
     timeout-minutes: 30
     env:
       TUSHARE_TOKEN: ${{ secrets.TUSHARE_TOKEN }}
+      FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
+      FEISHU_WEBHOOK_SECRET: ${{ secrets.FEISHU_WEBHOOK_SECRET }}
+      FEISHU_WEBHOOKS_JSON: ${{ secrets.FEISHU_WEBHOOKS_JSON }}
+      FEISHU_DAILY_WEBHOOK_URL: ${{ secrets.FEISHU_DAILY_WEBHOOK_URL }}
+      FEISHU_DAILY_WEBHOOK_SECRET: ${{ secrets.FEISHU_DAILY_WEBHOOK_SECRET }}
+      FEISHU_POTENTIAL_WEBHOOK_URL: ${{ secrets.FEISHU_POTENTIAL_WEBHOOK_URL }}
+      FEISHU_POTENTIAL_WEBHOOK_SECRET: ${{ secrets.FEISHU_POTENTIAL_WEBHOOK_SECRET }}
       END_DATE: ${{ inputs.end_date }}
       MIN_PCT_CHANGE: ${{ inputs.min_pct_change }}
       MIN_TRADING_DAYS: ${{ inputs.min_trading_days }}
@@ -50,14 +57,17 @@ jobs:
             echo "::error::Missing required secret TUSHARE_TOKEN"
             exit 1
           fi
+          if [ -z "$FEISHU_WEBHOOK_URL" ] && [ -z "$FEISHU_WEBHOOKS_JSON" ] && [ -z "$FEISHU_POTENTIAL_WEBHOOK_URL" ] && [ -z "$FEISHU_DAILY_WEBHOOK_URL" ]; then
+            echo "::warning::No Feishu webhook secret configured; the report will be generated but not sent."
+          fi
 
       - name: Run potential-stock recap chain
         run: |
-          args=(full-chain --progress --min-pct-change "$MIN_PCT_CHANGE" --min-trading-days "$MIN_TRADING_DAYS")
+          args=(--task potential --output-dir artifacts/reports --potential-min-pct-change "$MIN_PCT_CHANGE" --potential-min-trading-days "$MIN_TRADING_DAYS")
           if [ -n "$END_DATE" ]; then
-            args+=(--end-date "$END_DATE")
+            args+=(--trade-date "$END_DATE")
           fi
-          python3 skills/tushare-recap-reports/scripts/run.py "${args[@]}"
+          python3 scripts/run_recap.py "${args[@]}"
 
       - name: Upload potential-stock recap artifacts
         if: always()

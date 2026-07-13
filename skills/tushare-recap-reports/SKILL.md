@@ -12,8 +12,8 @@ Use this skill for the Tushare stock recap chain from PR #1:
 - `full-chain`: run both reports in sequence.
 
 The skill is self-contained under `skills/tushare-recap-reports` and writes HTML,
-CSV, and JSON artifacts. It expects `TUSHARE_TOKEN` in the environment or in a
-repo-root `.env` file.
+CSV, JSON, and (for `full-chain`) a Feishu interactive card payload. It expects
+`TUSHARE_TOKEN` in the environment or in a repo-root `.env` file.
 
 The default first-double screen uses Tushare `daily` prices multiplied by
 `adj_factor` and normalized by the interval-end factor (the `qfq` price mode), requires at least 80 available trading days,
@@ -42,6 +42,10 @@ The second-stage report is a scored research queue, not a tenbagger prediction.
 Its scoring version and any source/backfill data warnings are included in the
 JSON and HTML output. Fundamental quality, catalysts, and forward returns are
 planned follow-ups rather than hidden assumptions in the current score.
+
+When run through the `potential` GitHub Actions task, the card is sent after the
+report chain succeeds. `FEISHU_POTENTIAL_WEBHOOK_URL` is preferred; when it is
+not configured, the existing daily webhook is used as the fallback target.
 
 Default output directory: `artifacts/reports/tushare-recap-reports`.
 Default Tushare cache directory: `artifacts/cache/tushare`.

@@ -87,7 +87,7 @@ python3 skills/tushare-recap-reports/scripts/run.py full-chain
 ```
 
 默认输出到 `artifacts/reports/tushare-recap-reports`，Tushare API 缓存放在 `artifacts/cache/tushare`。
-GitHub Actions 可通过 `Potential Stock Recap` 的 `workflow_dispatch` 手动运行同一条链路，结果会作为 artifact 上传。
+GitHub Actions 可通过 `Potential Stock Recap` 的 `workflow_dispatch` 手动运行同一条链路；链路成功后会发送潜力股 Feishu 卡片，结果和卡片 JSON 也会作为 artifact 上传。`FEISHU_POTENTIAL_WEBHOOK_URL` 未配置时回退到 daily webhook。
 
 运行测试：
 

@@ -28,7 +28,11 @@ TASK_TITLES = {
 
 
 def run_potential_task(
-    output_dir: str, trade_date: str | None = None
+    output_dir: str,
+    dry_run: bool,
+    trade_date: str | None = None,
+    min_pct_change: float = 100.0,
+    min_trading_days: int = 80,
 ) -> dict[str, object]:
     repo_root = Path(__file__).resolve().parents[1]
     report_dir = Path(output_dir) / "tushare-recap-reports"
@@ -37,12 +41,24 @@ def run_potential_task(
         str(repo_root / "skills" / "tushare-recap-reports" / "scripts" / "run.py"),
         "full-chain",
         "--output-dir",
-        str(report_dir),
+        str(output_dir),
         "--progress",
+        "--min-pct-change",
+        str(min_pct_change),
+        "--min-trading-days",
+        str(min_trading_days),
     ]
     if trade_date:
         command.extend(["--end-date", trade_date])
     subprocess.run(command, cwd=repo_root, check=True)
+    card_path = report_dir / "latest-card.json"
+    push_result: dict[str, object]
+    try:
+        target = FeishuConfig.from_env().resolve("potential")
+        payload = json.loads(card_path.read_text(encoding="utf-8"))
+        push_result = FeishuSender(dry_run=dry_run).send(target, payload).__dict__
+    except ValueError as exc:
+        push_result = {"skipped": True, "reason": str(exc)}
     return {
         "task": "potential",
         "files": {
@@ -52,15 +68,28 @@ def run_potential_task(
             "watch_html": str(report_dir / "tenbagger_watch" / "latest.html"),
             "watch_csv": str(report_dir / "tenbagger_watch" / "latest.csv"),
             "watch_json": str(report_dir / "tenbagger_watch" / "latest.json"),
+            "card": str(card_path),
         },
+        "feishu": push_result,
     }
 
 
 def run_task(
-    task: str, output_dir: str, dry_run: bool, trade_date: str | None = None
+    task: str,
+    output_dir: str,
+    dry_run: bool,
+    trade_date: str | None = None,
+    potential_min_pct_change: float = 100.0,
+    potential_min_trading_days: int = 80,
 ) -> dict[str, object]:
     if task == "potential":
-        return run_potential_task(output_dir, trade_date)
+        return run_potential_task(
+            output_dir,
+            dry_run,
+            trade_date,
+            min_pct_change=potential_min_pct_change,
+            min_trading_days=potential_min_trading_days,
+        )
     collector = TushareDataCollector()
     end_trade_date = resolve_latest_trade_date(collector, trade_date)
     period = build_market_period(task, end_trade_date)
@@ -110,8 +139,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output-dir", default="artifacts/reports")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--trade-date")
+    parser.add_argument("--potential-min-pct-change", type=float, default=100.0)
+    parser.add_argument("--potential-min-trading-days", type=int, default=80)
     args = parser.parse_args(argv)
-    result = run_task(args.task, args.output_dir, args.dry_run, args.trade_date)
+    result = run_task(
+        args.task,
+        args.output_dir,
+        args.dry_run,
+        args.trade_date,
+        args.potential_min_pct_change,
+        args.potential_min_trading_days,
+    )
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
 

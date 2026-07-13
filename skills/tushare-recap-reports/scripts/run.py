@@ -1120,6 +1120,91 @@ def output_paths(base_dir: Path, topic: str) -> tuple[Path, Path, Path]:
     )
 
 
+def build_feishu_card(
+    first_report: dict[str, Any], watch_report: dict[str, Any]
+) -> dict[str, Any]:
+    first_candidates = first_report.get("candidates", [])[:5]
+    watch_candidates = watch_report.get("candidates", [])[:5]
+    first_lines = [
+        f"{item.get('rank', 0)}. {item.get('name') or item.get('ts_code')}（{item.get('ts_code')}）"
+        f" · 半年 {parse_float(item.get('pct_change')):.2f}% · {item.get('industry') or '行业未标注'}"
+        for item in first_candidates
+    ] or ["暂无符合条件的半年强势股"]
+    watch_lines = [
+        f"{item.get('rank', 0)}. {item.get('name') or item.get('ts_code')}（{item.get('ts_code')}）"
+        f" · {item.get('tier')} · {item.get('score')} 分 · {item.get('industry') or '行业未标注'}"
+        for item in watch_candidates
+    ] or ["暂无二阶段跟踪候选"]
+    warnings = list(
+        dict.fromkeys(
+            first_report.get("data_warnings", [])
+            + watch_report.get("data_warnings", [])
+        )
+    )
+    warning_text = (
+        "\n".join(f"- {warning}" for warning in warnings[:3]) or "- 无数据质量提示"
+    )
+    summary = (
+        f"**区间**: {first_report.get('start_trade_date')} - {first_report.get('end_trade_date')}\n"
+        f"**口径**: {'前复权' if first_report.get('price_mode') == 'qfq' else '未复权'}，"
+        f"最低交易日 {first_report.get('min_trading_days', 0)}\n"
+        f"**A 股样本**: {first_report.get('stock_count', 0)} · "
+        f"**半年强势股**: {first_report.get('candidate_count', 0)} · "
+        f"**二阶段跟踪池**: {watch_report.get('watch_count', 0)} · "
+        f"**A 级核心**: {watch_report.get('core_count', 0)}"
+    )
+    return {
+        "msg_type": "interactive",
+        "card": {
+            "config": {"wide_screen_mode": True},
+            "header": {
+                "template": "blue",
+                "title": {"tag": "plain_text", "content": "过去半年潜力股复盘"},
+            },
+            "elements": [
+                {"tag": "div", "text": {"tag": "lark_md", "content": summary}},
+                {"tag": "hr"},
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content": "**半年强势股初筛 Top 5**\n"
+                        + "\n".join(first_lines),
+                    },
+                },
+                {"tag": "hr"},
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content": (
+                            f"**二阶段研究跟踪池 Top 5**（评分 {watch_report.get('scoring_version', 'unknown')}）\n"
+                            + "\n".join(watch_lines)
+                        ),
+                    },
+                },
+                {"tag": "hr"},
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content": "**数据质量提示**\n" + warning_text,
+                    },
+                },
+                {
+                    "tag": "note",
+                    "elements": [
+                        {
+                            "tag": "plain_text",
+                            "content": "研究复盘队列，不构成投资建议；基本面、催化和后验收益仍需验证。",
+                        }
+                    ],
+                },
+            ],
+        },
+    }
+
+
 def run_first_double(args: argparse.Namespace) -> dict[str, str]:
     load_dotenv(PROJECT_ROOT / ".env")
     client = TushareClient(
@@ -1180,11 +1265,21 @@ def run_tenbagger_watch(args: argparse.Namespace) -> dict[str, str]:
     }
 
 
-def run_full_chain(args: argparse.Namespace) -> dict[str, dict[str, str]]:
+def run_full_chain(args: argparse.Namespace) -> dict[str, Any]:
     first = run_first_double(args)
     args.source_report = Path(first["json"])
     watch = run_tenbagger_watch(args)
-    return {"first_double": first, "tenbagger_watch": watch}
+    card_path = args.output_dir / "tushare-recap-reports" / "latest-card.json"
+    first_report = json.loads(Path(first["json"]).read_text(encoding="utf-8"))
+    watch_report = json.loads(Path(watch["json"]).read_text(encoding="utf-8"))
+    write_text(
+        card_path,
+        json.dumps(
+            build_feishu_card(first_report, watch_report), ensure_ascii=False, indent=2
+        )
+        + "\n",
+    )
+    return {"first_double": first, "tenbagger_watch": watch, "card": str(card_path)}
 
 
 def add_common_arguments(parser: argparse.ArgumentParser) -> None:

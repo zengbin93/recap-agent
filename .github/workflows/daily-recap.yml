@@ -43,6 +43,8 @@ jobs:
       FEISHU_WEEKLY_WEBHOOK_SECRET: ${{ secrets.FEISHU_WEEKLY_WEBHOOK_SECRET }}
       FEISHU_MONTHLY_WEBHOOK_URL: ${{ secrets.FEISHU_MONTHLY_WEBHOOK_URL }}
       FEISHU_MONTHLY_WEBHOOK_SECRET: ${{ secrets.FEISHU_MONTHLY_WEBHOOK_SECRET }}
+      FEISHU_POTENTIAL_WEBHOOK_URL: ${{ secrets.FEISHU_POTENTIAL_WEBHOOK_URL }}
+      FEISHU_POTENTIAL_WEBHOOK_SECRET: ${{ secrets.FEISHU_POTENTIAL_WEBHOOK_SECRET }}
       RECAP_TASK: ${{ github.event.inputs.task || 'daily' }}
       RECAP_DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
 

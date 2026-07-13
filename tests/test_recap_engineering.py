@@ -136,6 +136,7 @@ class RecapEngineeringTests(unittest.TestCase):
 
         config = feishu.FeishuConfig.from_env(env)
         target = config.resolve("daily")
+        self.assertEqual(config.resolve("potential"), target)
         payload = feishu.build_signed_payload(
             {"msg_type": "interactive"}, "daily-secret", timestamp=1700000000
         )
@@ -336,8 +337,9 @@ class RecapEngineeringTests(unittest.TestCase):
 
         self.assertIn("workflow_dispatch", text)
         self.assertIn("TUSHARE_TOKEN", text)
-        self.assertIn("full-chain", text)
+        self.assertIn("--task potential", text)
         self.assertIn("min-trading-days", text)
+        self.assertIn("FEISHU_POTENTIAL_WEBHOOK_URL", text)
         self.assertIn("actions/upload-artifact", text)
 
     def test_task_skill_wrappers_forward_cli_arguments(self):
