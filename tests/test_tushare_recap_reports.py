@@ -264,6 +264,63 @@ class TushareRecapReportsTests(unittest.TestCase):
         self.assertIn("营业利润同比 +28.1%", evidence)
         self.assertIn("ROE 12.4%", evidence)
 
+    def test_fetched_fundamental_evidence_replaces_pending_marker(self):
+        source = {
+            "price_mode": "raw",
+            "start_trade_date": "20260709",
+            "end_trade_date": "20260710",
+            "candidates": [
+                {
+                    "rank": 1,
+                    "ts_code": "600000.SH",
+                    "name": "Alpha",
+                    "industry": "软件服务",
+                    "market": "主板",
+                    "pct_change": 120,
+                    "pullback_from_high": -5,
+                }
+            ],
+        }
+        client = FakeTushareClient(
+            {
+                "daily_basic": [
+                    {
+                        "ts_code": "600000.SH",
+                        "turnover_rate_f": 5,
+                        "volume_ratio": 1,
+                        "pe_ttm": 20,
+                        "pb": 2,
+                        "total_mv": 100000,
+                        "circ_mv": 50000,
+                    }
+                ],
+                "daily": [
+                    {"ts_code": "600000.SH", "trade_date": "20260709", "close": 10},
+                    {"ts_code": "600000.SH", "trade_date": "20260710", "close": 20},
+                ],
+                "fina_indicator": [
+                    {
+                        "end_date": "20260331",
+                        "ann_date": "20260430",
+                        "netprofit_yoy": 35.2,
+                    }
+                ],
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as tmp:
+            report = run.build_watch_report(
+                source,
+                client=client,
+                source_report=Path(tmp) / "source.json",
+                cache_dir=Path(tmp) / "cache",
+            )
+
+        candidate = report.candidates[0]
+        self.assertIn("20260331净利润同比 +35.2%", candidate.financial_evidence)
+        self.assertNotIn(run.FUNDAMENTAL_PENDING_DRIVER, candidate.unverified_drivers)
+        self.assertNotIn(run.FUNDAMENTAL_PENDING_DRIVER, candidate.thesis)
+
 
 if __name__ == "__main__":
     unittest.main()

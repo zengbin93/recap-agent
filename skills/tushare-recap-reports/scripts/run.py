@@ -22,6 +22,7 @@ DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "artifacts" / "reports" / "tushare-recap-rep
 TUSHARE_URL = "http://api.tushare.pro"
 DATE_FMT = "%Y%m%d"
 SCORING_VERSION = "v2.1-quality-gated"
+FUNDAMENTAL_PENDING_DRIVER = "财报增长信号将在排序靠前的候选中补拉"
 A_SHARE_MARKETS = {"主板", "创业板", "科创板", "北交所"}
 
 
@@ -1077,7 +1078,7 @@ def build_watch_report(
         )
         unverified_drivers = [
             "公告、订单、政策催化尚未接入，需人工核对",
-            "财报增长信号将在排序靠前的候选中补拉",
+            FUNDAMENTAL_PENDING_DRIVER,
         ]
         breakdown = ScoreBreakdown(
             stage=stage_score(pct_change),
@@ -1137,6 +1138,11 @@ def build_watch_report(
     fundamental_fetch_blocked = False
     fundamental_warning_samples: list[str] = []
     for candidate in scored[:20]:
+        candidate.unverified_drivers = [
+            reason
+            for reason in candidate.unverified_drivers
+            if reason != FUNDAMENTAL_PENDING_DRIVER
+        ]
         if fundamental_fetch_blocked:
             candidate.unverified_drivers.append(
                 "财务指标接口不可用，未取得最新财报证据"
