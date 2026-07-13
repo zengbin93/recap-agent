@@ -242,6 +242,28 @@ class TushareRecapReportsTests(unittest.TestCase):
         self.assertIn("复权覆盖率不足", content)
         self.assertIn("Alpha", content)
 
+    def test_fundamental_evidence_is_rendered_from_latest_indicator_row(self):
+        client = FakeTushareClient(
+            {
+                "fina_indicator": [
+                    {
+                        "end_date": "20260331",
+                        "ann_date": "20260430",
+                        "netprofit_yoy": 35.2,
+                        "op_yoy": 28.1,
+                        "roe": 12.4,
+                        "grossprofit_margin": 31.5,
+                    }
+                ]
+            }
+        )
+
+        evidence = run.load_fundamental_evidence(client, "600000.SH")
+
+        self.assertIn("20260331净利润同比 +35.2%", evidence)
+        self.assertIn("营业利润同比 +28.1%", evidence)
+        self.assertIn("ROE 12.4%", evidence)
+
 
 if __name__ == "__main__":
     unittest.main()

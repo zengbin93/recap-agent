@@ -10,6 +10,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import date, datetime, timedelta
 from html import escape
 from pathlib import Path
+from statistics import median
 from typing import Any, Callable
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -150,6 +151,12 @@ class FirstDoubleCandidate:
     max_gain: float
     pullback_from_high: float
     trading_days: int
+    industry_pct_change: float = 0.0
+    industry_breadth_pct: float = 0.0
+    period_avg_amount_yi: float = 0.0
+    recent_avg_amount_yi: float = 0.0
+    amount_change_pct: float = 0.0
+    positive_days_ratio: float = 0.0
 
 
 @dataclass
@@ -209,6 +216,9 @@ class WatchCandidate:
     breakdown: ScoreBreakdown
     source_rank: int
     end_trade_date: str
+    rise_drivers: list[str] = field(default_factory=list)
+    financial_evidence: list[str] = field(default_factory=list)
+    unverified_drivers: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -377,7 +387,7 @@ def load_daily_by_date(
     rows = client.query(
         "daily",
         params={"trade_date": trade_date},
-        fields=["ts_code", "trade_date", "close"],
+        fields=["ts_code", "trade_date", "close", "pct_chg", "vol", "amount"],
         cache_key=trade_date,
     )
     if price_mode == "raw":
@@ -409,7 +419,7 @@ def load_daily_range(
     rows = client.query(
         "daily",
         params={"ts_code": ts_code, "start_date": start_date, "end_date": end_date},
-        fields=["ts_code", "trade_date", "close"],
+        fields=["ts_code", "trade_date", "close", "pct_chg", "vol", "amount"],
         cache_key=f"{ts_code}_{start_date}_{end_date}",
     )
     if price_mode == "raw":
@@ -463,6 +473,63 @@ def load_daily_range(
     )
 
 
+def price_activity_metrics(prices: list[dict[str, Any]]) -> dict[str, float]:
+    amounts = [
+        parse_float(item.get("amount")) / 100000.0
+        for item in prices
+        if parse_float(item.get("amount")) > 0
+    ]
+    recent_prices = prices[-20:]
+    recent_amounts = [
+        parse_float(item.get("amount")) / 100000.0
+        for item in recent_prices
+        if parse_float(item.get("amount")) > 0
+    ]
+    period_avg = sum(amounts) / len(amounts) if amounts else 0.0
+    recent_avg = sum(recent_amounts) / len(recent_amounts) if recent_amounts else 0.0
+    amount_change = (recent_avg / period_avg - 1.0) * 100.0 if period_avg > 0 else 0.0
+    pct_values = [parse_float(item.get("pct_chg")) for item in prices]
+    positive_days_ratio = (
+        sum(1 for value in pct_values if value > 0) / len(pct_values) * 100.0
+        if pct_values
+        else 0.0
+    )
+    return {
+        "period_avg_amount_yi": round(period_avg, 2),
+        "recent_avg_amount_yi": round(recent_avg, 2),
+        "amount_change_pct": round(amount_change, 2),
+        "positive_days_ratio": round(positive_days_ratio, 2),
+    }
+
+
+def industry_stats_for_prices(
+    by_stock: dict[str, list[dict[str, Any]]],
+    stock_basic: dict[str, dict[str, Any]],
+    min_trading_days: int,
+) -> dict[str, dict[str, float]]:
+    grouped: dict[str, list[float]] = {}
+    for ts_code, prices in by_stock.items():
+        if len(prices) < min_trading_days:
+            continue
+        start_close = parse_float(prices[0].get("close"))
+        end_close = parse_float(prices[-1].get("close"))
+        if start_close <= 0 or end_close <= 0:
+            continue
+        industry = str(stock_basic.get(ts_code, {}).get("industry") or "行业未标注")
+        grouped.setdefault(industry, []).append((end_close / start_close - 1.0) * 100.0)
+    return {
+        industry: {
+            "pct_change": round(median(changes), 2),
+            "breadth_pct": round(
+                sum(1 for value in changes if value > 0) / len(changes) * 100.0, 2
+            ),
+            "member_count": float(len(changes)),
+        }
+        for industry, changes in grouped.items()
+        if changes
+    }
+
+
 def build_first_double_report(
     client: TushareClient,
     *,
@@ -490,7 +557,7 @@ def build_first_double_report(
         and (include_st or not is_risk_name(str(basic.get("name") or "")))
     }
 
-    by_stock: dict[str, list[tuple[str, float]]] = {}
+    by_stock: dict[str, list[dict[str, Any]]] = {}
     total_price_rows = 0
     adjusted_price_rows = 0
     data_warnings = ["股票基础信息使用当前 list_status=L，历史回测存在生存者偏差"]
@@ -527,28 +594,43 @@ def build_first_double_report(
                 continue
             close = parse_float(row.get("close"))
             if close > 0:
-                by_stock.setdefault(ts_code, []).append((str(row["trade_date"]), close))
+                by_stock.setdefault(ts_code, []).append(
+                    {
+                        "trade_date": str(row["trade_date"]),
+                        "close": close,
+                        "pct_chg": parse_float(row.get("pct_chg")),
+                        "amount": parse_float(row.get("amount")),
+                    }
+                )
 
+    industry_stats = industry_stats_for_prices(by_stock, stock_basic, min_trading_days)
     candidates: list[FirstDoubleCandidate] = []
     for ts_code, prices in by_stock.items():
-        prices.sort(key=lambda item: item[0])
-        if len(prices) < min_trading_days or prices[0][1] <= 0:
+        prices.sort(key=lambda item: str(item["trade_date"]))
+        if len(prices) < min_trading_days or parse_float(prices[0].get("close")) <= 0:
             continue
-        start_trade_date, start_close = prices[0]
-        end_trade_date, end_close = prices[-1]
+        start_trade_date = str(prices[0]["trade_date"])
+        start_close = parse_float(prices[0].get("close"))
+        end_trade_date = str(prices[-1]["trade_date"])
+        end_close = parse_float(prices[-1].get("close"))
         pct_change = (end_close / start_close - 1.0) * 100.0
         if pct_change < min_pct_change or (
             max_pct_change is not None and pct_change > max_pct_change
         ):
             continue
-        max_trade_date, max_close = max(prices, key=lambda item: item[1])
+        max_point = max(prices, key=lambda item: parse_float(item.get("close")))
+        max_trade_date = str(max_point["trade_date"])
+        max_close = parse_float(max_point.get("close"))
         basic = stock_basic.get(ts_code, {})
+        industry = str(basic.get("industry") or "行业未标注")
+        activity = price_activity_metrics(prices)
+        industry_stat = industry_stats.get(industry, {})
         candidates.append(
             FirstDoubleCandidate(
                 rank=0,
                 ts_code=ts_code,
                 name=str(basic.get("name") or ""),
-                industry=str(basic.get("industry") or ""),
+                industry=industry,
                 market=str(basic.get("market") or ""),
                 list_date=str(basic.get("list_date") or ""),
                 start_trade_date=start_trade_date,
@@ -561,6 +643,12 @@ def build_first_double_report(
                 max_gain=round((max_close / start_close - 1.0) * 100.0, 2),
                 pullback_from_high=round((end_close / max_close - 1.0) * 100.0, 2),
                 trading_days=len(prices),
+                industry_pct_change=parse_float(industry_stat.get("pct_change")),
+                industry_breadth_pct=parse_float(industry_stat.get("breadth_pct")),
+                period_avg_amount_yi=activity["period_avg_amount_yi"],
+                recent_avg_amount_yi=activity["recent_avg_amount_yi"],
+                amount_change_pct=activity["amount_change_pct"],
+                positive_days_ratio=activity["positive_days_ratio"],
             )
         )
 
@@ -819,6 +907,98 @@ def tier_for_score(score: int) -> str:
     return "D 暂缓"
 
 
+def build_rise_drivers(
+    source: dict[str, Any],
+    *,
+    recent_20d_pct: float,
+    pullback_from_high: float,
+    prices_available: bool,
+) -> list[str]:
+    drivers: list[str] = []
+    industry_pct = parse_float(source.get("industry_pct_change"))
+    industry_breadth = parse_float(source.get("industry_breadth_pct"))
+    amount_change = parse_float(source.get("amount_change_pct"))
+    recent_amount = parse_float(source.get("recent_avg_amount_yi"))
+    positive_days = parse_float(source.get("positive_days_ratio"))
+    industry = str(source.get("industry") or "行业未标注")
+    if industry_pct >= 15 and industry_breadth >= 55:
+        drivers.append(
+            f"行业共振：{industry}样本中位涨幅 {industry_pct:.1f}%，上涨个股占比 {industry_breadth:.1f}%"
+        )
+    elif industry_pct > 0:
+        drivers.append(f"行业偏强：{industry}样本中位涨幅 {industry_pct:.1f}%")
+    if amount_change >= 25 and recent_amount > 0:
+        drivers.append(
+            f"成交活跃度抬升：近20日均成交额 {recent_amount:.2f} 亿，较区间均值高 {amount_change:.1f}%"
+        )
+    if recent_20d_pct >= 15:
+        drivers.append(f"近期加速：近20日涨幅 {recent_20d_pct:.1f}%")
+    elif recent_20d_pct > 0:
+        drivers.append(f"近期延续：近20日涨幅 {recent_20d_pct:.1f}%")
+    if pullback_from_high >= -10:
+        drivers.append(f"趋势保持：距区间高点仅回撤 {abs(pullback_from_high):.1f}%")
+    if positive_days >= 55:
+        drivers.append(f"上涨日占比 {positive_days:.1f}%")
+    if not prices_available:
+        drivers.append("行情证据不完整：近期价格缓存缺失")
+    return drivers or ["行情层暂未识别出单一主导驱动"]
+
+
+def load_fundamental_evidence(client: TushareClient, ts_code: str) -> list[str]:
+    rows = client.query(
+        "fina_indicator",
+        params={"ts_code": ts_code},
+        fields=[
+            "ts_code",
+            "ann_date",
+            "end_date",
+            "roe",
+            "grossprofit_margin",
+            "op_yoy",
+            "netprofit_yoy",
+            "ocf_yoy",
+        ],
+        cache_key=ts_code,
+    )
+    rows = sorted(
+        rows,
+        key=lambda row: (
+            str(row.get("end_date") or ""),
+            str(row.get("ann_date") or ""),
+        ),
+        reverse=True,
+    )
+    if not rows:
+        return []
+    latest = rows[0]
+    period = str(latest.get("end_date") or "最新财报")
+    evidence: list[str] = []
+    netprofit_yoy = parse_float(latest.get("netprofit_yoy"), default=float("nan"))
+    op_yoy = parse_float(latest.get("op_yoy"), default=float("nan"))
+    roe = parse_float(latest.get("roe"), default=float("nan"))
+    gross_margin = parse_float(latest.get("grossprofit_margin"), default=float("nan"))
+    if netprofit_yoy == netprofit_yoy:
+        evidence.append(f"{period}净利润同比 {netprofit_yoy:+.1f}%")
+    if op_yoy == op_yoy:
+        evidence.append(f"营业利润同比 {op_yoy:+.1f}%")
+    if roe == roe:
+        evidence.append(f"ROE {roe:.1f}%")
+    if gross_margin == gross_margin:
+        evidence.append(f"毛利率 {gross_margin:.1f}%")
+    return evidence[:3]
+
+
+def refresh_watch_thesis(candidate: WatchCandidate) -> None:
+    observed = "；".join(candidate.rise_drivers) or "行情层暂未识别出单一主导驱动"
+    financial = "；".join(candidate.financial_evidence)
+    if financial:
+        observed += f"；财务信号：{financial}"
+    unresolved = "；".join(candidate.unverified_drivers)
+    candidate.thesis = f"已观测驱动：{observed}。"
+    if unresolved:
+        candidate.thesis += f" 待核实：{unresolved}。"
+
+
 def build_watch_report(
     first_double_report: dict[str, Any],
     *,
@@ -889,6 +1069,16 @@ def build_watch_report(
         if len(prices) < 2:
             flags.append("近半年价格数据缺失")
             data_warnings.append(f"{ts_code} 缺少可计算近 20 日动量的价格数据")
+        rise_drivers = build_rise_drivers(
+            source,
+            recent_20d_pct=recent_20d,
+            pullback_from_high=pullback,
+            prices_available=len(prices) >= 2,
+        )
+        unverified_drivers = [
+            "公告、订单、政策催化尚未接入，需人工核对",
+            "财报增长信号将在排序靠前的候选中补拉",
+        ]
         breakdown = ScoreBreakdown(
             stage=stage_score(pct_change),
             size=size_score(circ_mv_yi),
@@ -900,13 +1090,7 @@ def build_watch_report(
             penalties=penalties,
         )
         score = sum(asdict(breakdown).values())
-        theme = theme_reason
-        thesis = (
-            f"{theme}；半年涨幅 {pct_change:.2f}%，已被市场初步验证；"
-            f"流通市值约 {circ_mv_yi:.2f} 亿，回撤 {pullback:.2f}%，"
-            f"自由流通换手 {turnover_rate_f:.2f}%，近 20 日涨幅 {recent_20d:.2f}%"
-            f"{'（数据缺失）' if len(prices) < 2 else ''}。"
-        )
+        thesis = ""
         next_checks = [
             "核对最近两期营收/利润是否出现加速",
             "追踪公告、互动易和机构调研中是否有订单/产能/客户变化",
@@ -941,12 +1125,41 @@ def build_watch_report(
                 breakdown=breakdown,
                 source_rank=int(source.get("rank") or 0),
                 end_trade_date=end_trade_date,
+                rise_drivers=rise_drivers,
+                unverified_drivers=unverified_drivers,
             )
         )
+        refresh_watch_thesis(scored[-1])
 
     scored.sort(key=lambda item: (item.score, item.pct_change), reverse=True)
     for index, candidate in enumerate(scored, start=1):
         candidate.rank = index
+    fundamental_fetch_blocked = False
+    fundamental_warning_samples: list[str] = []
+    for candidate in scored[:20]:
+        if fundamental_fetch_blocked:
+            candidate.unverified_drivers.append(
+                "财务指标接口不可用，未取得最新财报证据"
+            )
+            refresh_watch_thesis(candidate)
+            continue
+        try:
+            candidate.financial_evidence = load_fundamental_evidence(
+                client, candidate.ts_code
+            )
+        except TushareError as error:
+            fundamental_fetch_blocked = True
+            fundamental_warning_samples.append(f"财务指标接口不可用：{error}")
+            candidate.unverified_drivers.append(
+                "财务指标接口不可用，未取得最新财报证据"
+            )
+        if not candidate.financial_evidence:
+            candidate.unverified_drivers.append("最近财报未返回可用增长指标")
+        refresh_watch_thesis(candidate)
+    for candidate in scored[20:]:
+        candidate.unverified_drivers.insert(0, "财务证据仅对排序前 20 名补拉")
+        refresh_watch_thesis(candidate)
+    data_warnings.extend(fundamental_warning_samples)
     limited = scored[:limit] if limit > 0 else scored
     return WatchReport(
         generated_at=datetime.now().isoformat(timespec="seconds"),
@@ -976,9 +1189,16 @@ def write_csv_report(report: Any, path: Path) -> None:
     rows = []
     for item in report.candidates:
         row = asdict(item)
-        if "risk_flags" in row:
-            row["risk_flags"] = "；".join(item.risk_flags)
-            row["next_checks"] = "；".join(item.next_checks)
+        for key in (
+            "risk_flags",
+            "next_checks",
+            "rise_drivers",
+            "financial_evidence",
+            "unverified_drivers",
+        ):
+            if key in row and isinstance(row[key], list):
+                row[key] = "；".join(str(value) for value in row[key])
+        if "breakdown" in row and isinstance(row["breakdown"], dict):
             row["breakdown"] = json.dumps(
                 asdict(item.breakdown), ensure_ascii=False, sort_keys=True
             )
@@ -1005,11 +1225,14 @@ def render_first_double_html(report: FirstDoubleReport) -> str:
             f"<td>{escape(item.end_trade_date)}<span>{item.end_close:g}</span></td>"
             f"<td class='gain'>{fmt_pct(item.pct_change)}</td>"
             f"<td>{escape(item.max_trade_date)}<span>{fmt_pct(item.max_gain)}</span></td>"
-            f"<td>{fmt_pct(item.pullback_from_high)}</td><td>{item.trading_days}</td>"
+            f"<td>{fmt_pct(item.pullback_from_high)}</td>"
+            f"<td>{fmt_pct(item.industry_pct_change)}<span>上涨占比 {fmt_pct(item.industry_breadth_pct)}</span></td>"
+            f"<td>{fmt_pct(item.amount_change_pct)}<span>近20日 {item.recent_avg_amount_yi:g} 亿</span></td>"
+            f"<td>{fmt_pct(item.positive_days_ratio)}<span>{item.trading_days} 个交易日</span></td>"
             "</tr>"
         )
     table_body = (
-        "\n".join(rows) or "<tr><td colspan='10' class='empty'>暂无候选。</td></tr>"
+        "\n".join(rows) or "<tr><td colspan='12' class='empty'>暂无候选。</td></tr>"
     )
     price_label = "前复权" if report.price_mode == "qfq" else "未复权"
     warning_note = "；".join(report.data_warnings[:3])
@@ -1028,7 +1251,7 @@ def render_first_double_html(report: FirstDoubleReport) -> str:
             ("有行情股票数", str(report.stocks_with_prices)),
             ("入选股票数", str(report.candidate_count)),
         ],
-        "<table><thead><tr><th>排名</th><th>股票</th><th>行业</th><th>市场</th><th>区间起点</th><th>区间终点</th><th>区间涨幅</th><th>期间高点</th><th>高点回撤</th><th>交易天数</th></tr></thead>"
+        "<table><thead><tr><th>排名</th><th>股票</th><th>行业</th><th>市场</th><th>区间起点</th><th>区间终点</th><th>区间涨幅</th><th>期间高点</th><th>高点回撤</th><th>行业共振</th><th>成交额变化</th><th>上涨日占比</th></tr></thead>"
         f"<tbody>{table_body}</tbody></table>",
         f"默认使用 Tushare daily × adj_factor 的前复权口径；最低交易日为 {report.min_trading_days}，避免新股短历史误入。{warning_note}",
     )
@@ -1038,6 +1261,14 @@ def render_watch_html(report: WatchReport) -> str:
     rows = []
     for item in report.candidates:
         checks = "".join(f"<li>{escape(check)}</li>" for check in item.next_checks)
+        drivers = "".join(f"<li>{escape(driver)}</li>" for driver in item.rise_drivers)
+        financial = "；".join(item.financial_evidence)
+        unverified = "；".join(item.unverified_drivers)
+        driver_note = f"<ul>{drivers}</ul>"
+        if financial:
+            driver_note += f"<span>财务证据：{escape(financial)}</span>"
+        if unverified:
+            driver_note += f"<span>待核实：{escape(unverified)}</span>"
         rows.append(
             "<tr>"
             f"<td>{item.rank}</td><td><strong>{escape(item.name)}</strong><span>{escape(item.ts_code)}</span></td>"
@@ -1046,7 +1277,8 @@ def render_watch_html(report: WatchReport) -> str:
             f"<td class='gain'>{fmt_pct(item.pct_change)}<span>20日 {fmt_pct(item.recent_20d_pct)}</span></td>"
             f"<td>{item.circ_mv_yi:g} 亿<span>总市值 {item.total_mv_yi:g} 亿</span></td>"
             f"<td>{fmt_pct(item.pullback_from_high)}<span>换手 {fmt_pct(item.turnover_rate_f)} / 量比 {item.volume_ratio:g}</span></td>"
-            f"<td>{escape(item.thesis)}</td><td>{escape('；'.join(item.risk_flags))}<ul>{checks}</ul></td>"
+            f"<td>{escape(item.thesis)}{driver_note}</td>"
+            f"<td>{escape('；'.join(item.risk_flags))}<ul>{checks}</ul></td>"
             "</tr>"
         )
     table_body = (
@@ -1132,7 +1364,13 @@ def build_feishu_card(
     ] or ["暂无符合条件的半年强势股"]
     watch_lines = [
         f"{item.get('rank', 0)}. {item.get('name') or item.get('ts_code')}（{item.get('ts_code')}）"
-        f" · {item.get('tier')} · {item.get('score')} 分 · {item.get('industry') or '行业未标注'}"
+        f" · {item.get('tier')} · {item.get('score')} 分 · {item.get('industry') or '行业未标注'}\n"
+        f"   驱动：{'；'.join(item.get('rise_drivers', [])[:2]) or '行情层未识别'}"
+        + (
+            f"\n   财务：{'；'.join(item.get('financial_evidence', [])[:2])}"
+            if item.get("financial_evidence")
+            else ""
+        )
         for item in watch_candidates
     ] or ["暂无二阶段跟踪候选"]
     warnings = list(

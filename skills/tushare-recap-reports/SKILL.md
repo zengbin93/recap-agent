@@ -43,6 +43,13 @@ Its scoring version and any source/backfill data warnings are included in the
 JSON and HTML output. Fundamental quality, catalysts, and forward returns are
 planned follow-ups rather than hidden assumptions in the current score.
 
+The watch report now separates observed rise drivers from unverified hypotheses.
+Observed drivers include industry breadth/median return, recent turnover amount,
+recent acceleration, trend drawdown, and positive-day ratio. The top 20 ranked
+names also attempt to load Tushare `fina_indicator` evidence; missing permissions
+or missing filings are shown as warnings instead of being treated as a reason for
+the rise.
+
 When run through the `potential` GitHub Actions task, the card is sent after the
 report chain succeeds. `FEISHU_POTENTIAL_WEBHOOK_URL` is preferred; when it is
 not configured, the existing daily webhook is used as the fallback target.
