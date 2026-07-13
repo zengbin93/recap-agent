@@ -20,10 +20,20 @@ DEFAULT_CACHE_DIR = PROJECT_ROOT / "artifacts" / "cache" / "tushare"
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "artifacts" / "reports" / "tushare-recap-reports"
 TUSHARE_URL = "http://api.tushare.pro"
 DATE_FMT = "%Y%m%d"
+SCORING_VERSION = "v2.1-quality-gated"
+A_SHARE_MARKETS = {"主板", "创业板", "科创板", "北交所"}
 
 
 class TushareError(RuntimeError):
     pass
+
+
+@dataclass
+class DailyPriceBatch:
+    rows: list[dict[str, Any]]
+    total_count: int
+    adjusted_count: int = 0
+    warning: str | None = None
 
 
 class TushareClient:
@@ -39,7 +49,9 @@ class TushareClient:
     ) -> None:
         self.token = token or os.environ.get("TUSHARE_TOKEN", "")
         if not self.token:
-            raise TushareError("Missing TUSHARE_TOKEN. Set it in the environment or repo-root .env.")
+            raise TushareError(
+                "Missing TUSHARE_TOKEN. Set it in the environment or repo-root .env."
+            )
         self.cache_dir = cache_dir
         self.use_cache = use_cache
         self.retries = retries
@@ -58,24 +70,44 @@ class TushareClient:
         fields_text = ",".join(fields) if isinstance(fields, list) else fields or ""
         cache_path = self._cache_path(api_name, cache_key)
         if self.use_cache and cache_path and cache_path.exists():
-            return self._rows_from_payload(json.loads(cache_path.read_text(encoding="utf-8")))
+            return self._rows_from_payload(
+                json.loads(cache_path.read_text(encoding="utf-8"))
+            )
 
-        payload = {"api_name": api_name, "token": self.token, "params": params, "fields": fields_text}
+        payload = {
+            "api_name": api_name,
+            "token": self.token,
+            "params": params,
+            "fields": fields_text,
+        }
         raw = self._post(payload)
         if cache_path:
             cache_path.parent.mkdir(parents=True, exist_ok=True)
-            cache_path.write_text(json.dumps(raw, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            cache_path.write_text(
+                json.dumps(raw, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+            )
         return self._rows_from_payload(raw)
 
     def _post(self, payload: dict[str, Any]) -> dict[str, Any]:
         body = json.dumps(payload).encode("utf-8")
-        request = Request(TUSHARE_URL, data=body, headers={"Content-Type": "application/json"}, method="POST")
+        request = Request(
+            TUSHARE_URL,
+            data=body,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
         last_error: Exception | None = None
         for attempt in range(1, max(1, self.retries + 1) + 1):
             try:
                 with urlopen(request, timeout=self.timeout) as response:
                     return json.loads(response.read().decode("utf-8"))
-            except (HTTPError, URLError, TimeoutError, OSError, json.JSONDecodeError) as error:
+            except (
+                HTTPError,
+                URLError,
+                TimeoutError,
+                OSError,
+                json.JSONDecodeError,
+            ) as error:
                 last_error = error
                 if attempt <= self.retries:
                     time.sleep(self.retry_sleep * attempt)
@@ -89,7 +121,9 @@ class TushareClient:
 
     def _rows_from_payload(self, payload: dict[str, Any]) -> list[dict[str, Any]]:
         if payload.get("code") != 0:
-            raise TushareError(f"Tushare error {payload.get('code')}: {payload.get('msg')}")
+            raise TushareError(
+                f"Tushare error {payload.get('code')}: {payload.get('msg')}"
+            )
         data = payload.get("data") or {}
         fields = data.get("fields") or []
         items = data.get("items") or []
@@ -132,6 +166,10 @@ class FirstDoubleReport:
     stocks_with_prices: int
     candidate_count: int
     candidates: list[FirstDoubleCandidate]
+    price_mode: str = "qfq"
+    min_trading_days: int = 80
+    adjustment_coverage: float = 0.0
+    data_warnings: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -182,6 +220,9 @@ class WatchReport:
     input_count: int
     watch_count: int
     core_count: int
+    scoring_version: str = SCORING_VERSION
+    price_mode: str = "qfq"
+    data_warnings: list[str] = field(default_factory=list)
     candidates: list[WatchCandidate] = field(default_factory=list)
 
 
@@ -223,10 +264,17 @@ def parse_float(value: Any, default: float = 0.0) -> float:
         return default
 
 
-def pick_trade_dates(client: TushareClient, start_date: str, end_date: str) -> list[str]:
+def pick_trade_dates(
+    client: TushareClient, start_date: str, end_date: str
+) -> list[str]:
     rows = client.query(
         "trade_cal",
-        params={"exchange": "SSE", "start_date": start_date, "end_date": end_date, "is_open": "1"},
+        params={
+            "exchange": "SSE",
+            "start_date": start_date,
+            "end_date": end_date,
+            "is_open": "1",
+        },
         fields=["cal_date", "is_open"],
         cache_key=f"SSE_{start_date}_{end_date}_open",
     )
@@ -246,12 +294,172 @@ def load_stock_basic(client: TushareClient) -> dict[str, dict[str, Any]]:
     return {row["ts_code"]: row for row in rows}
 
 
-def load_daily_by_date(client: TushareClient, trade_date: str) -> list[dict[str, Any]]:
-    return client.query(
+def is_risk_name(name: str) -> bool:
+    normalized = name.strip().upper()
+    return (
+        normalized.startswith("ST")
+        or normalized.startswith("*ST")
+        or "退" in normalized
+    )
+
+
+def is_a_share(ts_code: str, basic: dict[str, Any]) -> bool:
+    code, _, exchange = str(ts_code or "").upper().partition(".")
+    if exchange not in {"SH", "SZ", "BJ"} or not code.isdigit():
+        return False
+    if code.startswith(("200", "900")):
+        return False
+    return str(basic.get("market") or "") in A_SHARE_MARKETS
+
+
+def load_adj_factor_by_date(client: TushareClient, trade_date: str) -> dict[str, float]:
+    rows = client.query(
+        "adj_factor",
+        params={"trade_date": trade_date},
+        fields=["ts_code", "trade_date", "adj_factor"],
+        cache_key=trade_date,
+    )
+    return {
+        str(row["ts_code"]): parse_float(row.get("adj_factor"))
+        for row in rows
+        if row.get("ts_code") and parse_float(row.get("adj_factor")) > 0
+    }
+
+
+def apply_adjustment(
+    rows: list[dict[str, Any]],
+    factors: dict[str, float],
+    *,
+    price_mode: str,
+    reference_factors: dict[str, float] | None = None,
+) -> DailyPriceBatch:
+    if price_mode == "raw":
+        return DailyPriceBatch(rows=rows, total_count=len(rows))
+
+    adjusted_rows: list[dict[str, Any]] = []
+    adjusted_count = 0
+    unnormalized_count = 0
+    for row in rows:
+        adjusted = dict(row)
+        close = parse_float(row.get("close"))
+        factor = factors.get(str(row.get("ts_code")))
+        reference_factor = (reference_factors or {}).get(str(row.get("ts_code")))
+        if close > 0 and factor and factor > 0:
+            if reference_factors is not None and not reference_factor:
+                unnormalized_count += 1
+            adjusted["close"] = (
+                close * factor / reference_factor
+                if reference_factor
+                else close * factor
+            )
+            adjusted_count += 1
+        adjusted_rows.append(adjusted)
+    warning = None
+    if adjusted_count < len(rows):
+        warning = f"复权因子缺失，{len(rows) - adjusted_count}/{len(rows)} 条日线回退原始收盘价"
+    elif unnormalized_count:
+        warning = f"区间末日复权因子缺失，{unnormalized_count}/{len(rows)} 条日线未按最新因子归一化"
+    return DailyPriceBatch(
+        rows=adjusted_rows,
+        total_count=len(rows),
+        adjusted_count=adjusted_count,
+        warning=warning,
+    )
+
+
+def load_daily_by_date(
+    client: TushareClient,
+    trade_date: str,
+    *,
+    price_mode: str = "qfq",
+    reference_factors: dict[str, float] | None = None,
+) -> DailyPriceBatch:
+    rows = client.query(
         "daily",
         params={"trade_date": trade_date},
         fields=["ts_code", "trade_date", "close"],
         cache_key=trade_date,
+    )
+    if price_mode == "raw":
+        return apply_adjustment(rows, {}, price_mode=price_mode)
+    try:
+        factors = load_adj_factor_by_date(client, trade_date)
+    except TushareError as error:
+        return DailyPriceBatch(
+            rows=rows,
+            total_count=len(rows),
+            warning=f"{trade_date} 复权因子获取失败，回退原始收盘价：{error}",
+        )
+    return apply_adjustment(
+        rows,
+        factors,
+        price_mode=price_mode,
+        reference_factors=reference_factors,
+    )
+
+
+def load_daily_range(
+    client: TushareClient,
+    ts_code: str,
+    start_date: str,
+    end_date: str,
+    *,
+    price_mode: str = "qfq",
+) -> DailyPriceBatch:
+    rows = client.query(
+        "daily",
+        params={"ts_code": ts_code, "start_date": start_date, "end_date": end_date},
+        fields=["ts_code", "trade_date", "close"],
+        cache_key=f"{ts_code}_{start_date}_{end_date}",
+    )
+    if price_mode == "raw":
+        return apply_adjustment(rows, {}, price_mode=price_mode)
+    try:
+        factors = {
+            str(row["trade_date"]): parse_float(row.get("adj_factor"))
+            for row in client.query(
+                "adj_factor",
+                params={
+                    "ts_code": ts_code,
+                    "start_date": start_date,
+                    "end_date": end_date,
+                },
+                fields=["ts_code", "trade_date", "adj_factor"],
+                cache_key=f"{ts_code}_{start_date}_{end_date}",
+            )
+            if row.get("trade_date") and parse_float(row.get("adj_factor")) > 0
+        }
+    except TushareError as error:
+        return DailyPriceBatch(
+            rows=rows,
+            total_count=len(rows),
+            warning=f"{ts_code} 复权因子获取失败，回退原始收盘价：{error}",
+        )
+    reference_factor = factors.get(end_date)
+    adjusted_rows: list[dict[str, Any]] = []
+    adjusted_count = 0
+    for row in rows:
+        adjusted = dict(row)
+        close = parse_float(row.get("close"))
+        factor = factors.get(str(row.get("trade_date")))
+        if close > 0 and factor and factor > 0:
+            adjusted["close"] = (
+                close * factor / reference_factor
+                if reference_factor
+                else close * factor
+            )
+            adjusted_count += 1
+        adjusted_rows.append(adjusted)
+    warning = None
+    if adjusted_count < len(rows):
+        warning = f"{ts_code} 复权因子缺失，{len(rows) - adjusted_count}/{len(rows)} 条日线回退原始收盘价"
+    elif rows and not reference_factor:
+        warning = f"{ts_code} 区间末日缺少复权因子，无法按最新因子归一化"
+    return DailyPriceBatch(
+        rows=adjusted_rows,
+        total_count=len(rows),
+        adjusted_count=adjusted_count,
+        warning=warning,
     )
 
 
@@ -262,31 +470,76 @@ def build_first_double_report(
     lookback_days: int = 183,
     min_pct_change: float = 100.0,
     max_pct_change: float | None = None,
+    price_mode: str = "qfq",
+    min_trading_days: int = 80,
+    include_st: bool = False,
     progress: Callable[[str], None] | None = None,
 ) -> FirstDoubleReport:
+    if price_mode not in {"raw", "qfq"}:
+        raise ValueError(f"Unsupported price mode: {price_mode}")
+    if min_trading_days < 2:
+        raise ValueError("min_trading_days must be at least 2")
     end_date = end_date or date.today()
     start_date = end_date - timedelta(days=lookback_days)
     trade_dates = pick_trade_dates(client, yyyymmdd(start_date), yyyymmdd(end_date))
-    stock_basic = load_stock_basic(client)
+    all_stock_basic = load_stock_basic(client)
+    stock_basic = {
+        ts_code: basic
+        for ts_code, basic in all_stock_basic.items()
+        if is_a_share(ts_code, basic)
+        and (include_st or not is_risk_name(str(basic.get("name") or "")))
+    }
 
     by_stock: dict[str, list[tuple[str, float]]] = {}
+    total_price_rows = 0
+    adjusted_price_rows = 0
+    data_warnings = ["股票基础信息使用当前 list_status=L，历史回测存在生存者偏差"]
+    adjustment_warning_samples: list[str] = []
+    adjustment_warning_count = 0
+    reference_factors: dict[str, float] = {}
+    if price_mode == "qfq":
+        try:
+            reference_factors = load_adj_factor_by_date(client, trade_dates[-1])
+        except TushareError as error:
+            data_warnings.append(
+                f"区间末日复权因子获取失败，无法按最新因子归一化：{error}"
+            )
+    if price_mode == "raw":
+        data_warnings.append("使用未复权收盘价，分红送转可能扭曲区间涨幅")
     for index, trade_date in enumerate(trade_dates, start=1):
         if progress:
             progress(f"拉取日线 {index}/{len(trade_dates)}：{trade_date}")
-        for row in load_daily_by_date(client, trade_date):
+        batch = load_daily_by_date(
+            client,
+            trade_date,
+            price_mode=price_mode,
+            reference_factors=reference_factors,
+        )
+        total_price_rows += batch.total_count
+        adjusted_price_rows += batch.adjusted_count
+        if batch.warning:
+            adjustment_warning_count += 1
+            if len(adjustment_warning_samples) < 3:
+                adjustment_warning_samples.append(batch.warning)
+        for row in batch.rows:
+            ts_code = str(row.get("ts_code") or "")
+            if ts_code not in stock_basic:
+                continue
             close = parse_float(row.get("close"))
             if close > 0:
-                by_stock.setdefault(row["ts_code"], []).append((row["trade_date"], close))
+                by_stock.setdefault(ts_code, []).append((str(row["trade_date"]), close))
 
     candidates: list[FirstDoubleCandidate] = []
     for ts_code, prices in by_stock.items():
         prices.sort(key=lambda item: item[0])
-        if len(prices) < 2 or prices[0][1] <= 0:
+        if len(prices) < min_trading_days or prices[0][1] <= 0:
             continue
         start_trade_date, start_close = prices[0]
         end_trade_date, end_close = prices[-1]
         pct_change = (end_close / start_close - 1.0) * 100.0
-        if pct_change < min_pct_change or (max_pct_change is not None and pct_change > max_pct_change):
+        if pct_change < min_pct_change or (
+            max_pct_change is not None and pct_change > max_pct_change
+        ):
             continue
         max_trade_date, max_close = max(prices, key=lambda item: item[1])
         basic = stock_basic.get(ts_code, {})
@@ -315,6 +568,26 @@ def build_first_double_report(
     for index, candidate in enumerate(candidates, start=1):
         candidate.rank = index
 
+    if adjustment_warning_samples:
+        data_warnings.extend(adjustment_warning_samples)
+        if adjustment_warning_count > len(adjustment_warning_samples):
+            data_warnings.append(
+                f"另有 {adjustment_warning_count - len(adjustment_warning_samples)} 个交易日存在复权因子提示"
+            )
+    if (
+        price_mode == "qfq"
+        and total_price_rows
+        and adjusted_price_rows < total_price_rows
+    ):
+        data_warnings.append(
+            f"复权覆盖率仅 {adjusted_price_rows / total_price_rows * 100:.1f}%，请检查 adj_factor 数据"
+        )
+    adjustment_coverage = (
+        round(adjusted_price_rows / total_price_rows * 100.0, 2)
+        if total_price_rows
+        else 0.0
+    )
+
     return FirstDoubleReport(
         generated_at=datetime.now().isoformat(timespec="seconds"),
         lookback_days=lookback_days,
@@ -328,10 +601,16 @@ def build_first_double_report(
         stocks_with_prices=len(by_stock),
         candidate_count=len(candidates),
         candidates=candidates,
+        price_mode=price_mode,
+        min_trading_days=min_trading_days,
+        adjustment_coverage=adjustment_coverage,
+        data_warnings=list(dict.fromkeys(data_warnings)),
     )
 
 
-def load_daily_basic(client: TushareClient, trade_date: str) -> dict[str, dict[str, Any]]:
+def load_daily_basic(
+    client: TushareClient, trade_date: str
+) -> dict[str, dict[str, Any]]:
     rows = client.query(
         "daily_basic",
         params={"trade_date": trade_date},
@@ -351,11 +630,39 @@ def load_daily_basic(client: TushareClient, trade_date: str) -> dict[str, dict[s
     return {row["ts_code"]: row for row in rows}
 
 
-def load_price_series_from_cache(cache_dir: Path, start_date: str, end_date: str) -> dict[str, list[tuple[str, float]]]:
+def load_cached_adj_factors(cache_dir: Path, trade_date: str) -> dict[str, float]:
+    path = cache_dir / "adj_factor" / f"{trade_date}.json"
+    if not path.exists():
+        return {}
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    data = payload.get("data") or {}
+    fields = data.get("fields") or []
+    items = data.get("items") or []
+    if "ts_code" not in fields or "adj_factor" not in fields:
+        return {}
+    ts_index = fields.index("ts_code")
+    factor_index = fields.index("adj_factor")
+    return {
+        str(item[ts_index]): parse_float(item[factor_index])
+        for item in items
+        if parse_float(item[factor_index]) > 0
+    }
+
+
+def load_price_series_from_cache(
+    cache_dir: Path,
+    start_date: str,
+    end_date: str,
+    *,
+    price_mode: str = "raw",
+) -> dict[str, list[tuple[str, float]]]:
     daily_dir = cache_dir / "daily"
     series: dict[str, list[tuple[str, float]]] = {}
     if not daily_dir.exists():
         return series
+    reference_factors = (
+        load_cached_adj_factors(cache_dir, end_date) if price_mode == "qfq" else {}
+    )
     for path in sorted(daily_dir.glob("*.json")):
         trade_date = path.stem
         if trade_date < start_date or trade_date > end_date:
@@ -369,20 +676,57 @@ def load_price_series_from_cache(cache_dir: Path, start_date: str, end_date: str
         ts_index = fields.index("ts_code")
         close_index = fields.index("close")
         date_index = fields.index("trade_date") if "trade_date" in fields else None
+        factors = (
+            load_cached_adj_factors(cache_dir, trade_date)
+            if price_mode == "qfq"
+            else {}
+        )
         for item in items:
             close = parse_float(item[close_index])
+            if price_mode == "qfq":
+                factor = factors.get(str(item[ts_index]))
+                if factor and factor > 0:
+                    reference_factor = reference_factors.get(str(item[ts_index]))
+                    close = (
+                        close * factor / reference_factor
+                        if reference_factor
+                        else close * factor
+                    )
             if close > 0:
-                series.setdefault(item[ts_index], []).append((item[date_index] if date_index is not None else trade_date, close))
+                series.setdefault(item[ts_index], []).append(
+                    (item[date_index] if date_index is not None else trade_date, close)
+                )
     for prices in series.values():
         prices.sort(key=lambda item: item[0])
     return series
+
+
+def price_cache_needs_backfill(
+    cache_dir: Path, start_date: str, end_date: str, *, price_mode: str
+) -> bool:
+    if price_mode != "qfq":
+        return False
+    daily_dir = cache_dir / "daily"
+    if not daily_dir.exists():
+        return False
+    for path in daily_dir.glob("*.json"):
+        if (
+            start_date <= path.stem <= end_date
+            and not (cache_dir / "adj_factor" / path.name).exists()
+        ):
+            return True
+    return False
 
 
 def recent_pct(prices: list[tuple[str, float]], days: int = 20) -> float:
     if len(prices) < 2:
         return 0.0
     window = prices[-days:] if len(prices) >= days else prices
-    return round((window[-1][1] / window[0][1] - 1.0) * 100.0, 2) if window[0][1] > 0 else 0.0
+    return (
+        round((window[-1][1] / window[0][1] - 1.0) * 100.0, 2)
+        if window[0][1] > 0
+        else 0.0
+    )
 
 
 def stage_score(pct_change: float) -> int:
@@ -445,7 +789,9 @@ def recent_momentum_score(value: float) -> int:
     return 0
 
 
-def risk_penalties(name: str, market: str, pe_ttm: float, pb: float) -> tuple[int, list[str]]:
+def risk_penalties(
+    name: str, market: str, pe_ttm: float, pb: float
+) -> tuple[int, list[str]]:
     penalties = 0
     flags: list[str] = []
     if name.startswith("ST") or name.startswith("*ST") or "退" in name:
@@ -482,29 +828,67 @@ def build_watch_report(
     limit: int = 80,
 ) -> WatchReport:
     end_trade_date = first_double_report["end_trade_date"]
+    price_mode = str(first_double_report.get("price_mode") or "raw")
     daily_basic = load_daily_basic(client, end_trade_date)
     price_series = load_price_series_from_cache(
         cache_dir,
         first_double_report["start_trade_date"],
         first_double_report["end_trade_date"],
+        price_mode=price_mode,
     )
+    data_warnings: list[str] = list(first_double_report.get("data_warnings") or [])
+    cache_needs_backfill = price_cache_needs_backfill(
+        cache_dir,
+        first_double_report["start_trade_date"],
+        first_double_report["end_trade_date"],
+        price_mode=price_mode,
+    )
+    if cache_needs_backfill:
+        data_warnings.append("日线缓存缺少复权因子，已对候选股按区间自动补拉")
 
     scored: list[WatchCandidate] = []
     for source in first_double_report.get("candidates", []):
         ts_code = source["ts_code"]
+        if len(price_series.get(ts_code, [])) < 2 or cache_needs_backfill:
+            batch = load_daily_range(
+                client,
+                ts_code,
+                first_double_report["start_trade_date"],
+                first_double_report["end_trade_date"],
+                price_mode=price_mode,
+            )
+            if batch.rows:
+                price_series[ts_code] = [
+                    (str(row["trade_date"]), parse_float(row.get("close")))
+                    for row in batch.rows
+                    if parse_float(row.get("close")) > 0
+                ]
+                price_series[ts_code].sort(key=lambda item: item[0])
+            if batch.warning:
+                data_warnings.append(batch.warning)
         basic = daily_basic.get(ts_code, {})
         industry = str(source.get("industry") or "")
         pct_change = parse_float(source.get("pct_change"))
         pullback = parse_float(source.get("pullback_from_high"))
         circ_mv_yi = round(parse_float(basic.get("circ_mv")) / 10000.0, 2)
         total_mv_yi = round(parse_float(basic.get("total_mv")) / 10000.0, 2)
-        turnover_rate_f = parse_float(basic.get("turnover_rate_f") or basic.get("turnover_rate"))
+        turnover_rate_f = parse_float(
+            basic.get("turnover_rate_f") or basic.get("turnover_rate")
+        )
         volume_ratio = parse_float(basic.get("volume_ratio"))
         pe_ttm = parse_float(basic.get("pe_ttm"))
         pb = parse_float(basic.get("pb"))
-        recent_20d = recent_pct(price_series.get(ts_code, []), 20)
-        theme_points, theme_reason = THEME_SCORES.get(industry, (3, "行业弹性需要单独验证"))
-        penalties, flags = risk_penalties(str(source.get("name") or ""), str(source.get("market") or ""), pe_ttm, pb)
+        prices = price_series.get(ts_code, [])
+        recent_20d = recent_pct(prices, 20)
+        theme_points, theme_reason = THEME_SCORES.get(
+            industry, (3, "行业弹性需要单独验证")
+        )
+        penalties, flags = risk_penalties(
+            str(source.get("name") or ""), str(source.get("market") or ""), pe_ttm, pb
+        )
+        if len(prices) < 2:
+            flags.append("近半年价格数据缺失")
+            data_warnings.append(f"{ts_code} 缺少可计算近 20 日动量的价格数据")
         breakdown = ScoreBreakdown(
             stage=stage_score(pct_change),
             size=size_score(circ_mv_yi),
@@ -520,7 +904,8 @@ def build_watch_report(
         thesis = (
             f"{theme}；半年涨幅 {pct_change:.2f}%，已被市场初步验证；"
             f"流通市值约 {circ_mv_yi:.2f} 亿，回撤 {pullback:.2f}%，"
-            f"自由流通换手 {turnover_rate_f:.2f}%，近 20 日涨幅 {recent_20d:.2f}%。"
+            f"自由流通换手 {turnover_rate_f:.2f}%，近 20 日涨幅 {recent_20d:.2f}%"
+            f"{'（数据缺失）' if len(prices) < 2 else ''}。"
         )
         next_checks = [
             "核对最近两期营收/利润是否出现加速",
@@ -571,13 +956,19 @@ def build_watch_report(
         input_count=len(first_double_report.get("candidates", [])),
         watch_count=len(limited),
         core_count=sum(1 for item in limited if item.tier.startswith("A")),
+        scoring_version=SCORING_VERSION,
+        price_mode=price_mode,
+        data_warnings=list(dict.fromkeys(data_warnings)),
         candidates=limited,
     )
 
 
 def write_json_report(report: Any, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(asdict(report), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(asdict(report), ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
 
 
 def write_csv_report(report: Any, path: Path) -> None:
@@ -588,7 +979,9 @@ def write_csv_report(report: Any, path: Path) -> None:
         if "risk_flags" in row:
             row["risk_flags"] = "；".join(item.risk_flags)
             row["next_checks"] = "；".join(item.next_checks)
-            row["breakdown"] = json.dumps(asdict(item.breakdown), ensure_ascii=False, sort_keys=True)
+            row["breakdown"] = json.dumps(
+                asdict(item.breakdown), ensure_ascii=False, sort_keys=True
+            )
         rows.append(row)
     columns = list(rows[0].keys()) if rows else []
     with path.open("w", encoding="utf-8-sig", newline="") as file:
@@ -615,20 +1008,29 @@ def render_first_double_html(report: FirstDoubleReport) -> str:
             f"<td>{fmt_pct(item.pullback_from_high)}</td><td>{item.trading_days}</td>"
             "</tr>"
         )
-    table_body = "\n".join(rows) or "<tr><td colspan='10' class='empty'>暂无候选。</td></tr>"
+    table_body = (
+        "\n".join(rows) or "<tr><td colspan='10' class='empty'>暂无候选。</td></tr>"
+    )
+    price_label = "前复权" if report.price_mode == "qfq" else "未复权"
+    warning_note = "；".join(report.data_warnings[:3])
+    if len(report.data_warnings) > 3:
+        warning_note += f"；另有 {len(report.data_warnings) - 3} 条数据提示请查看 JSON"
     return render_page(
-        "一个股票要想涨 10 倍，先涨 1 倍",
-        "筛选最近半年区间涨幅超过阈值的 A 股股票池。数据来自 Tushare Pro 日线行情。",
+        "半年强势股初筛",
+        "先筛出过去半年表现强势的 A 股，再进入财报、公告和后验收益验证。该模块是研究池，不是买入建议。",
         [
             ("统计区间", f"{report.start_trade_date} - {report.end_trade_date}"),
             ("自然日回看", str(report.lookback_days)),
-            ("上市股票数", str(report.stock_count)),
+            ("价格口径", price_label),
+            ("最低交易日", str(report.min_trading_days)),
+            ("复权覆盖率", fmt_pct(report.adjustment_coverage)),
+            ("A 股股票数", str(report.stock_count)),
             ("有行情股票数", str(report.stocks_with_prices)),
             ("入选股票数", str(report.candidate_count)),
         ],
         "<table><thead><tr><th>排名</th><th>股票</th><th>行业</th><th>市场</th><th>区间起点</th><th>区间终点</th><th>区间涨幅</th><th>期间高点</th><th>高点回撤</th><th>交易天数</th></tr></thead>"
         f"<tbody>{table_body}</tbody></table>",
-        "当前版本使用 Tushare daily 收盘价计算，未做复权处理；停牌股票使用区间内第一条和最后一条可用日线。",
+        f"默认使用 Tushare daily × adj_factor 的前复权口径；最低交易日为 {report.min_trading_days}，避免新股短历史误入。{warning_note}",
     )
 
 
@@ -647,25 +1049,37 @@ def render_watch_html(report: WatchReport) -> str:
             f"<td>{escape(item.thesis)}</td><td>{escape('；'.join(item.risk_flags))}<ul>{checks}</ul></td>"
             "</tr>"
         )
-    table_body = "\n".join(rows) or "<tr><td colspan='9' class='empty'>暂无候选。</td></tr>"
+    table_body = (
+        "\n".join(rows) or "<tr><td colspan='9' class='empty'>暂无候选。</td></tr>"
+    )
+    warning_note = "；".join(report.data_warnings[:3])
+    if len(report.data_warnings) > 3:
+        warning_note += f"；另有 {len(report.data_warnings) - 3} 条数据提示请查看 JSON"
     return render_page(
-        "十倍潜力跟踪池",
-        "从最近半年已翻倍的股票中，继续筛选更值得深挖的二阶段候选。不是买入建议，是复盘研究队列。",
+        "二阶段研究跟踪池",
+        "从最近半年已翻倍的股票中，继续筛选更值得深挖的二阶段候选。评分只负责排序，基本面与催化仍需人工核验。",
         [
             ("源区间", f"{report.start_trade_date} - {report.end_trade_date}"),
             ("输入翻倍股", str(report.input_count)),
             ("跟踪池数量", str(report.watch_count)),
             ("A 级核心", str(report.core_count)),
+            ("评分版本", report.scoring_version),
+            ("价格口径", "前复权" if report.price_mode == "qfq" else "未复权"),
             ("生成日期", report.generated_at[:10]),
         ],
         "<table><thead><tr><th>排名</th><th>股票</th><th>分层/分数</th><th>行业</th><th>涨幅</th><th>流通市值</th><th>趋势/资金</th><th>候选逻辑</th><th>风险与下一步</th></tr></thead>"
         f"<tbody>{table_body}</tbody></table>",
-        "评分模型用于复盘研究，不构成投资建议。下一步可接入前复权、财报增速、公告催化和资金流。",
+        f"评分模型 {report.scoring_version} 仅用于复盘研究，不构成投资建议。{warning_note}",
     )
 
 
-def render_page(title: str, subtitle: str, cards: list[tuple[str, str]], table: str, note: str) -> str:
-    cards_html = "".join(f"<div class='card'><span>{escape(label)}</span><strong>{escape(value)}</strong></div>" for label, value in cards)
+def render_page(
+    title: str, subtitle: str, cards: list[tuple[str, str]], table: str, note: str
+) -> str:
+    cards_html = "".join(
+        f"<div class='card'><span>{escape(label)}</span><strong>{escape(value)}</strong></div>"
+        for label, value in cards
+    )
     return f"""<!doctype html>
 <html lang="zh-CN">
 <head>
@@ -699,18 +1113,27 @@ def write_text(path: Path, text: str) -> None:
 
 def output_paths(base_dir: Path, topic: str) -> tuple[Path, Path, Path]:
     report_dir = base_dir / topic
-    return report_dir / "latest.html", report_dir / "latest.csv", report_dir / "latest.json"
+    return (
+        report_dir / "latest.html",
+        report_dir / "latest.csv",
+        report_dir / "latest.json",
+    )
 
 
 def run_first_double(args: argparse.Namespace) -> dict[str, str]:
     load_dotenv(PROJECT_ROOT / ".env")
-    client = TushareClient(args.token, cache_dir=args.cache_dir, use_cache=not args.no_cache)
+    client = TushareClient(
+        args.token, cache_dir=args.cache_dir, use_cache=not args.no_cache
+    )
     report = build_first_double_report(
         client,
         end_date=parse_yyyymmdd(args.end_date) if args.end_date else None,
         lookback_days=args.lookback_days,
         min_pct_change=args.min_pct_change,
         max_pct_change=args.max_pct_change,
+        price_mode=args.price_mode,
+        min_trading_days=args.min_trading_days,
+        include_st=args.include_st,
         progress=print if args.progress else None,
     )
     html_path = args.html or output_paths(args.output_dir, "first_double")[0]
@@ -719,22 +1142,42 @@ def run_first_double(args: argparse.Namespace) -> dict[str, str]:
     write_text(html_path, render_first_double_html(report))
     write_csv_report(report, csv_path)
     write_json_report(report, json_path)
-    return {"html": str(html_path), "csv": str(csv_path), "json": str(json_path), "count": str(report.candidate_count)}
+    return {
+        "html": str(html_path),
+        "csv": str(csv_path),
+        "json": str(json_path),
+        "count": str(report.candidate_count),
+    }
 
 
 def run_tenbagger_watch(args: argparse.Namespace) -> dict[str, str]:
     load_dotenv(PROJECT_ROOT / ".env")
-    client = TushareClient(args.token, cache_dir=args.cache_dir, use_cache=not args.no_cache)
-    source_report = args.source_report or output_paths(args.output_dir, "first_double")[2]
+    client = TushareClient(
+        args.token, cache_dir=args.cache_dir, use_cache=not args.no_cache
+    )
+    source_report = (
+        args.source_report or output_paths(args.output_dir, "first_double")[2]
+    )
     source = json.loads(source_report.read_text(encoding="utf-8"))
-    report = build_watch_report(source, client=client, source_report=source_report, cache_dir=args.cache_dir, limit=args.limit)
+    report = build_watch_report(
+        source,
+        client=client,
+        source_report=source_report,
+        cache_dir=args.cache_dir,
+        limit=args.limit,
+    )
     html_path = args.html or output_paths(args.output_dir, "tenbagger_watch")[0]
     csv_path = args.csv or output_paths(args.output_dir, "tenbagger_watch")[1]
     json_path = args.json or output_paths(args.output_dir, "tenbagger_watch")[2]
     write_text(html_path, render_watch_html(report))
     write_csv_report(report, csv_path)
     write_json_report(report, json_path)
-    return {"html": str(html_path), "csv": str(csv_path), "json": str(json_path), "count": str(report.watch_count)}
+    return {
+        "html": str(html_path),
+        "csv": str(csv_path),
+        "json": str(json_path),
+        "count": str(report.watch_count),
+    }
 
 
 def run_full_chain(args: argparse.Namespace) -> dict[str, dict[str, str]]:
@@ -745,48 +1188,140 @@ def run_full_chain(args: argparse.Namespace) -> dict[str, dict[str, str]]:
 
 
 def add_common_arguments(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--token", default=None, help="Tushare token; defaults to TUSHARE_TOKEN")
-    parser.add_argument("--cache-dir", type=Path, default=DEFAULT_CACHE_DIR, help="Tushare API cache directory")
-    parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR, help="Report output directory")
-    parser.add_argument("--no-cache", action="store_true", help="Disable local Tushare cache")
+    parser.add_argument(
+        "--token", default=None, help="Tushare token; defaults to TUSHARE_TOKEN"
+    )
+    parser.add_argument(
+        "--cache-dir",
+        type=Path,
+        default=DEFAULT_CACHE_DIR,
+        help="Tushare API cache directory",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=DEFAULT_OUTPUT_DIR,
+        help="Report output directory",
+    )
+    parser.add_argument(
+        "--no-cache", action="store_true", help="Disable local Tushare cache"
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run Tushare recap report skills.")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    first = subparsers.add_parser("first-double", help="Generate the first-double stock pool report")
+    first = subparsers.add_parser(
+        "first-double", help="Generate the first-double stock pool report"
+    )
     add_common_arguments(first)
-    first.add_argument("--end-date", default=None, help="End date in YYYYMMDD; defaults to today")
-    first.add_argument("--lookback-days", type=int, default=183, help="Natural days to look back")
-    first.add_argument("--min-pct-change", type=float, default=100.0, help="Minimum interval gain percent")
-    first.add_argument("--max-pct-change", type=float, default=None, help="Maximum interval gain percent")
+    first.add_argument(
+        "--end-date", default=None, help="End date in YYYYMMDD; defaults to today"
+    )
+    first.add_argument(
+        "--lookback-days", type=int, default=183, help="Natural days to look back"
+    )
+    first.add_argument(
+        "--min-pct-change",
+        type=float,
+        default=100.0,
+        help="Minimum interval gain percent",
+    )
+    first.add_argument(
+        "--max-pct-change",
+        type=float,
+        default=None,
+        help="Maximum interval gain percent",
+    )
+    first.add_argument(
+        "--price-mode",
+        choices=["qfq", "raw"],
+        default="qfq",
+        help="Price basis; qfq uses adj_factor",
+    )
+    first.add_argument(
+        "--min-trading-days",
+        type=int,
+        default=80,
+        help="Minimum available trading days per stock",
+    )
+    first.add_argument(
+        "--include-st",
+        action="store_true",
+        help="Include ST/delisting-risk names in first-double",
+    )
     first.add_argument("--html", type=Path, default=None, help="HTML output path")
     first.add_argument("--csv", type=Path, default=None, help="CSV output path")
     first.add_argument("--json", type=Path, default=None, help="JSON output path")
-    first.add_argument("--progress", action="store_true", help="Print each fetched trade date")
+    first.add_argument(
+        "--progress", action="store_true", help="Print each fetched trade date"
+    )
     first.set_defaults(func=run_first_double)
 
-    watch = subparsers.add_parser("tenbagger-watch", help="Generate the second-stage watchlist report")
+    watch = subparsers.add_parser(
+        "tenbagger-watch", help="Generate the second-stage watchlist report"
+    )
     add_common_arguments(watch)
-    watch.add_argument("--source-report", type=Path, default=None, help="first-double JSON report")
-    watch.add_argument("--limit", type=int, default=80, help="Maximum candidates to output")
+    watch.add_argument(
+        "--source-report", type=Path, default=None, help="first-double JSON report"
+    )
+    watch.add_argument(
+        "--limit", type=int, default=80, help="Maximum candidates to output"
+    )
     watch.add_argument("--html", type=Path, default=None, help="HTML output path")
     watch.add_argument("--csv", type=Path, default=None, help="CSV output path")
     watch.add_argument("--json", type=Path, default=None, help="JSON output path")
     watch.set_defaults(func=run_tenbagger_watch)
 
-    full = subparsers.add_parser("full-chain", help="Run first-double and tenbagger-watch in sequence")
+    full = subparsers.add_parser(
+        "full-chain", help="Run first-double and tenbagger-watch in sequence"
+    )
     add_common_arguments(full)
-    full.add_argument("--end-date", default=None, help="End date in YYYYMMDD; defaults to today")
-    full.add_argument("--lookback-days", type=int, default=183, help="Natural days to look back")
-    full.add_argument("--min-pct-change", type=float, default=100.0, help="Minimum interval gain percent")
-    full.add_argument("--max-pct-change", type=float, default=None, help="Maximum interval gain percent")
-    full.add_argument("--limit", type=int, default=80, help="Maximum watch candidates to output")
+    full.add_argument(
+        "--end-date", default=None, help="End date in YYYYMMDD; defaults to today"
+    )
+    full.add_argument(
+        "--lookback-days", type=int, default=183, help="Natural days to look back"
+    )
+    full.add_argument(
+        "--min-pct-change",
+        type=float,
+        default=100.0,
+        help="Minimum interval gain percent",
+    )
+    full.add_argument(
+        "--max-pct-change",
+        type=float,
+        default=None,
+        help="Maximum interval gain percent",
+    )
+    full.add_argument(
+        "--price-mode",
+        choices=["qfq", "raw"],
+        default="qfq",
+        help="Price basis; qfq uses adj_factor",
+    )
+    full.add_argument(
+        "--min-trading-days",
+        type=int,
+        default=80,
+        help="Minimum available trading days per stock",
+    )
+    full.add_argument(
+        "--include-st",
+        action="store_true",
+        help="Include ST/delisting-risk names in first-double",
+    )
+    full.add_argument(
+        "--limit", type=int, default=80, help="Maximum watch candidates to output"
+    )
     full.add_argument("--html", type=Path, default=None, help=argparse.SUPPRESS)
     full.add_argument("--csv", type=Path, default=None, help=argparse.SUPPRESS)
     full.add_argument("--json", type=Path, default=None, help=argparse.SUPPRESS)
-    full.add_argument("--progress", action="store_true", help="Print each fetched trade date")
+    full.add_argument(
+        "--progress", action="store_true", help="Print each fetched trade date"
+    )
     full.set_defaults(func=run_full_chain)
 
     return parser
@@ -796,7 +1331,13 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         result = args.func(args)
-    except (TushareError, FileNotFoundError, KeyError, RuntimeError) as error:
+    except (
+        TushareError,
+        FileNotFoundError,
+        KeyError,
+        RuntimeError,
+        ValueError,
+    ) as error:
         print(f"错误：{error}")
         return 1
     print(json.dumps(result, ensure_ascii=False, indent=2))

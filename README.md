@@ -80,7 +80,7 @@ python3 scripts/run_recap.py --task daily --output-dir artifacts/reports --dry-r
 python3 scripts/run_recap.py --task daily --output-dir artifacts/reports --dry-run
 ```
 
-运行 PR #1 迁移后的 Tushare 课题 skill：
+运行 PR #1 迁移后的 Tushare 课题 skill（默认前复权、至少 80 个交易日、A 股范围过滤）：
 
 ```bash
 python3 skills/tushare-recap-reports/scripts/run.py full-chain

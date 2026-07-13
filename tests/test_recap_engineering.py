@@ -371,6 +371,8 @@ class RecapEngineeringTests(unittest.TestCase):
         )
         self.assertIn("--lookback-days", first_double.stdout)
         self.assertIn("--min-pct-change", first_double.stdout)
+        self.assertIn("--price-mode", first_double.stdout)
+        self.assertIn("--min-trading-days", first_double.stdout)
 
         watch = subprocess.run(
             [sys.executable, str(script), "tenbagger-watch", "--help"],
