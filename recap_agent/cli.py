@@ -2,8 +2,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
+import sys
 from dataclasses import asdict
 from datetime import datetime, timezone
+from pathlib import Path
 
 from .data import (
     TushareDataCollector,
@@ -20,12 +23,44 @@ TASK_TITLES = {
     "daily": "全球市场日报",
     "weekly": "全球市场周报",
     "monthly": "全球市场月报",
+    "potential": "过去半年潜力股复盘",
 }
+
+
+def run_potential_task(
+    output_dir: str, trade_date: str | None = None
+) -> dict[str, object]:
+    repo_root = Path(__file__).resolve().parents[1]
+    report_dir = Path(output_dir) / "tushare-recap-reports"
+    command = [
+        sys.executable,
+        str(repo_root / "skills" / "tushare-recap-reports" / "scripts" / "run.py"),
+        "full-chain",
+        "--output-dir",
+        str(report_dir),
+        "--progress",
+    ]
+    if trade_date:
+        command.extend(["--end-date", trade_date])
+    subprocess.run(command, cwd=repo_root, check=True)
+    return {
+        "task": "potential",
+        "files": {
+            "first_double_html": str(report_dir / "first_double" / "latest.html"),
+            "first_double_csv": str(report_dir / "first_double" / "latest.csv"),
+            "first_double_json": str(report_dir / "first_double" / "latest.json"),
+            "watch_html": str(report_dir / "tenbagger_watch" / "latest.html"),
+            "watch_csv": str(report_dir / "tenbagger_watch" / "latest.csv"),
+            "watch_json": str(report_dir / "tenbagger_watch" / "latest.json"),
+        },
+    }
 
 
 def run_task(
     task: str, output_dir: str, dry_run: bool, trade_date: str | None = None
 ) -> dict[str, object]:
+    if task == "potential":
+        return run_potential_task(output_dir, trade_date)
     collector = TushareDataCollector()
     end_trade_date = resolve_latest_trade_date(collector, trade_date)
     period = build_market_period(task, end_trade_date)

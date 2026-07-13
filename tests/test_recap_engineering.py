@@ -324,6 +324,8 @@ class RecapEngineeringTests(unittest.TestCase):
         self.assertIn("actions/upload-artifact", text)
         self.assertIn("if: always()", text)
         self.assertIn("claude", text.lower())
+        self.assertIn("potential", text)
+        self.assertIn("scripts/run_recap.py --task potential", text)
 
     def test_potential_stock_workflow_dispatches_current_recap_chain(self):
         workflow = ROOT / ".github" / "workflows" / "potential-stock-recap.yml"
