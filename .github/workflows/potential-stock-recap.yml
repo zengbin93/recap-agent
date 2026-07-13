@@ -1,0 +1,70 @@
+name: Potential Stock Recap
+
+on:
+  workflow_dispatch:
+    inputs:
+      end_date:
+        description: "Optional end date in YYYYMMDD; defaults to today"
+        required: false
+        default: ""
+        type: string
+      min_pct_change:
+        description: "Minimum six-month gain percentage"
+        required: true
+        default: "100"
+        type: string
+      min_trading_days:
+        description: "Minimum available trading days per stock"
+        required: true
+        default: "80"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  potential-stock-recap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      TUSHARE_TOKEN: ${{ secrets.TUSHARE_TOKEN }}
+      END_DATE: ${{ inputs.end_date }}
+      MIN_PCT_CHANGE: ${{ inputs.min_pct_change }}
+      MIN_TRADING_DAYS: ${{ inputs.min_trading_days }}
+
+    steps:
+      - name: Checkout current branch
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install local package
+        run: python -m pip install -e .
+
+      - name: Preflight Tushare token
+        run: |
+          if [ -z "$TUSHARE_TOKEN" ]; then
+            echo "::error::Missing required secret TUSHARE_TOKEN"
+            exit 1
+          fi
+
+      - name: Run potential-stock recap chain
+        run: |
+          args=(full-chain --progress --min-pct-change "$MIN_PCT_CHANGE" --min-trading-days "$MIN_TRADING_DAYS")
+          if [ -n "$END_DATE" ]; then
+            args+=(--end-date "$END_DATE")
+          fi
+          python3 skills/tushare-recap-reports/scripts/run.py "${args[@]}"
+
+      - name: Upload potential-stock recap artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: potential-stock-recap-${{ github.run_id }}
+          path: |
+            artifacts/reports/tushare-recap-reports/**
+            artifacts/cache/tushare/**
+          if-no-files-found: warn

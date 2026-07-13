@@ -325,6 +325,19 @@ class RecapEngineeringTests(unittest.TestCase):
         self.assertIn("if: always()", text)
         self.assertIn("claude", text.lower())
 
+    def test_potential_stock_workflow_dispatches_current_recap_chain(self):
+        workflow = ROOT / ".github" / "workflows" / "potential-stock-recap.yml"
+        if not workflow.exists():
+            self.fail("Expected .github/workflows/potential-stock-recap.yml to exist")
+
+        text = workflow.read_text(encoding="utf-8")
+
+        self.assertIn("workflow_dispatch", text)
+        self.assertIn("TUSHARE_TOKEN", text)
+        self.assertIn("full-chain", text)
+        self.assertIn("min-trading-days", text)
+        self.assertIn("actions/upload-artifact", text)
+
     def test_task_skill_wrappers_forward_cli_arguments(self):
         for task in ("daily", "weekly", "monthly"):
             script = ROOT / "skills" / f"recap-{task}" / "scripts" / "run.py"
