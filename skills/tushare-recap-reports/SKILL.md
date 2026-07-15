@@ -39,16 +39,24 @@ python3 skills/tushare-recap-reports/scripts/run.py first-double --price-mode ra
 ```
 
 The second-stage report is a scored research queue, not a tenbagger prediction.
-Its scoring version and any source/backfill data warnings are included in the
-JSON and HTML output. Fundamental quality, catalysts, and forward returns are
-planned follow-ups rather than hidden assumptions in the current score.
+The current scoring version is `v3.0-quality-setup`. It combines the existing
+price/liquidity screen with point-in-time financial quality, valuation safety
+margin, benchmark market regime, sector stage, and multi-timeframe pullback
+structure. Each candidate also carries an archetype, `why_now`, first rejection
+point, and thesis-kill condition.
+
+The A tier is gated: a candidate needs both verified quality and a usable setup.
+Names outside the fundamental fetch window remain explicitly unverified rather
+than being presented as core candidates. The scoring version and any
+source/backfill data warnings are included in the JSON and HTML output.
 
 The watch report now separates observed rise drivers from unverified hypotheses.
 Observed drivers include industry breadth/median return, recent turnover amount,
-recent acceleration, trend drawdown, and positive-day ratio. The top 20 ranked
-names also attempt to load Tushare `fina_indicator` evidence; missing permissions
-or missing filings are shown as warnings instead of being treated as a reason for
-the rise.
+recent acceleration, trend drawdown, positive-day ratio, benchmark regime, and
+multi-timeframe price structure. The top 80 provisional names attempt to load
+Tushare `fina_indicator` evidence as of the report cutoff date; future-announced
+rows are excluded to avoid look-ahead leakage. Missing permissions or missing
+filings are shown as warnings instead of being treated as a reason for the rise.
 
 When run through the `potential` GitHub Actions task, the card is sent after the
 report chain succeeds. `FEISHU_POTENTIAL_WEBHOOK_URL` is preferred; when it is

@@ -38,6 +38,23 @@ class TushareRecapReportsTests(unittest.TestCase):
         self.assertFalse(run.is_a_share("200001.SZ", main_board))
         self.assertFalse(run.is_a_share("600000.SH", {"market": "ETF"}))
 
+    def test_market_regime_uses_broad_index_trend(self):
+        index_rows = [
+            {
+                "ts_code": "000300.SH",
+                "trade_date": f"2026{index:04d}",
+                "close": 100 + index,
+            }
+            for index in range(1, 81)
+        ]
+        client = FakeTushareClient({"index_daily": index_rows})
+
+        regime = run.load_market_regime(client, "20260101", "20260710")
+
+        self.assertEqual(regime["label"], "偏强")
+        self.assertEqual(regime["score"], 10)
+        self.assertIn("20日中位", regime["evidence"])
+
     def test_qfq_daily_batch_applies_adjustment_factor(self):
         client = FakeTushareClient(
             {
@@ -264,6 +281,31 @@ class TushareRecapReportsTests(unittest.TestCase):
         self.assertIn("营业利润同比 +28.1%", evidence)
         self.assertIn("ROE 12.4%", evidence)
 
+    def test_fundamental_evidence_respects_report_cutoff_date(self):
+        client = FakeTushareClient(
+            {
+                "fina_indicator": [
+                    {
+                        "end_date": "20260630",
+                        "ann_date": "20260720",
+                        "netprofit_yoy": 99.0,
+                    },
+                    {
+                        "end_date": "20260331",
+                        "ann_date": "20260430",
+                        "netprofit_yoy": 12.0,
+                    },
+                ]
+            }
+        )
+
+        evidence = run.load_fundamental_evidence(
+            client, "600000.SH", as_of_date="20260710"
+        )
+
+        self.assertIn("20260331净利润同比 +12.0%", evidence)
+        self.assertNotIn("+99.0%", "；".join(evidence))
+
     def test_fetched_fundamental_evidence_replaces_pending_marker(self):
         source = {
             "price_mode": "raw",
@@ -318,6 +360,9 @@ class TushareRecapReportsTests(unittest.TestCase):
 
         candidate = report.candidates[0]
         self.assertIn("20260331净利润同比 +35.2%", candidate.financial_evidence)
+        self.assertGreater(candidate.quality_score, 0)
+        self.assertIn(candidate.quality_status, {"质量中性", "质量较强"})
+        self.assertGreaterEqual(candidate.setup_score, 0)
         self.assertNotIn(run.FUNDAMENTAL_PENDING_DRIVER, candidate.unverified_drivers)
         self.assertNotIn(run.FUNDAMENTAL_PENDING_DRIVER, candidate.thesis)
 

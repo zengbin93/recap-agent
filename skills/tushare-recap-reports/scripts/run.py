@@ -21,9 +21,11 @@ DEFAULT_CACHE_DIR = PROJECT_ROOT / "artifacts" / "cache" / "tushare"
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "artifacts" / "reports" / "tushare-recap-reports"
 TUSHARE_URL = "http://api.tushare.pro"
 DATE_FMT = "%Y%m%d"
-SCORING_VERSION = "v2.1-quality-gated"
-FUNDAMENTAL_PENDING_DRIVER = "财报增长信号将在排序靠前的候选中补拉"
+SCORING_VERSION = "v3.0-quality-setup"
+FUNDAMENTAL_FETCH_LIMIT = 80
+FUNDAMENTAL_PENDING_DRIVER = f"财务质量证据仅对排序前 {FUNDAMENTAL_FETCH_LIMIT} 名补拉"
 A_SHARE_MARKETS = {"主板", "创业板", "科创板", "北交所"}
+BENCHMARK_INDEX_CODES = ("000300.SH", "000905.SH", "000852.SH", "000688.SH")
 
 
 class TushareError(RuntimeError):
@@ -190,6 +192,10 @@ class ScoreBreakdown:
     heat: int
     recent_momentum: int
     penalties: int
+    quality: int
+    valuation: int
+    setup: int
+    market: int
 
 
 @dataclass
@@ -220,6 +226,15 @@ class WatchCandidate:
     rise_drivers: list[str] = field(default_factory=list)
     financial_evidence: list[str] = field(default_factory=list)
     unverified_drivers: list[str] = field(default_factory=list)
+    archetype: str = "待分类"
+    quality_score: int = 0
+    quality_status: str = "未验证"
+    setup_score: int = 0
+    market_regime: str = "市场数据不足"
+    sector_stage: str = "行业阶段待判断"
+    why_now: str = ""
+    first_rejection: str = ""
+    what_would_kill: str = ""
 
 
 @dataclass
@@ -235,6 +250,8 @@ class WatchReport:
     price_mode: str = "qfq"
     data_warnings: list[str] = field(default_factory=list)
     candidates: list[WatchCandidate] = field(default_factory=list)
+    market_regime: str = "市场数据不足"
+    market_evidence: str = ""
 
 
 THEME_SCORES: dict[str, tuple[int, str]] = {
@@ -719,6 +736,92 @@ def load_daily_basic(
     return {row["ts_code"]: row for row in rows}
 
 
+def load_market_regime(
+    client: TushareClient, start_date: str, end_date: str
+) -> dict[str, Any]:
+    """Use broad benchmarks as a top-down gate for the stock queue.
+
+    The recap is still a research queue, so missing index permissions degrade to
+    an explicit "data insufficient" state instead of silently assuming a bull
+    market.
+    """
+    returns_20: list[float] = []
+    returns_60: list[float] = []
+    trend_flags: list[bool] = []
+    loaded_codes: list[str] = []
+    warnings: list[str] = []
+    for ts_code in BENCHMARK_INDEX_CODES:
+        try:
+            rows = client.query(
+                "index_daily",
+                params={
+                    "ts_code": ts_code,
+                    "start_date": start_date,
+                    "end_date": end_date,
+                },
+                fields=["ts_code", "trade_date", "close"],
+                cache_key=f"{ts_code}_{start_date}_{end_date}",
+            )
+        except TushareError as error:
+            warnings.append(f"{ts_code} 指数行情不可用：{error}")
+            continue
+        prices = sorted(
+            [
+                (str(row.get("trade_date") or ""), parse_float(row.get("close")))
+                for row in rows
+                if row.get("trade_date") and parse_float(row.get("close")) > 0
+            ],
+            key=lambda item: item[0],
+        )
+        if len(prices) < 2:
+            continue
+        loaded_codes.append(ts_code)
+        latest = prices[-1][1]
+        if len(prices) >= 20 and prices[-20][1] > 0:
+            returns_20.append((latest / prices[-20][1] - 1.0) * 100.0)
+        if len(prices) >= 60 and prices[-60][1] > 0:
+            returns_60.append((latest / prices[-60][1] - 1.0) * 100.0)
+        if len(prices) >= 60:
+            ma20 = sum(item[1] for item in prices[-20:]) / 20
+            ma60 = sum(item[1] for item in prices[-60:]) / 60
+            trend_flags.append(latest >= ma20 >= ma60)
+
+    if not returns_20 and not returns_60:
+        return {
+            "label": "市场数据不足",
+            "evidence": "未取得沪深宽基指数的 20/60 日行情，暂不对市场方向做强判断",
+            "warnings": warnings,
+            "score": 0,
+        }
+
+    median_20 = median(returns_20) if returns_20 else 0.0
+    median_60 = median(returns_60) if returns_60 else 0.0
+    trend_ratio = (
+        sum(1 for flag in trend_flags if flag) / len(trend_flags)
+        if trend_flags
+        else 0.0
+    )
+    if median_20 >= 3 and median_60 >= 0 and trend_ratio >= 0.5:
+        label = "偏强"
+        score = 10
+    elif median_20 <= -3 or median_60 <= -8 or trend_ratio < 0.25:
+        label = "偏弱"
+        score = 0
+    else:
+        label = "震荡筑底"
+        score = 5
+    evidence = (
+        f"{len(loaded_codes)} 个宽基：20日中位 {median_20:+.1f}%，"
+        f"60日中位 {median_60:+.1f}%，站上MA20且MA20高于MA60的比例 {trend_ratio:.0%}"
+    )
+    return {
+        "label": label,
+        "evidence": evidence,
+        "warnings": warnings,
+        "score": score,
+    }
+
+
 def load_cached_adj_factors(cache_dir: Path, trade_date: str) -> dict[str, float]:
     path = cache_dir / "adj_factor" / f"{trade_date}.json"
     if not path.exists():
@@ -818,6 +921,197 @@ def recent_pct(prices: list[tuple[str, float]], days: int = 20) -> float:
     )
 
 
+def price_setup_metrics(
+    prices: list[tuple[str, float]],
+    *,
+    pullback_from_high: float,
+    recent_20d_pct: float,
+    amount_change_pct: float,
+) -> tuple[int, str]:
+    """Score a non-chasing entry setup from daily prices.
+
+    This intentionally rewards a healthy pullback and multi-timeframe
+    alignment. A recent vertical move receives less setup credit even when the
+    six-month return is impressive.
+    """
+    if len(prices) < 2:
+        return 0, "行情不足，无法确认日线/中期结构"
+    score = 0
+    reasons: list[str] = []
+    latest = prices[-1][1]
+    if len(prices) >= 60:
+        ma20 = sum(item[1] for item in prices[-20:]) / 20
+        ma60 = sum(item[1] for item in prices[-60:]) / 60
+        if latest >= ma20 >= ma60:
+            score += 12
+            reasons.append("收盘价在20日线上且20日线高于60日线")
+        elif latest >= ma20:
+            score += 8
+            reasons.append("收盘价仍在20日线上")
+        elif latest >= ma60:
+            score += 4
+            reasons.append("收盘价守住60日线但短线偏弱")
+        else:
+            reasons.append("收盘价跌破60日线")
+    else:
+        reasons.append("价格历史不足60日，多周期结构待补")
+
+    if -18 <= pullback_from_high <= -5:
+        score += 10
+        reasons.append(f"距阶段高点回撤 {abs(pullback_from_high):.1f}%，处于回踩观察区")
+    elif -25 <= pullback_from_high < -18:
+        score += 6
+        reasons.append(f"阶段高点回撤 {abs(pullback_from_high):.1f}%，等待止跌确认")
+    elif -5 < pullback_from_high <= 0:
+        score += 5
+        reasons.append("距离阶段高点较近，暂不追涨")
+    else:
+        score += 2
+        reasons.append("回撤或再创新高结构尚未形成理想买点")
+
+    if 0 <= recent_20d_pct <= 30:
+        score += 5
+        reasons.append(f"近20日涨幅 {recent_20d_pct:.1f}%，没有明显短线过热")
+    elif -10 <= recent_20d_pct < 0:
+        score += 3
+        reasons.append(f"近20日回落 {abs(recent_20d_pct):.1f}%，等待企稳")
+    elif recent_20d_pct > 30:
+        score += 1
+        reasons.append(f"近20日上涨 {recent_20d_pct:.1f}%，存在追高风险")
+
+    if amount_change_pct >= 10:
+        score += 3
+        reasons.append(f"近20日成交额较区间均值增加 {amount_change_pct:.1f}%")
+    return min(score, 30), "；".join(reasons)
+
+
+def sector_stage_for_source(source: dict[str, Any], recent_20d_pct: float) -> str:
+    industry_pct = parse_float(source.get("industry_pct_change"))
+    breadth = parse_float(source.get("industry_breadth_pct"))
+    if industry_pct >= 15 and breadth >= 55:
+        return "主线强势" if recent_20d_pct >= 0 else "强势回踩"
+    if industry_pct > 0 and breadth >= 45:
+        return "改善但分化"
+    if recent_20d_pct > 5:
+        return "筑底修复"
+    return "弱势/待确认"
+
+
+def market_score(label: str, score: int) -> int:
+    if label == "偏强":
+        return score
+    if label == "震荡筑底":
+        return score or 5
+    return 0
+
+
+def valuation_score(pe_ttm: float, pb: float) -> int:
+    score = 0
+    if 0 < pe_ttm <= 20:
+        score += 8
+    elif 20 < pe_ttm <= 35:
+        score += 6
+    elif 35 < pe_ttm <= 60:
+        score += 3
+    elif pe_ttm > 120:
+        score -= 4
+    if 0 < pb <= 3:
+        score += 2
+    elif pb > 10:
+        score -= 2
+    return score
+
+
+def quality_score_from_snapshot(snapshot: dict[str, Any]) -> tuple[int, str]:
+    if not snapshot:
+        return 0, "财务质量未验证"
+
+    def metric(name: str) -> float:
+        return parse_float(snapshot.get(name), default=float("nan"))
+
+    score = 0
+    netprofit_yoy = metric("netprofit_yoy")
+    op_yoy = metric("op_yoy")
+    roe = metric("roe")
+    ocf_yoy = metric("ocf_yoy")
+    gross_margin = metric("grossprofit_margin")
+    if netprofit_yoy == netprofit_yoy:
+        score += 8 if netprofit_yoy >= 20 else 4 if netprofit_yoy >= 0 else -4
+    if op_yoy == op_yoy:
+        score += 5 if op_yoy >= 20 else 3 if op_yoy >= 0 else -3
+    if roe == roe:
+        score += 7 if roe >= 15 else 5 if roe >= 10 else 2 if roe >= 5 else -3
+    if ocf_yoy == ocf_yoy:
+        score += 3 if ocf_yoy >= 0 else -2
+    if gross_margin == gross_margin and gross_margin >= 20:
+        score += 3
+    score = max(0, min(score, 30))
+    if score >= 20:
+        status = "质量较强"
+    elif score >= 8:
+        status = "质量中性"
+    else:
+        status = "质量偏弱"
+    return score, status
+
+
+def candidate_archetype(
+    *,
+    quality_score: int,
+    pe_ttm: float,
+    industry_pct: float,
+    industry_breadth: float,
+    setup_score: int,
+    recent_20d_pct: float,
+) -> str:
+    if quality_score >= 15 and 0 < pe_ttm <= 35:
+        return "质量价值"
+    if quality_score >= 18 and pe_ttm > 60:
+        return "成长确认"
+    if industry_pct >= 15 and industry_breadth >= 55 and setup_score >= 18:
+        return "趋势龙头回踩"
+    if industry_pct > 0 and recent_20d_pct > 0:
+        return "周期拐点/景气修复"
+    return "强势股观察"
+
+
+def format_why_now(
+    market_label: str,
+    sector_stage: str,
+    setup_reason: str,
+    quality_status: str,
+) -> str:
+    return (
+        f"市场 {market_label}；行业处于{sector_stage}；{setup_reason}；"
+        f"{quality_status}"
+    )
+
+
+def first_rejection_reason(
+    *,
+    quality_status: str,
+    recent_20d_pct: float,
+    pullback_from_high: float,
+    market_label: str,
+    setup_score: int,
+) -> str:
+    if quality_status == "财务质量未验证":
+        return "第一拒绝点：财务质量尚未取得点时财报证据"
+    if quality_status == "质量偏弱":
+        return "第一拒绝点：利润、现金流或 ROE 信号偏弱，先排除题材炒作"
+    if recent_20d_pct > 30 or pullback_from_high > -5:
+        return "第一拒绝点：短线过热或离高点过近，不满足回踩低吸条件"
+    if market_label == "偏弱":
+        return "第一拒绝点：大盘偏弱，个股强势需要更高安全边际"
+    if setup_score < 15:
+        return "第一拒绝点：日线/中期结构尚未确认"
+    return "第一拒绝点：行业广度或后续财报无法延续时降级"
+
+
+def what_would_kill() -> str:
+    return "连续两个披露期盈利/现金流恶化、行业广度转弱，或收盘有效跌破60日线。"
+
+
 def stage_score(pct_change: float) -> int:
     if 120 <= pct_change <= 350:
         return 25
@@ -898,12 +1192,24 @@ def risk_penalties(
     return penalties, flags
 
 
-def tier_for_score(score: int) -> str:
-    if score >= 100:
+def tier_for_score(
+    score: int,
+    *,
+    quality_score: int = 0,
+    setup_score: int = 0,
+    market_regime: str = "市场数据不足",
+) -> str:
+    """Keep A-tier gated on both company quality and a usable setup."""
+    if (
+        score >= 125
+        and quality_score >= 15
+        and setup_score >= 18
+        and market_regime != "偏弱"
+    ):
         return "A 核心跟踪"
-    if score >= 90:
+    if score >= 105:
         return "B 重点观察"
-    if score >= 78:
+    if score >= 80:
         return "C 观察名单"
     return "D 暂缓"
 
@@ -945,7 +1251,9 @@ def build_rise_drivers(
     return drivers or ["行情层暂未识别出单一主导驱动"]
 
 
-def load_fundamental_evidence(client: TushareClient, ts_code: str) -> list[str]:
+def load_fundamental_snapshot(
+    client: TushareClient, ts_code: str, *, as_of_date: str | None = None
+) -> dict[str, Any]:
     rows = client.query(
         "fina_indicator",
         params={"ts_code": ts_code},
@@ -961,6 +1269,13 @@ def load_fundamental_evidence(client: TushareClient, ts_code: str) -> list[str]:
         ],
         cache_key=ts_code,
     )
+    if as_of_date:
+        rows = [
+            row
+            for row in rows
+            if str(row.get("ann_date") or "")
+            and str(row.get("ann_date")) <= as_of_date
+        ]
     rows = sorted(
         rows,
         key=lambda row: (
@@ -969,15 +1284,20 @@ def load_fundamental_evidence(client: TushareClient, ts_code: str) -> list[str]:
         ),
         reverse=True,
     )
-    if not rows:
+    return dict(rows[0]) if rows else {}
+
+
+def fundamental_evidence_from_snapshot(snapshot: dict[str, Any]) -> list[str]:
+    if not snapshot:
         return []
-    latest = rows[0]
-    period = str(latest.get("end_date") or "最新财报")
+    period = str(snapshot.get("end_date") or "最新财报")
     evidence: list[str] = []
-    netprofit_yoy = parse_float(latest.get("netprofit_yoy"), default=float("nan"))
-    op_yoy = parse_float(latest.get("op_yoy"), default=float("nan"))
-    roe = parse_float(latest.get("roe"), default=float("nan"))
-    gross_margin = parse_float(latest.get("grossprofit_margin"), default=float("nan"))
+    netprofit_yoy = parse_float(snapshot.get("netprofit_yoy"), default=float("nan"))
+    op_yoy = parse_float(snapshot.get("op_yoy"), default=float("nan"))
+    roe = parse_float(snapshot.get("roe"), default=float("nan"))
+    gross_margin = parse_float(
+        snapshot.get("grossprofit_margin"), default=float("nan")
+    )
     if netprofit_yoy == netprofit_yoy:
         evidence.append(f"{period}净利润同比 {netprofit_yoy:+.1f}%")
     if op_yoy == op_yoy:
@@ -987,6 +1307,13 @@ def load_fundamental_evidence(client: TushareClient, ts_code: str) -> list[str]:
     if gross_margin == gross_margin:
         evidence.append(f"毛利率 {gross_margin:.1f}%")
     return evidence[:3]
+
+
+def load_fundamental_evidence(
+    client: TushareClient, ts_code: str, *, as_of_date: str | None = None
+) -> list[str]:
+    snapshot = load_fundamental_snapshot(client, ts_code, as_of_date=as_of_date)
+    return fundamental_evidence_from_snapshot(snapshot)
 
 
 def refresh_watch_thesis(candidate: WatchCandidate) -> None:
@@ -1011,6 +1338,11 @@ def build_watch_report(
     end_trade_date = first_double_report["end_trade_date"]
     price_mode = str(first_double_report.get("price_mode") or "raw")
     daily_basic = load_daily_basic(client, end_trade_date)
+    market = load_market_regime(
+        client,
+        first_double_report["start_trade_date"],
+        end_trade_date,
+    )
     price_series = load_price_series_from_cache(
         cache_dir,
         first_double_report["start_trade_date"],
@@ -1018,6 +1350,7 @@ def build_watch_report(
         price_mode=price_mode,
     )
     data_warnings: list[str] = list(first_double_report.get("data_warnings") or [])
+    data_warnings.extend(market.get("warnings") or [])
     cache_needs_backfill = price_cache_needs_backfill(
         cache_dir,
         first_double_report["start_trade_date"],
@@ -1027,6 +1360,10 @@ def build_watch_report(
     if cache_needs_backfill:
         data_warnings.append("日线缓存缺少复权因子，已对候选股按区间自动补拉")
 
+    source_by_code = {
+        str(item.get("ts_code")): item
+        for item in first_double_report.get("candidates", [])
+    }
     scored: list[WatchCandidate] = []
     for source in first_double_report.get("candidates", []):
         ts_code = source["ts_code"]
@@ -1076,6 +1413,13 @@ def build_watch_report(
             pullback_from_high=pullback,
             prices_available=len(prices) >= 2,
         )
+        setup_points, setup_reason = price_setup_metrics(
+            prices,
+            pullback_from_high=pullback,
+            recent_20d_pct=recent_20d,
+            amount_change_pct=parse_float(source.get("amount_change_pct")),
+        )
+        sector_stage = sector_stage_for_source(source, recent_20d)
         unverified_drivers = [
             "公告、订单、政策催化尚未接入，需人工核对",
             FUNDAMENTAL_PENDING_DRIVER,
@@ -1089,13 +1433,17 @@ def build_watch_report(
             heat=heat_score(volume_ratio),
             recent_momentum=recent_momentum_score(recent_20d),
             penalties=penalties,
+            quality=0,
+            valuation=valuation_score(pe_ttm, pb),
+            setup=setup_points,
+            market=market_score(str(market["label"]), int(market["score"])),
         )
         score = sum(asdict(breakdown).values())
         thesis = ""
         next_checks = [
-            "核对最近两期营收/利润是否出现加速",
+            "核对报告截止日前已披露的两期营收/利润/现金流是否出现加速",
             "追踪公告、互动易和机构调研中是否有订单/产能/客户变化",
-            "复盘涨停与放量日，确认是板块共振还是孤立炒作",
+            "等待突破—回踩—量能恢复，确认不是单日脉冲",
         ]
         if pe_ttm <= 0:
             next_checks.append("当前 PE_TTM 无效或亏损，必须优先验证盈利拐点")
@@ -1128,30 +1476,50 @@ def build_watch_report(
                 end_trade_date=end_trade_date,
                 rise_drivers=rise_drivers,
                 unverified_drivers=unverified_drivers,
+                archetype="强势股观察",
+                setup_score=setup_points,
+                market_regime=str(market["label"]),
+                sector_stage=sector_stage,
+                why_now=format_why_now(
+                    str(market["label"]),
+                    sector_stage,
+                    setup_reason,
+                    "财务质量待补拉",
+                ),
+                first_rejection=first_rejection_reason(
+                    quality_status="财务质量未验证",
+                    recent_20d_pct=recent_20d,
+                    pullback_from_high=pullback,
+                    market_label=str(market["label"]),
+                    setup_score=setup_points,
+                ),
+                what_would_kill=what_would_kill(),
             )
         )
         refresh_watch_thesis(scored[-1])
 
     scored.sort(key=lambda item: (item.score, item.pct_change), reverse=True)
-    for index, candidate in enumerate(scored, start=1):
-        candidate.rank = index
     fundamental_fetch_blocked = False
     fundamental_warning_samples: list[str] = []
-    for candidate in scored[:20]:
+    fundamental_candidates = scored[:FUNDAMENTAL_FETCH_LIMIT]
+    for candidate in fundamental_candidates:
         candidate.unverified_drivers = [
             reason
             for reason in candidate.unverified_drivers
             if reason != FUNDAMENTAL_PENDING_DRIVER
         ]
         if fundamental_fetch_blocked:
+            candidate.quality_status = "财务指标接口不可用"
             candidate.unverified_drivers.append(
                 "财务指标接口不可用，未取得最新财报证据"
             )
             refresh_watch_thesis(candidate)
             continue
         try:
-            candidate.financial_evidence = load_fundamental_evidence(
-                client, candidate.ts_code
+            snapshot = load_fundamental_snapshot(
+                client,
+                candidate.ts_code,
+                as_of_date=end_trade_date,
             )
         except TushareError as error:
             fundamental_fetch_blocked = True
@@ -1159,13 +1527,54 @@ def build_watch_report(
             candidate.unverified_drivers.append(
                 "财务指标接口不可用，未取得最新财报证据"
             )
+            snapshot = {}
+        candidate.financial_evidence = fundamental_evidence_from_snapshot(snapshot)
+        candidate.quality_score, candidate.quality_status = quality_score_from_snapshot(
+            snapshot
+        )
+        candidate.breakdown.quality = candidate.quality_score
+        candidate.breakdown.valuation = valuation_score(
+            candidate.pe_ttm, candidate.pb
+        )
         if not candidate.financial_evidence:
             candidate.unverified_drivers.append("最近财报未返回可用增长指标")
+        source = source_by_code.get(candidate.ts_code, {})
+        candidate.archetype = candidate_archetype(
+            quality_score=candidate.quality_score,
+            pe_ttm=candidate.pe_ttm,
+            industry_pct=parse_float(source.get("industry_pct_change")),
+            industry_breadth=parse_float(source.get("industry_breadth_pct")),
+            setup_score=candidate.setup_score,
+            recent_20d_pct=candidate.recent_20d_pct,
+        )
+        candidate.why_now = format_why_now(
+            candidate.market_regime,
+            candidate.sector_stage,
+            "；".join(candidate.rise_drivers[:2]) or "行情驱动待确认",
+            candidate.quality_status,
+        )
+        candidate.first_rejection = first_rejection_reason(
+            quality_status=candidate.quality_status,
+            recent_20d_pct=candidate.recent_20d_pct,
+            pullback_from_high=candidate.pullback_from_high,
+            market_label=candidate.market_regime,
+            setup_score=candidate.setup_score,
+        )
+        candidate.score = sum(asdict(candidate.breakdown).values())
         refresh_watch_thesis(candidate)
-    for candidate in scored[20:]:
-        candidate.unverified_drivers.insert(0, "财务证据仅对排序前 20 名补拉")
+    for candidate in scored[FUNDAMENTAL_FETCH_LIMIT:]:
+        candidate.unverified_drivers.insert(0, FUNDAMENTAL_PENDING_DRIVER)
         refresh_watch_thesis(candidate)
     data_warnings.extend(fundamental_warning_samples)
+    scored.sort(key=lambda item: (item.score, item.quality_score, item.pct_change), reverse=True)
+    for index, candidate in enumerate(scored, start=1):
+        candidate.rank = index
+        candidate.tier = tier_for_score(
+            candidate.score,
+            quality_score=candidate.quality_score,
+            setup_score=candidate.setup_score,
+            market_regime=candidate.market_regime,
+        )
     limited = scored[:limit] if limit > 0 else scored
     return WatchReport(
         generated_at=datetime.now().isoformat(timespec="seconds"),
@@ -1179,6 +1588,8 @@ def build_watch_report(
         price_mode=price_mode,
         data_warnings=list(dict.fromkeys(data_warnings)),
         candidates=limited,
+        market_regime=str(market["label"]),
+        market_evidence=str(market["evidence"]),
     )
 
 
@@ -1278,36 +1689,38 @@ def render_watch_html(report: WatchReport) -> str:
         rows.append(
             "<tr>"
             f"<td>{item.rank}</td><td><strong>{escape(item.name)}</strong><span>{escape(item.ts_code)}</span></td>"
-            f"<td><strong>{escape(item.tier)}</strong><span>{item.score} 分</span></td>"
-            f"<td>{escape(item.industry)}<span>{escape(item.theme_reason)}</span></td>"
+            f"<td><strong>{escape(item.tier)}</strong><span>{item.score} 分</span><span>{escape(item.archetype)}</span></td>"
+            f"<td>{escape(item.industry)}<span>{escape(item.theme_reason)}</span><span>{escape(item.sector_stage)}</span></td>"
             f"<td class='gain'>{fmt_pct(item.pct_change)}<span>20日 {fmt_pct(item.recent_20d_pct)}</span></td>"
             f"<td>{item.circ_mv_yi:g} 亿<span>总市值 {item.total_mv_yi:g} 亿</span></td>"
             f"<td>{fmt_pct(item.pullback_from_high)}<span>换手 {fmt_pct(item.turnover_rate_f)} / 量比 {item.volume_ratio:g}</span></td>"
-            f"<td>{escape(item.thesis)}{driver_note}</td>"
+            f"<td><strong>质量 {escape(item.quality_status)} {item.quality_score} 分 / 结构 {item.setup_score} 分</strong><span>估值 {item.breakdown.valuation} 分</span></td>"
+            f"<td>{escape(item.why_now)}<span>第一拒绝点：{escape(item.first_rejection)}</span><span>证伪：{escape(item.what_would_kill)}</span>{driver_note}</td>"
             f"<td>{escape('；'.join(item.risk_flags))}<ul>{checks}</ul></td>"
             "</tr>"
         )
     table_body = (
-        "\n".join(rows) or "<tr><td colspan='9' class='empty'>暂无候选。</td></tr>"
+        "\n".join(rows) or "<tr><td colspan='10' class='empty'>暂无候选。</td></tr>"
     )
     warning_note = "；".join(report.data_warnings[:3])
     if len(report.data_warnings) > 3:
         warning_note += f"；另有 {len(report.data_warnings) - 3} 条数据提示请查看 JSON"
     return render_page(
         "二阶段研究跟踪池",
-        "从最近半年已翻倍的股票中，继续筛选更值得深挖的二阶段候选。评分只负责排序，基本面与催化仍需人工核验。",
+        "从最近半年已翻倍的股票中，按质量、估值、行业阶段、市场状态和回踩结构筛选研究候选；不是买入建议。",
         [
             ("源区间", f"{report.start_trade_date} - {report.end_trade_date}"),
             ("输入翻倍股", str(report.input_count)),
             ("跟踪池数量", str(report.watch_count)),
             ("A 级核心", str(report.core_count)),
             ("评分版本", report.scoring_version),
+            ("市场状态", report.market_regime),
             ("价格口径", "前复权" if report.price_mode == "qfq" else "未复权"),
             ("生成日期", report.generated_at[:10]),
         ],
-        "<table><thead><tr><th>排名</th><th>股票</th><th>分层/分数</th><th>行业</th><th>涨幅</th><th>流通市值</th><th>趋势/资金</th><th>候选逻辑</th><th>风险与下一步</th></tr></thead>"
+        "<table><thead><tr><th>排名</th><th>股票</th><th>分层/类型</th><th>行业/阶段</th><th>涨幅</th><th>流通市值</th><th>趋势/资金</th><th>质量/估值</th><th>为什么现在/驱动</th><th>风险与下一步</th></tr></thead>"
         f"<tbody>{table_body}</tbody></table>",
-        f"评分模型 {report.scoring_version} 仅用于复盘研究，不构成投资建议。{warning_note}",
+        f"评分模型 {report.scoring_version} 把财务质量、估值和买点结构纳入排序；市场证据：{report.market_evidence}。仅用于复盘研究，不构成投资建议。{warning_note}",
     )
 
 
@@ -1370,8 +1783,11 @@ def build_feishu_card(
     ] or ["暂无符合条件的半年强势股"]
     watch_lines = [
         f"{item.get('rank', 0)}. {item.get('name') or item.get('ts_code')}（{item.get('ts_code')}）"
-        f" · {item.get('tier')} · {item.get('score')} 分 · {item.get('industry') or '行业未标注'}\n"
-        f"   驱动：{'；'.join(item.get('rise_drivers', [])[:2]) or '行情层未识别'}"
+        f" · {item.get('tier')} · {item.get('score')} 分 · {item.get('archetype', '待分类')} · {item.get('industry') or '行业未标注'}\n"
+        f"   质量：{item.get('quality_status', '未验证')} {item.get('quality_score', 0)} 分；结构 {item.get('setup_score', 0)} 分\n"
+        f"   驱动：{'；'.join(item.get('rise_drivers', [])[:2]) or '行情层未识别'}\n"
+        f"   为什么现在：{item.get('why_now') or '待补充'}\n"
+        f"   第一拒绝点：{item.get('first_rejection') or '待补充'}"
         + (
             f"\n   财务：{'；'.join(item.get('financial_evidence', [])[:2])}"
             if item.get("financial_evidence")
@@ -1395,7 +1811,8 @@ def build_feishu_card(
         f"**A 股样本**: {first_report.get('stock_count', 0)} · "
         f"**半年强势股**: {first_report.get('candidate_count', 0)} · "
         f"**二阶段跟踪池**: {watch_report.get('watch_count', 0)} · "
-        f"**A 级核心**: {watch_report.get('core_count', 0)}"
+        f"**A 级核心**: {watch_report.get('core_count', 0)}\n"
+        f"**市场状态**: {watch_report.get('market_regime', '市场数据不足')}"
     )
     return {
         "msg_type": "interactive",
