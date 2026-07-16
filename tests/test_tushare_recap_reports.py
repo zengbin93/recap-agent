@@ -259,6 +259,58 @@ class TushareRecapReportsTests(unittest.TestCase):
         self.assertIn("复权覆盖率不足", content)
         self.assertIn("Alpha", content)
 
+    def test_feishu_card_prioritizes_conclusion_and_research_candidates(self):
+        card = run.build_feishu_card(
+            {
+                "candidate_count": 151,
+                "candidates": [
+                    {
+                        "name": "回放甲",
+                        "ts_code": "600000.SH",
+                        "pct_change": 480,
+                    }
+                ],
+            },
+            {
+                "watch_count": 80,
+                "core_count": 0,
+                "market_regime": "偏弱",
+                "candidates": [
+                    {
+                        "rank": 1,
+                        "name": "优先乙",
+                        "ts_code": "688001.SH",
+                        "tier": "B 重点观察",
+                        "archetype": "趋势龙头回踩",
+                        "industry": "半导体",
+                        "quality_score": 21,
+                        "setup_score": 25,
+                        "rise_drivers": ["行业共振", "成交活跃度抬升"],
+                        "financial_evidence": ["20260331净利润同比 +35.2%"],
+                        "first_rejection": "第一拒绝点：离高点过近，等待回踩",
+                    },
+                    {
+                        "rank": 2,
+                        "name": "次级丙",
+                        "ts_code": "000001.SZ",
+                        "tier": "C 观察名单",
+                    },
+                ],
+            },
+        )
+
+        content = json.dumps(card, ensure_ascii=False)
+
+        self.assertEqual(card["card"]["header"]["template"], "orange")
+        self.assertIn("本期结论｜市场偏弱｜暂无 A 级核心", content)
+        self.assertIn("本期优先研究", content)
+        self.assertIn("优先乙", content)
+        self.assertIn("暂缓条件", content)
+        self.assertIn("半年强势回放", content)
+        self.assertNotIn("为什么现在", content)
+        self.assertNotIn("第一拒绝点", content)
+        self.assertNotIn("次级丙", content)
+
     def test_fundamental_evidence_is_rendered_from_latest_indicator_row(self):
         client = FakeTushareClient(
             {

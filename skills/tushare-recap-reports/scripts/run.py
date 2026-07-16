@@ -1771,97 +1771,166 @@ def output_paths(base_dir: Path, topic: str) -> tuple[Path, Path, Path]:
     )
 
 
+def shorten_card_text(value: Any, limit: int = 96) -> str:
+    normalized = " ".join(str(value or "").split())
+    return normalized if len(normalized) <= limit else f"{normalized[: limit - 1]}…"
+
+
+def card_header_template(market_regime: str) -> str:
+    if market_regime == "偏强":
+        return "green"
+    if market_regime == "偏弱":
+        return "orange"
+    return "blue"
+
+
+def select_card_candidates(
+    watch_report: dict[str, Any], limit: int = 3
+) -> list[dict[str, Any]]:
+    candidates = list(watch_report.get("candidates") or [])
+    primary = [
+        item
+        for item in candidates
+        if str(item.get("tier") or "").startswith(("A", "B"))
+    ]
+    return (primary or candidates)[:limit]
+
+
+def card_conclusion(
+    watch_report: dict[str, Any], shown_candidates: list[dict[str, Any]]
+) -> str:
+    market_regime = str(watch_report.get("market_regime") or "市场数据不足")
+    core_count = int(watch_report.get("core_count") or 0)
+    if market_regime == "偏弱":
+        if core_count:
+            return f"市场偏弱｜仅跟踪 {core_count} 只 A 级候选的回踩确认"
+        if shown_candidates:
+            return "市场偏弱｜暂无 A 级核心，仅保留 B 级研究观察"
+        return "市场偏弱｜暂无优先研究候选"
+    if core_count:
+        return f"市场{market_regime}｜{core_count} 只 A 级候选优先补齐催化证据"
+    if shown_candidates:
+        return f"市场{market_regime}｜暂无 A 级核心，先跟踪 B 级验证信号"
+    return f"市场{market_regime}｜暂无优先研究候选"
+
+
+def compact_card_candidate(item: dict[str, Any]) -> str:
+    drivers = [str(value) for value in item.get("rise_drivers") or [] if value]
+    evidence = [
+        str(value) for value in item.get("financial_evidence") or [] if value
+    ]
+    rejection = str(item.get("first_rejection") or "").replace(
+        "第一拒绝点：", ""
+    )
+    title = (
+        f"**{item.get('rank', 0)}. {item.get('name') or item.get('ts_code')}"
+        f"（{item.get('ts_code')}）** · {item.get('tier', '观察')}"
+    )
+    score_line = (
+        f"{item.get('archetype', '待分类')} · {item.get('industry') or '行业未标注'}"
+        f" · 质量 {item.get('quality_score', 0)}/30 · 结构 {item.get('setup_score', 0)}/30"
+    )
+    lines = [title, score_line]
+    if drivers:
+        lines.append(f"**看点** {shorten_card_text('；'.join(drivers[:2]))}")
+    if evidence:
+        lines.append(f"**财务信号** {shorten_card_text(evidence[0], 72)}")
+    if rejection:
+        lines.append(f"**暂缓条件** {shorten_card_text(rejection, 72)}")
+    return "\n".join(lines)
+
+
 def build_feishu_card(
     first_report: dict[str, Any], watch_report: dict[str, Any]
 ) -> dict[str, Any]:
-    first_candidates = first_report.get("candidates", [])[:5]
-    watch_candidates = watch_report.get("candidates", [])[:5]
-    first_lines = [
-        f"{item.get('rank', 0)}. {item.get('name') or item.get('ts_code')}（{item.get('ts_code')}）"
-        f" · 半年 {parse_float(item.get('pct_change')):.2f}% · {item.get('industry') or '行业未标注'}"
+    first_candidates = first_report.get("candidates", [])[:3]
+    focus_candidates = select_card_candidates(watch_report)
+    market_regime = str(watch_report.get("market_regime") or "市场数据不足")
+    core_count = int(watch_report.get("core_count") or 0)
+    recap_snapshot = " · ".join(
+        f"{item.get('name') or item.get('ts_code')} {parse_float(item.get('pct_change')):.0f}%"
         for item in first_candidates
-    ] or ["暂无符合条件的半年强势股"]
-    watch_lines = [
-        f"{item.get('rank', 0)}. {item.get('name') or item.get('ts_code')}（{item.get('ts_code')}）"
-        f" · {item.get('tier')} · {item.get('score')} 分 · {item.get('archetype', '待分类')} · {item.get('industry') or '行业未标注'}\n"
-        f"   质量：{item.get('quality_status', '未验证')} {item.get('quality_score', 0)} 分；结构 {item.get('setup_score', 0)} 分\n"
-        f"   驱动：{'；'.join(item.get('rise_drivers', [])[:2]) or '行情层未识别'}\n"
-        f"   为什么现在：{item.get('why_now') or '待补充'}\n"
-        f"   第一拒绝点：{item.get('first_rejection') or '待补充'}"
-        + (
-            f"\n   财务：{'；'.join(item.get('financial_evidence', [])[:2])}"
-            if item.get("financial_evidence")
-            else ""
-        )
-        for item in watch_candidates
-    ] or ["暂无二阶段跟踪候选"]
+    )
     warnings = list(
         dict.fromkeys(
             first_report.get("data_warnings", [])
             + watch_report.get("data_warnings", [])
         )
     )
-    warning_text = (
-        "\n".join(f"- {warning}" for warning in warnings[:3]) or "- 无数据质量提示"
-    )
     summary = (
-        f"**区间**: {first_report.get('start_trade_date')} - {first_report.get('end_trade_date')}\n"
-        f"**口径**: {'前复权' if first_report.get('price_mode') == 'qfq' else '未复权'}，"
-        f"最低交易日 {first_report.get('min_trading_days', 0)}\n"
-        f"**A 股样本**: {first_report.get('stock_count', 0)} · "
-        f"**半年强势股**: {first_report.get('candidate_count', 0)} · "
-        f"**二阶段跟踪池**: {watch_report.get('watch_count', 0)} · "
-        f"**A 级核心**: {watch_report.get('core_count', 0)}\n"
-        f"**市场状态**: {watch_report.get('market_regime', '市场数据不足')}"
+        f"**本期结论｜{card_conclusion(watch_report, focus_candidates)}**\n"
+        f"研究池 {watch_report.get('watch_count', 0)} · A级 {core_count} · "
+        f"半年强势样本 {first_report.get('candidate_count', 0)}"
     )
-    return {
-        "msg_type": "interactive",
-        "card": {
-            "config": {"wide_screen_mode": True},
-            "header": {
-                "template": "blue",
-                "title": {"tag": "plain_text", "content": "过去半年潜力股复盘"},
+    focus_content = (
+        "\n\n".join(compact_card_candidate(item) for item in focus_candidates)
+        if focus_candidates
+        else "暂无优先候选；保留数据跟踪，等待市场和行业信号改善。"
+    )
+    elements: list[dict[str, Any]] = [
+        {"tag": "div", "text": {"tag": "lark_md", "content": summary}},
+        {"tag": "hr"},
+        {
+            "tag": "div",
+            "text": {
+                "tag": "lark_md",
+                "content": "**本期优先研究**\n" + focus_content,
             },
-            "elements": [
-                {"tag": "div", "text": {"tag": "lark_md", "content": summary}},
-                {"tag": "hr"},
-                {
-                    "tag": "div",
-                    "text": {
-                        "tag": "lark_md",
-                        "content": "**半年强势股初筛 Top 5**\n"
-                        + "\n".join(first_lines),
-                    },
-                },
+        },
+    ]
+    if recap_snapshot:
+        elements.extend(
+            [
                 {"tag": "hr"},
                 {
                     "tag": "div",
                     "text": {
                         "tag": "lark_md",
                         "content": (
-                            f"**二阶段研究跟踪池 Top 5**（评分 {watch_report.get('scoring_version', 'unknown')}）\n"
-                            + "\n".join(watch_lines)
+                            "**半年强势回放**（仅作复盘背景，不等于优先候选）\n"
+                            + recap_snapshot
                         ),
                     },
                 },
+            ]
+        )
+    if warnings:
+        elements.extend(
+            [
                 {"tag": "hr"},
                 {
                     "tag": "div",
                     "text": {
                         "tag": "lark_md",
-                        "content": "**数据质量提示**\n" + warning_text,
+                        "content": "**数据提示**\n"
+                        + "\n".join(
+                            f"- {shorten_card_text(warning, 100)}"
+                            for warning in warnings[:2]
+                        ),
                     },
                 },
+            ]
+        )
+    elements.append(
+        {
+            "tag": "note",
+            "elements": [
                 {
-                    "tag": "note",
-                    "elements": [
-                        {
-                            "tag": "plain_text",
-                            "content": "研究复盘队列，不构成投资建议；基本面、催化和后验收益仍需验证。",
-                        }
-                    ],
-                },
+                    "tag": "plain_text",
+                    "content": "完整驱动、财务证据和证伪条件请查看报告产物；本卡只保留研究优先级。",
+                }
             ],
+        }
+    )
+    return {
+        "msg_type": "interactive",
+        "card": {
+            "config": {"wide_screen_mode": True},
+            "header": {
+                "template": card_header_template(market_regime),
+                "title": {"tag": "plain_text", "content": "过去半年潜力股复盘"},
+            },
+            "elements": elements,
         },
     }
 
