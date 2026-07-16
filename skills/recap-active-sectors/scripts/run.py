@@ -35,7 +35,7 @@ from urllib.request import Request, urlopen
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_CACHE_DIR = PROJECT_ROOT / "artifacts" / "cache" / "tushare"
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "artifacts" / "reports" / "recap-active-sectors"
-TUSHARE_URL = "http://api.tushare.pro"
+DEFAULT_TUSHARE_URL = "http://api.tushare.pro"
 DATE_FMT = "%Y%m%d"
 
 # 同花顺板块类型：N 概念指数、I 行业指数（其余如 R 地域、S 特色默认不纳入）。
@@ -69,6 +69,7 @@ class TushareClient:
         self,
         token: str | None = None,
         *,
+        url: str | None = None,
         cache_dir: Path = DEFAULT_CACHE_DIR,
         use_cache: bool = True,
         retries: int = 2,
@@ -78,6 +79,7 @@ class TushareClient:
         self.token = token or os.environ.get("TUSHARE_TOKEN", "")
         if not self.token:
             raise TushareError("Missing TUSHARE_TOKEN. Set it in the environment or repo-root .env.")
+        self.url = url or os.environ.get("TUSHARE_URL") or DEFAULT_TUSHARE_URL
         self.cache_dir = cache_dir
         self.use_cache = use_cache
         self.retries = retries
@@ -107,7 +109,7 @@ class TushareClient:
 
     def _post(self, payload: dict[str, Any]) -> dict[str, Any]:
         body = json.dumps(payload).encode("utf-8")
-        request = Request(TUSHARE_URL, data=body, headers={"Content-Type": "application/json"}, method="POST")
+        request = Request(self.url, data=body, headers={"Content-Type": "application/json"}, method="POST")
         last_error: Exception | None = None
         for attempt in range(1, max(1, self.retries + 1) + 1):
             try:
@@ -781,7 +783,7 @@ def output_paths(base_dir: Path) -> tuple[Path, Path, Path]:
 
 def run(args: argparse.Namespace) -> dict[str, str]:
     load_dotenv(PROJECT_ROOT / ".env")
-    client = TushareClient(args.token, cache_dir=args.cache_dir, use_cache=not args.no_cache)
+    client = TushareClient(args.token, url=args.url, cache_dir=args.cache_dir, use_cache=not args.no_cache)
     sector_types = [t.strip().upper() for t in str(args.sector_types).split(",") if t.strip()]
     report = build_report(
         client,
@@ -817,6 +819,7 @@ def run(args: argparse.Namespace) -> dict[str, str]:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="深度分析成交活跃板块（同花顺概念/行业）。")
     parser.add_argument("--token", default=None, help="Tushare token；默认取 TUSHARE_TOKEN")
+    parser.add_argument("--url", default=None, help="Tushare API 地址；默认取 TUSHARE_URL")
     parser.add_argument("--cache-dir", type=Path, default=DEFAULT_CACHE_DIR, help="Tushare 缓存目录")
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR, help="报告输出目录")
     parser.add_argument("--no-cache", action="store_true", help="禁用本地缓存")

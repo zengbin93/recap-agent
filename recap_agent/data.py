@@ -91,8 +91,9 @@ def cache_file_name(table: str, params: Mapping[str, Any]) -> str:
 class TushareGateway:
     """Thin adapter around tushare; financial table knowledge lives in recap skills."""
 
-    def __init__(self, token: str | None = None):
+    def __init__(self, token: str | None = None, url: str | None = None):
         self.token = token or os.environ.get("TUSHARE_TOKEN")
+        self.url = url or os.environ.get("TUSHARE_URL")
 
     def query(self, table: str, params: Mapping[str, Any]) -> list[dict[str, Any]]:
         if not self.token:
@@ -102,6 +103,8 @@ class TushareGateway:
         except ImportError as exc:
             raise RuntimeError("tushare package is not installed") from exc
         pro = ts.pro_api(self.token)
+        if self.url:
+            pro._DataApi__http_url = self.url
         frame = pro.query(table, **dict(params))
         if hasattr(frame, "to_dict"):
             return frame.to_dict(orient="records")

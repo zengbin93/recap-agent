@@ -4,9 +4,11 @@ Everything runs against a fake Tushare client, so no real ``TUSHARE_TOKEN`` or
 network access is required.
 """
 import importlib.util
+import os
 import pathlib
 import sys
 import unittest
+from unittest import mock
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -117,6 +119,15 @@ def make_client():
 
 
 class ActiveSectorsTests(unittest.TestCase):
+    def test_tushare_client_uses_url_from_environment(self):
+        with mock.patch.dict(os.environ, {"TUSHARE_TOKEN": "token", "TUSHARE_URL": "https://tushare.example/api"}):
+            client = run.TushareClient(use_cache=False)
+        with mock.patch.object(run, "urlopen") as urlopen:
+            urlopen.return_value.__enter__.return_value.read.return_value = b'{"code":0,"data":{"fields":[],"items":[]}}'
+            client.query("daily")
+
+        self.assertEqual(urlopen.call_args.args[0].full_url, "https://tushare.example/api")
+
     def test_top_amount_filters_st_and_bj(self):
         client = make_client()
         basic = run.load_stock_basic(client)
