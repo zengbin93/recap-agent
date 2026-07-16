@@ -23,6 +23,14 @@ python3 scripts/run_recap.py --task daily --output-dir artifacts/reports --dry-r
 
 无论成功或失败，workflow 都会通过 `actions/upload-artifact` 上传 `artifacts/reports/**` 和 `artifacts/cache/**`，便于排查失败现场。
 
+每次日报、周报或月报会同时生成三类产物：
+
+- `*-recap.html`：带规则化市场摘要和原始数据表的可读报告。
+- `*-feishu-card.json`：可直接发送的飞书 interactive card payload。
+- `*-snapshot.json`：结构化证据快照，包含明确的起止日期、数据源、警告、涨跌条目和摘要统计，供后续大模型总结或历史对比使用。
+
+报告日期会先通过 Tushare `trade_cal` 解析为最近有效交易日。日报只查询该交易日；周报使用当周周一至报告日；月报使用当月月初至报告日，避免在未指定日期时查询无边界的历史数据。日报的市场状态只使用 Tushare `daily` 的 A 股行情计算涨跌家数；指数只展示主要基准指数，板块数量也单独标注，不再把不同类型的原始行数混成“股票数量”。
+
 ## Required Secrets
 
 在 GitHub 仓库的 `Settings -> Secrets and variables -> Actions` 中配置：
@@ -72,13 +80,14 @@ python3 scripts/run_recap.py --task daily --output-dir artifacts/reports --dry-r
 python3 scripts/run_recap.py --task daily --output-dir artifacts/reports --dry-run
 ```
 
-运行 PR #1 迁移后的 Tushare 课题 skill：
+运行 PR #1 迁移后的 Tushare 课题 skill（默认前复权、至少 80 个交易日、A 股范围过滤）：
 
 ```bash
 python3 skills/tushare-recap-reports/scripts/run.py full-chain
 ```
 
 默认输出到 `artifacts/reports/tushare-recap-reports`，Tushare API 缓存放在 `artifacts/cache/tushare`。
+GitHub Actions 可通过 `Potential Stock Recap` 的 `workflow_dispatch` 手动运行同一条链路；链路成功后会发送潜力股 Feishu 卡片，结果和卡片 JSON 也会作为 artifact 上传。`FEISHU_POTENTIAL_WEBHOOK_URL` 未配置时回退到 daily webhook。
 
 运行测试：
 
@@ -87,6 +96,8 @@ python3 -m unittest discover -s tests -v
 ```
 
 如果本机没有安装 `tushare` 或没有配置 `TUSHARE_TOKEN`，请在 `fallback-data/` 放置与 cache key 同名的 JSON fixture，或者只运行单元测试。
+
+当前 Claude Code action 负责工作流编排，核心数据计算和报告渲染仍由确定性的 Python 代码完成；`*-snapshot.json` 是后续接入受约束的自然语言总结层的输入边界。
 
 ## Development Docs
 

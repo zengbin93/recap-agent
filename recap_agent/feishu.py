@@ -32,11 +32,16 @@ class FeishuConfig:
     @classmethod
     def from_env(cls, env: Mapping[str, str] | None = None) -> "FeishuConfig":
         values = env or os.environ
-        default = _target_from_values(values.get("FEISHU_WEBHOOK_URL"), values.get("FEISHU_WEBHOOK_SECRET"))
+        default = _target_from_values(
+            values.get("FEISHU_WEBHOOK_URL"), values.get("FEISHU_WEBHOOK_SECRET")
+        )
         tasks = _targets_from_json(values.get("FEISHU_WEBHOOKS_JSON"))
-        for task in ("daily", "weekly", "monthly"):
+        for task in ("daily", "weekly", "monthly", "potential"):
             prefix = f"FEISHU_{task.upper()}_"
-            target = _target_from_values(values.get(prefix + "WEBHOOK_URL"), values.get(prefix + "WEBHOOK_SECRET"))
+            target = _target_from_values(
+                values.get(prefix + "WEBHOOK_URL"),
+                values.get(prefix + "WEBHOOK_SECRET"),
+            )
             if target:
                 tasks[task] = target
         return cls(default=default, tasks=tasks)
@@ -44,6 +49,8 @@ class FeishuConfig:
     def resolve(self, task: str) -> FeishuTarget:
         if task in self.tasks:
             return self.tasks[task]
+        if task == "potential" and "daily" in self.tasks:
+            return self.tasks["daily"]
         if self.default:
             return self.default
         raise ValueError(f"no feishu webhook configured for task {task}")
@@ -66,17 +73,23 @@ def _targets_from_json(raw: str | None) -> dict[str, FeishuTarget]:
         else:
             url = value.get("url") or value.get("webhook_url")
             if url:
-                targets[name] = FeishuTarget(url=url, secret=value.get("secret") or value.get("webhook_secret"))
+                targets[name] = FeishuTarget(
+                    url=url, secret=value.get("secret") or value.get("webhook_secret")
+                )
     return targets
 
 
-def build_signed_payload(payload: Mapping[str, Any], secret: str | None, timestamp: int | None = None) -> dict[str, Any]:
+def build_signed_payload(
+    payload: Mapping[str, Any], secret: str | None, timestamp: int | None = None
+) -> dict[str, Any]:
     body = dict(payload)
     if not secret:
         return body
     ts = str(timestamp or int(time.time()))
     string_to_sign = f"{ts}\n{secret}".encode("utf-8")
-    sign = base64.b64encode(hmac.new(string_to_sign, b"", digestmod=hashlib.sha256).digest()).decode("utf-8")
+    sign = base64.b64encode(
+        hmac.new(string_to_sign, b"", digestmod=hashlib.sha256).digest()
+    ).decode("utf-8")
     body["timestamp"] = ts
     body["sign"] = sign
     return body
@@ -101,4 +114,3 @@ class FeishuSender:
         with request.urlopen(req, timeout=self.timeout) as response:  # noqa: S310 - user-configured webhook.
             body = response.read().decode("utf-8")
             return SendResult(status_code=response.status, body=body, dry_run=False)
-

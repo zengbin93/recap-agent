@@ -712,13 +712,14 @@ def _sector_row(s: "ActiveSector", recent_days: int, shaded: bool) -> dict[str, 
         if s.quote_available
         else "<font color='grey'>行情不可用</font>"
     )
-    column = lambda weight, content: {
-        "tag": "column",
-        "width": "weighted",
-        "weight": weight,
-        "vertical_align": "top",
-        "elements": [{"tag": "div", "text": {"tag": "lark_md", "content": content}}],
-    }
+    def column(weight: int, content: str) -> dict[str, Any]:
+        return {
+            "tag": "column",
+            "width": "weighted",
+            "weight": weight,
+            "vertical_align": "top",
+            "elements": [{"tag": "div", "text": {"tag": "lark_md", "content": content}}],
+        }
     row: dict[str, Any] = {
         "tag": "column_set",
         "flex_mode": "none",
