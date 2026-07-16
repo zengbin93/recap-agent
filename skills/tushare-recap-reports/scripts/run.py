@@ -1814,6 +1814,20 @@ def card_conclusion(
     return f"市场{market_regime}｜暂无优先研究候选"
 
 
+def card_research_action(
+    watch_report: dict[str, Any], shown_candidates: list[dict[str, Any]]
+) -> str:
+    market_regime = str(watch_report.get("market_regime") or "市场数据不足")
+    core_count = int(watch_report.get("core_count") or 0)
+    if market_regime == "偏弱":
+        return "研究动作：只观察，不追高；等待回踩和行业共振确认。"
+    if core_count:
+        return "研究动作：优先核对 A 级候选的催化与回踩确认。"
+    if shown_candidates:
+        return "研究动作：先验证 B 级候选的财务和行业信号。"
+    return "研究动作：保留数据跟踪，等待新的市场和行业信号。"
+
+
 def compact_card_candidate(item: dict[str, Any]) -> str:
     drivers = [str(value) for value in item.get("rise_drivers") or [] if value]
     evidence = [
@@ -1827,8 +1841,9 @@ def compact_card_candidate(item: dict[str, Any]) -> str:
         f"（{item.get('ts_code')}）** · {item.get('tier', '观察')}"
     )
     score_line = (
-        f"{item.get('archetype', '待分类')} · {item.get('industry') or '行业未标注'}"
-        f" · 质量 {item.get('quality_score', 0)}/30 · 结构 {item.get('setup_score', 0)}/30"
+        f"{item.get('archetype', '待分类')} · {item.get('industry') or '行业未标注'}\n"
+        f"`总分 {item.get('score', 0)}` · `质量 {item.get('quality_score', 0)}/30`"
+        f" · `结构 {item.get('setup_score', 0)}/30`"
     )
     lines = [title, score_line]
     if drivers:
@@ -1836,7 +1851,7 @@ def compact_card_candidate(item: dict[str, Any]) -> str:
     if evidence:
         lines.append(f"**财务信号** {shorten_card_text(evidence[0], 72)}")
     if rejection:
-        lines.append(f"**暂缓条件** {shorten_card_text(rejection, 72)}")
+        lines.append(f"> **暂缓条件** {shorten_card_text(rejection, 72)}")
     return "\n".join(lines)
 
 
@@ -1859,8 +1874,9 @@ def build_feishu_card(
     )
     summary = (
         f"**本期结论｜{card_conclusion(watch_report, focus_candidates)}**\n"
-        f"研究池 {watch_report.get('watch_count', 0)} · A级 {core_count} · "
-        f"半年强势样本 {first_report.get('candidate_count', 0)}"
+        f"> {card_research_action(watch_report, focus_candidates)}\n\n"
+        f"`研究池 {watch_report.get('watch_count', 0)}` · `A级 {core_count}` · "
+        f"`半年强势样本 {first_report.get('candidate_count', 0)}`"
     )
     focus_content = (
         "\n\n".join(compact_card_candidate(item) for item in focus_candidates)
@@ -1871,10 +1887,11 @@ def build_feishu_card(
         {"tag": "div", "text": {"tag": "lark_md", "content": summary}},
         {"tag": "hr"},
         {
-            "tag": "div",
+                "tag": "div",
             "text": {
                 "tag": "lark_md",
-                "content": "**本期优先研究**\n" + focus_content,
+                "content": "**本期优先研究**\n> 仅展示 A/B 级；无 A 级时只作研究观察。\n\n"
+                + focus_content,
             },
         },
     ]
@@ -1887,7 +1904,8 @@ def build_feishu_card(
                     "text": {
                         "tag": "lark_md",
                         "content": (
-                            "**半年强势回放**（仅作复盘背景，不等于优先候选）\n"
+                            "**半年强势回放**\n"
+                            "> 仅作复盘背景，不代表优先级。\n\n"
                             + recap_snapshot
                         ),
                     },
