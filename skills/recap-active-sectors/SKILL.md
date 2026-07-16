@@ -16,7 +16,7 @@ Use this skill to build the daily "成交活跃板块" deep-dive report (SKZ-149
 4. 对每个活跃板块，挑选落在成交额榜内的代表成分股，分析其近 5 日表现。
 
 脚本自包含，内置一个带缓存/重试的 Tushare 客户端，产出 HTML/CSV/JSON。
-需要环境变量 `TUSHARE_TOKEN`（或 repo 根 `.env`）。
+需要环境变量 `TUSHARE_TOKEN`（或 repo 根 `.env`）；可用 `TUSHARE_URL` 指定兼容代理接口。
 
 > ⚠️ 依赖 `ths_index / ths_member / ths_daily` 接口，需相应 Tushare 积分权限。
 

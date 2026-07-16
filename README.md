@@ -30,6 +30,7 @@ python3 scripts/run_recap.py --task daily --output-dir artifacts/reports --dry-r
 | Secret | 必需 | 用途 |
 | --- | --- | --- |
 | `TUSHARE_TOKEN` | 是 | Tushare 数据接口 token。 |
+| `TUSHARE_URL` | 否 | Tushare 兼容代理接口地址；未配置时使用官方接口。 |
 | `ANTHROPIC_API_KEY` | 是 | Claude Code / Anthropic API 调用。 |
 | `FEISHU_WEBHOOK_URL` | 单群时是 | 默认飞书机器人 webhook。 |
 | `FEISHU_WEBHOOK_SECRET` | 否 | 默认飞书机器人签名密钥。 |

@@ -39,6 +39,19 @@ class FailingGateway:
 
 
 class RecapEngineeringTests(unittest.TestCase):
+    def test_tushare_gateway_uses_configured_url(self):
+        data = import_required("recap_agent.data")
+        pro = mock.Mock()
+        pro.query.return_value = []
+        tushare = mock.Mock()
+        tushare.pro_api.return_value = pro
+
+        with mock.patch.dict(sys.modules, {"tushare": tushare}):
+            rows = data.TushareGateway(token="token", url="https://tushare.example/api").query("daily", {})
+
+        self.assertEqual(rows, [])
+        self.assertEqual(pro._DataApi__http_url, "https://tushare.example/api")
+
     def test_tushare_collector_retries_and_persists_cache(self):
         data = import_required("recap_agent.data")
 
@@ -151,6 +164,7 @@ class RecapEngineeringTests(unittest.TestCase):
         self.assertIn("dry_run", text)
         self.assertIn("ANTHROPIC_API_KEY", text)
         self.assertIn("TUSHARE_TOKEN", text)
+        self.assertIn("TUSHARE_URL", text)
         self.assertIn("FEISHU_WEBHOOK", text)
         self.assertIn("actions/upload-artifact", text)
         self.assertIn("if: always()", text)

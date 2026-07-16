@@ -13,7 +13,7 @@ Use this skill for the Tushare stock recap chain from PR #1:
 
 The skill is self-contained under `skills/tushare-recap-reports` and writes HTML,
 CSV, and JSON artifacts. It expects `TUSHARE_TOKEN` in the environment or in a
-repo-root `.env` file.
+repo-root `.env` file. Set `TUSHARE_URL` to use a Tushare-compatible proxy.
 
 ```bash
 python3 skills/tushare-recap-reports/scripts/run.py full-chain
