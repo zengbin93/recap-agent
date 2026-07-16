@@ -15,6 +15,7 @@ on:
           - daily
           - weekly
           - monthly
+          - potential
       dry_run:
         description: "Generate artifacts without sending Feishu card"
         required: true
@@ -43,6 +44,8 @@ jobs:
       FEISHU_WEEKLY_WEBHOOK_SECRET: ${{ secrets.FEISHU_WEEKLY_WEBHOOK_SECRET }}
       FEISHU_MONTHLY_WEBHOOK_URL: ${{ secrets.FEISHU_MONTHLY_WEBHOOK_URL }}
       FEISHU_MONTHLY_WEBHOOK_SECRET: ${{ secrets.FEISHU_MONTHLY_WEBHOOK_SECRET }}
+      FEISHU_POTENTIAL_WEBHOOK_URL: ${{ secrets.FEISHU_POTENTIAL_WEBHOOK_URL }}
+      FEISHU_POTENTIAL_WEBHOOK_SECRET: ${{ secrets.FEISHU_POTENTIAL_WEBHOOK_SECRET }}
       RECAP_TASK: ${{ github.event.inputs.task || 'daily' }}
       RECAP_DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
 
@@ -61,7 +64,11 @@ jobs:
       - name: Preflight secrets
         run: |
           missing=0
-          for name in TUSHARE_TOKEN ANTHROPIC_API_KEY; do
+          required_names=(TUSHARE_TOKEN)
+          if [ "$RECAP_TASK" != "potential" ]; then
+            required_names+=(ANTHROPIC_API_KEY)
+          fi
+          for name in "${required_names[@]}"; do
             if [ -z "${!name}" ]; then
               echo "::error::Missing required secret $name"
               missing=1
@@ -73,6 +80,7 @@ jobs:
           exit "$missing"
 
       - name: Claude Code recap orchestration
+        if: env.RECAP_TASK != 'potential'
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -99,6 +107,10 @@ jobs:
             Leave the generated HTML/CSV/JSON and card under artifacts/reports/recap-active-sectors.
           claude_args: |
             --allowedTools Bash
+
+      - name: Potential stock recap chain
+        if: env.RECAP_TASK == 'potential'
+        run: python3 scripts/run_recap.py --task potential --output-dir artifacts/reports
 
       - name: Upload recap artifacts
         if: always()
