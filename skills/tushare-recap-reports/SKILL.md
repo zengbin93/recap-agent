@@ -5,10 +5,10 @@ description: Generate Tushare-based first-double and tenbagger watch recap repor
 
 # Tushare Recap Reports
 
-Use this skill for the Tushare stock recap chain from PR #1:
+Use this skill for the Tushare stock recap chain:
 
-- `first-double`: screen A-share stocks whose recent half-year price move has doubled.
-- `tenbagger-watch`: score the first-double pool for second-stage tenbagger follow-up.
+- `first-double`: build the eligible A-share research universe and separately mark stocks whose recent half-year price move has doubled.
+- `tenbagger-watch`: score the full eligible A-share universe for potential-stock follow-up.
 - `full-chain`: run both reports in sequence.
 
 The skill is self-contained under `skills/tushare-recap-reports` and writes HTML,
@@ -38,12 +38,15 @@ For an explicit raw-price comparison or a different coverage threshold:
 python3 skills/tushare-recap-reports/scripts/run.py first-double --price-mode raw --min-trading-days 100
 ```
 
-The second-stage report is a scored research queue, not a tenbagger prediction.
-The current scoring version is `v3.0-quality-setup`. It combines the existing
-price/liquidity screen with point-in-time financial quality, valuation safety
-margin, benchmark market regime, sector stage, and multi-timeframe pullback
-structure. Each candidate also carries an archetype, `why_now`, first rejection
-point, and thesis-kill condition.
+The potential-stock report is a scored research queue, not a tenbagger
+prediction. The current scoring version is `v4.0-full-universe`. It starts from
+the full eligible A-share universe (active A shares, non-ST, sufficient trading
+history) and combines trend stage, liquidity, industry breadth, point-in-time
+financial quality, valuation safety margin, benchmark market regime, and
+multi-timeframe pullback structure. The half-year-double list remains a
+separate retrospective validation sample; it is not an entry condition for the
+research pool. Each candidate also carries an archetype, `why_now`, first
+rejection point, and thesis-kill condition.
 
 The A tier is gated: a candidate needs both verified quality and a usable setup.
 Names outside the fundamental fetch window remain explicitly unverified rather
@@ -58,9 +61,17 @@ Tushare `fina_indicator` evidence as of the report cutoff date; future-announced
 rows are excluded to avoid look-ahead leakage. Missing permissions or missing
 filings are shown as warnings instead of being treated as a reason for the rise.
 
+The technical ranking runs across the full universe using the daily-market cache.
+To keep the job within the GitHub Actions time budget, point-in-time
+`fina_indicator` evidence is refreshed only for the top 80 pre-financial names;
+the rest are explicitly not eligible for A/B priority until that evidence is
+available.
+
 When run through the `potential` GitHub Actions task, the card is sent after the
-report chain succeeds. `FEISHU_POTENTIAL_WEBHOOK_URL` is preferred; when it is
-not configured, the existing daily webhook is used as the fallback target.
+report chain succeeds. The card explicitly distinguishes full-A-share coverage,
+the final research queue, and the half-year-strong replay sample.
+`FEISHU_POTENTIAL_WEBHOOK_URL` is preferred; when it is not configured, the
+existing daily webhook is used as the fallback target.
 
 Default output directory: `artifacts/reports/tushare-recap-reports`.
 Default Tushare cache directory: `artifacts/cache/tushare`.

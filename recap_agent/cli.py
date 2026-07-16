@@ -139,7 +139,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output-dir", default="artifacts/reports")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--trade-date")
-    parser.add_argument("--potential-min-pct-change", type=float, default=100.0)
+    parser.add_argument(
+        "--potential-min-pct-change",
+        type=float,
+        default=100.0,
+        help="Minimum six-month gain for the replay sample; full A-share screening remains enabled",
+    )
     parser.add_argument("--potential-min-trading-days", type=int, default=80)
     args = parser.parse_args(argv)
     result = run_task(

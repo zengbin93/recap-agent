@@ -9,7 +9,7 @@ on:
         default: ""
         type: string
       min_pct_change:
-        description: "Minimum six-month gain percentage"
+        description: "Minimum six-month gain for the replay sample (not the research-pool entry gate)"
         required: true
         default: "100"
         type: string
