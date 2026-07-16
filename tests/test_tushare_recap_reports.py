@@ -5,6 +5,10 @@ from datetime import date
 from pathlib import Path
 import importlib.util
 import sys
+from types import SimpleNamespace
+from unittest.mock import patch
+
+from recap_agent import cli
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -316,6 +320,63 @@ class TushareRecapReportsTests(unittest.TestCase):
         self.assertNotIn("为什么现在", content)
         self.assertNotIn("第一拒绝点", content)
         self.assertNotIn("次级丙", content)
+
+    def test_full_chain_writes_every_report_into_one_output_directory(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output_dir = Path(tmp) / "tushare-recap-reports"
+            first_json = output_dir / "first_double" / "latest.json"
+            watch_json = output_dir / "tenbagger_watch" / "latest.json"
+            first_json.parent.mkdir(parents=True)
+            watch_json.parent.mkdir(parents=True)
+            first_json.write_text(
+                json.dumps({"candidate_count": 0, "candidates": []}),
+                encoding="utf-8",
+            )
+            watch_json.write_text(
+                json.dumps(
+                    {
+                        "watch_count": 0,
+                        "core_count": 0,
+                        "market_regime": "市场数据不足",
+                        "candidates": [],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            args = SimpleNamespace(output_dir=output_dir, source_report=None)
+            with patch.object(
+                run,
+                "run_first_double",
+                return_value={"json": str(first_json)},
+            ), patch.object(
+                run,
+                "run_tenbagger_watch",
+                return_value={"json": str(watch_json)},
+            ):
+                result = run.run_full_chain(args)
+
+            self.assertEqual(
+                result["card"], str(output_dir / "latest-card.json")
+            )
+            self.assertTrue((output_dir / "latest-card.json").exists())
+
+    def test_potential_task_passes_the_same_report_directory_to_full_chain(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output_dir = Path(tmp) / "reports"
+            report_dir = output_dir / "tushare-recap-reports"
+            report_dir.mkdir(parents=True)
+            (report_dir / "latest-card.json").write_text(
+                json.dumps({"msg_type": "interactive"}), encoding="utf-8"
+            )
+            with patch("recap_agent.cli.subprocess.run") as run_command, patch(
+                "recap_agent.cli.FeishuConfig.from_env",
+                side_effect=ValueError("no test webhook"),
+            ):
+                cli.run_potential_task(str(output_dir), dry_run=True)
+
+            command = run_command.call_args.args[0]
+            output_dir_index = command.index("--output-dir") + 1
+            self.assertEqual(command[output_dir_index], str(report_dir))
 
     def test_watch_uses_full_research_universe_not_only_double_sample(self):
         source = {

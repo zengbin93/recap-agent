@@ -2089,7 +2089,7 @@ def run_full_chain(args: argparse.Namespace) -> dict[str, Any]:
     first = run_first_double(args)
     args.source_report = Path(first["json"])
     watch = run_tenbagger_watch(args)
-    card_path = args.output_dir / "tushare-recap-reports" / "latest-card.json"
+    card_path = args.output_dir / "latest-card.json"
     first_report = json.loads(Path(first["json"]).read_text(encoding="utf-8"))
     watch_report = json.loads(Path(watch["json"]).read_text(encoding="utf-8"))
     write_text(

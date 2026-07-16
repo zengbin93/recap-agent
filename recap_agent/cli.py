@@ -41,7 +41,7 @@ def run_potential_task(
         str(repo_root / "skills" / "tushare-recap-reports" / "scripts" / "run.py"),
         "full-chain",
         "--output-dir",
-        str(output_dir),
+        str(report_dir),
         "--progress",
         "--min-pct-change",
         str(min_pct_change),
