@@ -1,0 +1,7 @@
+interface:
+  display_name: "港股周复盘"
+  short_description: "基于交易日南向资金与市场宽度的港股每周研究复盘能力"
+  default_prompt: "Use $recap-hk-weekly to generate the current Hong Kong weekly market recap."
+
+policy:
+  allow_implicit_invocation: true
