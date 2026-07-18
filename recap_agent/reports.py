@@ -15,6 +15,50 @@ class ReportResult:
     snapshot: dict[str, Any] = field(default_factory=dict)
 
 
+# 板块到常用行业 ETF 的静态映射字典
+SECTOR_TO_ETF = {
+    "银行": "银行ETF (512800)",
+    "电力": "电力ETF (561560)",
+    "元器件": "电子ETF (515260)",
+    "半导体": "半导体ETF (512480)",
+    "芯片": "芯片ETF (159995)",
+    "存储芯片": "科创芯片ETF (588200)",
+    "光伏": "光伏ETF (515790)",
+    "新能源车": "新能源车ETF (515030)",
+    "白酒": "酒ETF (512690)",
+    "证券": "证券ETF (512880)",
+    "券商": "证券ETF (512880)",
+    "军工": "军工ETF (512660)",
+    "计算机": "计算机ETF (512720)",
+    "共封装光学": "5G通信ETF (515050)",
+    "通信": "5G通信ETF (515050)",
+    "人工智能": "AI.ETF (512930)",
+    "软件": "软件ETF (515220)",
+    "医药": "医药ETF (512010)",
+    "有色": "有色金属ETF (512400)",
+    "钢铁": "钢铁ETF (515290)",
+    "煤炭": "煤炭ETF (515200)",
+    "地产": "房地产ETF (512200)",
+    "游戏": "游戏ETF (159869)",
+    "传媒": "传媒ETF (512980)",
+    "酿酒": "酒ETF (512690)",
+    "消费": "消费ETF (159928)",
+    "电子": "电子ETF (515260)",
+    "黄金": "黄金ETF (518880)",
+    "汽车": "汽车ETF (516110)",
+    "家电": "龙头家电ETF (159730)",
+    "农业": "农业ETF (159825)",
+}
+
+
+def get_matched_etf(sector_name: str) -> str:
+    """模糊匹配板块所对应的 ETF"""
+    for key, val in SECTOR_TO_ETF.items():
+        if key in sector_name or sector_name in key:
+            return val
+    return "暂无匹配ETF"
+
+
 def _process_stealth_flow(rows: list[Mapping[str, Any]]) -> dict[str, list[dict[str, Any]]]:
     # 提取主力净流入额和涨幅
     cleaned = []
@@ -60,7 +104,8 @@ def _process_stealth_flow(rows: list[Mapping[str, Any]]) -> dict[str, list[dict[
             "板块名称": c["industry"],
             "主力净流入 (亿元)": f"{c['net_amount']:.2f}",
             "今日涨幅": f"{c['pct_change']:.2f}%" if c["pct_change"] is not None else "—",
-            "领涨个股": c["lead_stock"]
+            "领涨个股": c["lead_stock"],
+            "对应ETF": get_matched_etf(c["industry"])
         })
         
     # 2. 净流出排行 (升序)
@@ -72,7 +117,8 @@ def _process_stealth_flow(rows: list[Mapping[str, Any]]) -> dict[str, list[dict[
             "板块名称": c["industry"],
             "主力净流出 (亿元)": f"{abs(c['net_amount']):.2f}",
             "今日涨幅": f"{c['pct_change']:.2f}%" if c["pct_change"] is not None else "—",
-            "领涨个股": c["lead_stock"]
+            "领涨个股": c["lead_stock"],
+            "对应ETF": get_matched_etf(c["industry"])
         })
         
     # 3. 主力潜伏（悄悄建仓）板块 (默认使用回测出的最优经验保底参数：净买入 > 5.0亿 且 0.0% <= 涨幅 <= 3.0%)
@@ -102,15 +148,16 @@ def _process_stealth_flow(rows: list[Mapping[str, Any]]) -> dict[str, list[dict[
             "板块名称": c["industry"],
             "主力净买入 (亿元)": f"{c['net_amount']:.2f}",
             "今日涨幅": f"{c['pct_change']:.2f}%",
-            "领涨个股": c["lead_stock"]
+            "领涨个股": c["lead_stock"],
+            "对应ETF": get_matched_etf(c["industry"])
         })
         
     return {
         "top_inflows": top_inflows,
         "top_outflows": top_outflows,
         "stealth_inflows": stealth_inflows,
-        "raw_top_inflows": [x["raw_row"] for x in inflows_sorted[:5]],
-        "raw_stealth_inflows": [x["raw_row"] for x in stealth_sorted[:5]]
+        "raw_top_inflows": [x for x in inflows_sorted[:5]],
+        "raw_stealth_inflows": [x for x in stealth_sorted[:5]]
     }
 
 
@@ -142,15 +189,27 @@ def render_recap_report(
         extra_sections += _render_table("主力资金净流出排行 (Top 5)", rankings["top_outflows"])
         extra_sections += _render_table("主力潜伏板块 (资金悄悄建仓)", rankings["stealth_inflows"])
         
-        # 飞书卡片主力流向文本提炼
-        inflow_txt = "、".join(
-            f"{x.get('industry') or x.get('name') or '未知'}(+{float(x.get('net_amount') or x.get('net_amt') or 0.0):.1f}亿)"
-            for x in rankings["raw_top_inflows"][:3]
-        )
-        stealth_txt = "、".join(
-            f"{x.get('industry') or x.get('name') or '未知'}(+{float(x.get('net_amount') or x.get('net_amt') or 0.0):.1f}亿, 涨{float(x.get('pct_change') or x.get('pct_chg') or 0.0):.1f}%)"
-            for x in rankings["raw_stealth_inflows"][:3]
-        )
+        # 飞书卡片主力流向文本提炼 (集成个股及 ETF 推荐)
+        inflow_items = []
+        for x in rankings["raw_top_inflows"][:3]:
+            name = x.get('industry') or x.get('name') or '未知'
+            amt = float(x.get('net_amount') or x.get('net_amt') or 0.0)
+            lead = x.get('lead_stock') or x.get('lead') or '—'
+            etf = get_matched_etf(name)
+            etf_str = f" | ETF: {etf}" if etf != "暂无匹配ETF" else ""
+            inflow_items.append(f"{name}(+{amt:.1f}亿 | 领涨: {lead}{etf_str})")
+        inflow_txt = "、".join(inflow_items)
+
+        stealth_items = []
+        for x in rankings["raw_stealth_inflows"][:3]:
+            name = x.get('industry') or x.get('name') or '未知'
+            amt = float(x.get('net_amount') or x.get('net_amt') or 0.0)
+            pct = float(x.get('pct_change') or x.get('pct_chg') or 0.0)
+            lead = x.get('lead_stock') or x.get('lead') or '—'
+            etf = get_matched_etf(name)
+            etf_str = f" | ETF: {etf}" if etf != "暂无匹配ETF" else ""
+            stealth_items.append(f"{name}(+{amt:.1f}亿, 涨{pct:.1f}% | 领涨: {lead}{etf_str})")
+        stealth_txt = "、".join(stealth_items)
         
         stealth_summary_md = f"🔥 **今日主力净买入前三**：{inflow_txt or '无'}\n"
         if stealth_txt:
