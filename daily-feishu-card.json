@@ -1,0 +1,62 @@
+{
+  "msg_type": "interactive",
+  "card": {
+    "config": {
+      "wide_screen_mode": true
+    },
+    "header": {
+      "title": {
+        "tag": "plain_text",
+        "content": "全球市场日报"
+      }
+    },
+    "elements": [
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "**区间**: 20260717\n**市场状态**: 偏弱\n**生成时间**: 2026-07-18T10:31:03+00:00"
+        }
+      },
+      {
+        "tag": "hr"
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "🔥 **今日主力净买入前三**：银行(+43.0亿)、元件(+32.0亿)、电力(+24.0亿)\n🕵️ **主力暗中建仓（潜伏）板块**：银行(+43.0亿, 涨0.4%)、电力(+24.0亿, 涨1.2%)\n"
+        }
+      },
+      {
+        "tag": "hr"
+      },
+      {
+        "tag": "div",
+        "text": {
+          "tag": "lark_md",
+          "content": "- 市场状态: 偏弱\n- A股上涨/下跌/平盘: 482/5001/39\n- A股样本: 5522\n- 主要指数: 8 条，来源 tushare，原始返回 8000 条\n- 板块资金流: 90 条，来源 tushare\n- A股日行情: 5522 条，来源 tushare"
+        }
+      },
+      {
+        "tag": "action",
+        "actions": [
+          {
+            "tag": "button",
+            "text": {
+              "tag": "plain_text",
+              "content": "🌐 查看网页版详细报告"
+            },
+            "type": "primary",
+            "multi_url": {
+              "url": "https://zengbin93.github.io/recap-agent/daily-recap.html",
+              "android_url": "https://zengbin93.github.io/recap-agent/daily-recap.html",
+              "ios_url": "https://zengbin93.github.io/recap-agent/daily-recap.html",
+              "pc_url": "https://zengbin93.github.io/recap-agent/daily-recap.html"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "task": "daily",
+  "title": "全球市场日报",
+  "generated_at": "2026-07-18T10:31:03+00:00",
+  "period": {
+    "task": "daily",
+    "start_date": "20260717",
+    "end_date": "20260717"
+  },
+  "summary": {
+    "trend": "偏弱",
+    "positive_rows": 482,
+    "negative_rows": 5001,
+    "flat_rows": 39,
+    "stock_count": 5522,
+    "breadth_basis": "a_share_daily",
+    "total_rows": 5620
+  },
+  "top_gainers": [
+    {
+      "dataset": "a_share_daily",
+      "label": "920305.BJ",
+      "pct_change": 29.49
+    },
+    {
+      "dataset": "a_share_daily",
+      "label": "300795.SZ",
+      "pct_change": 20.05
+    },
+    {
+      "dataset": "a_share_daily",
+      "label": "300577.SZ",
+      "pct_change": 19.98
+    },
+    {
+      "dataset": "a_share_daily",
+      "label": "300317.SZ",
+      "pct_change": 16.01
+    },
+    {
+      "dataset": "a_share_daily",
+      "label": "301609.SZ",
+      "pct_change": 14.67
+    }
+  ],
+  "top_losers": [
+    {
+      "dataset": "a_share_daily",
+      "label": "920117.BJ",
+      "pct_change": -22.24
+    },
+    {
+      "dataset": "a_share_daily",
+      "label": "300137.SZ",
+      "pct_change": -20.03
+    },
+    {
+      "dataset": "a_share_daily",
+      "label": "300688.SZ",
+      "pct_change": -20.02
+    },
+    {
+      "dataset": "a_share_daily",
+      "label": "688371.SH",
+      "pct_change": -20.01
+    },
+    {
+      "dataset": "a_share_daily",
+      "label": "688218.SH",
+      "pct_change": -20.01
+    }
+  ],
+  "datasets": {
+    "indices": {
+      "rows": 8,
+      "label": "主要指数",
+      "source": "tushare",
+      "warning": null,
+      "raw_rows": 8000
+    },
+    "hot_sectors": {
+      "rows": 90,
+      "label": "板块资金流",
+      "source": "tushare",
+      "warning": null,
+      "raw_rows": 90
+    },
+    "a_share_daily": {
+      "rows": 5522,
+      "label": "A股日行情",
+      "source": "tushare",
+      "warning": null,
+      "raw_rows": 5522
+    }
+  }
+}
