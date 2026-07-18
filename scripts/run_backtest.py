@@ -278,15 +278,16 @@ def run_grid_search(engine: BacktestEngine, start_date: str, end_date: str, repo
     if not trade_dates:
         raise ValueError("Calendar is empty.")
 
-    # Parameters grid
-    min_amounts = [0.2, 0.5, 1.0, 1.5]
+    # Parameters grid - expanded for stronger inflows and tighter price deviations
+    min_amounts = [1.0, 2.0, 3.0, 5.0]
     pct_ranges = [
         (-1.5, 1.0),
-        (-1.5, 2.0),
-        (-1.0, 1.5),
-        (-1.0, 2.0),
+        (-1.0, 1.0),
+        (-0.5, 0.5),
         (-0.5, 1.5),
+        (0.0, 1.5),
         (0.0, 2.0),
+        (0.0, 3.0),
     ]
     hold_days = [3, 5, 10]
 
