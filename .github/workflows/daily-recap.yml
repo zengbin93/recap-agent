@@ -23,7 +23,7 @@ on:
         type: boolean
 
 permissions:
-  contents: read
+  contents: write  # 需要写权限来发布 gh-pages
   id-token: write  # claude-code-action 需要 OIDC token
 
 jobs:
@@ -48,6 +48,7 @@ jobs:
       FEISHU_POTENTIAL_WEBHOOK_SECRET: ${{ secrets.FEISHU_POTENTIAL_WEBHOOK_SECRET }}
       RECAP_TASK: ${{ github.event.inputs.task || 'daily' }}
       RECAP_DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+      RECAP_PAGES_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
 
     steps:
       - name: Checkout
@@ -121,3 +122,11 @@ jobs:
             artifacts/reports/**
             artifacts/cache/**
           if-no-files-found: warn
+
+      - name: Deploy to GitHub Pages
+        if: always() && env.RECAP_DRY_RUN != 'true'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./artifacts/reports
+          keep_files: true

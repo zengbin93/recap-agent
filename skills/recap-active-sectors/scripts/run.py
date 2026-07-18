@@ -806,6 +806,15 @@ def write_csv_report(report: ActiveSectorsReport, path: Path) -> None:
 def render_html(report: ActiveSectorsReport) -> str:
     rows = []
     for s in report.sectors:
+        if not s.quote_available:
+            flow_tag_html = "<span style='display:inline; color:#667085; font-weight:bold; margin-left:8px;'>[方向未知]</span>"
+        elif s.today_pct > 0:
+            flow_tag_html = "<span style='display:inline; color:#b42318; font-weight:bold; margin-left:8px;'>[主力流入]</span>"
+        elif s.today_pct < 0:
+            flow_tag_html = "<span style='display:inline; color:#17b423; font-weight:bold; margin-left:8px;'>[主力流出]</span>"
+        else:
+            flow_tag_html = "<span style='display:inline; color:#667085; font-weight:bold; margin-left:8px;'>[多空平衡]</span>"
+
         reps = "".join(
             f"<li><strong>{escape(r.name)}</strong> 今日 {fmt_pct(r.pct_chg)} / {report.recent_days}日 {fmt_pct(r.recent_pct)}"
             f"<span>{escape(r.ts_code)} · 成交 {r.amount_yi:g} 亿</span></li>"
@@ -833,7 +842,7 @@ def render_html(report: ActiveSectorsReport) -> str:
         rows.append(
             "<tr>"
             f"<td>{s.rank}</td>"
-            f"<td><strong>{escape(s.name)}</strong><span>{escape(s.index_code)} · {escape(s.type_label)} · {change}</span>{merged}</td>"
+            f"<td><strong>{escape(s.name)}</strong>{flow_tag_html}<span>{escape(s.index_code)} · {escape(s.type_label)} · {change}</span>{merged}</td>"
             f"<td class='gain'>{activity}</td>"
             f"<td>{quote}</td>"
             f"<td>{escape('、'.join(s.hit_stocks))}</td>"
@@ -904,6 +913,15 @@ def _color_pct(value: float) -> str:
 
 def _sector_row(s: "ActiveSector", recent_days: int, shaded: bool) -> dict[str, Any]:
     """一个板块 = 一行两列 column_set：左侧板块/代表股，右侧今日/近N日涨跌。"""
+    if not s.quote_available:
+        flow_tag = "<font color='grey'>【方向未知】</font>"
+    elif s.today_pct > 0:
+        flow_tag = "<font color='red'>【主力流入】</font>"
+    elif s.today_pct < 0:
+        flow_tag = "<font color='green'>【主力流出】</font>"
+    else:
+        flow_tag = "<font color='grey'>【多空平衡】</font>"
+
     reps = " · ".join(r.name for r in s.representatives[:3]) or "—"
     history = (
         f"较前{max(recent_days - 1, 1)}日均值 {s.hit_change:+.1f}"
@@ -916,7 +934,7 @@ def _sector_row(s: "ActiveSector", recent_days: int, shaded: bool) -> dict[str, 
         else ""
     )
     left = (
-        f"**{s.rank}. {s.name}**　<font color='grey'>{s.type_label} · 命中 {s.hit_count}/{s.sector_size or '—'} · 覆盖 {s.coverage_pct:.1f}%</font>\n"
+        f"**{s.rank}. {s.name}** {flow_tag}　<font color='grey'>{s.type_label} · 命中 {s.hit_count}/{s.sector_size or '—'} · 覆盖 {s.coverage_pct:.1f}%</font>\n"
         f"<font color='grey'>榜内成交</font> {s.turnover_yi:g} 亿（{s.turnover_share_pct:.1f}%） · {history}\n"
         f"<font color='grey'>代表</font> {reps}{merged}"
     )
@@ -965,6 +983,28 @@ def build_feishu_card(report: ActiveSectorsReport, *, top: int = 10) -> dict[str
         rows = [{"tag": "div", "text": {"tag": "lark_md", "content": "今日无满足阈值的活跃板块。"}}]
 
     elements: list[dict[str, Any]] = [overview, {"tag": "hr"}, *rows, {"tag": "hr"}]
+    pages_url = os.environ.get("RECAP_PAGES_URL")
+    if pages_url:
+        base_url = pages_url.rstrip("/")
+        report_url = f"{base_url}/recap-active-sectors/latest.html"
+        elements.append(
+            {
+                "tag": "action",
+                "actions": [
+                    {
+                        "tag": "button",
+                        "text": {"tag": "plain_text", "content": "🌐 查看网页版详细报告"},
+                        "type": "primary",
+                        "multi_url": {
+                            "url": report_url,
+                            "android_url": report_url,
+                            "ios_url": report_url,
+                            "pc_url": report_url,
+                        }
+                    }
+                ]
+            }
+        )
     elements.append(
         {
             "tag": "note",
