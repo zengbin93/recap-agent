@@ -5,6 +5,10 @@ from datetime import date
 from pathlib import Path
 import importlib.util
 import sys
+from types import SimpleNamespace
+from unittest.mock import patch
+
+from recap_agent import cli
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -151,6 +155,8 @@ class TushareRecapReportsTests(unittest.TestCase):
         )
 
         self.assertEqual(report.stock_count, 2)
+        self.assertEqual(report.universe_count, 1)
+        self.assertEqual(report.research_universe[0].ts_code, "600000.SH")
         self.assertEqual(report.candidate_count, 1)
         self.assertEqual(report.candidates[0].ts_code, "600000.SH")
         self.assertEqual(report.price_mode, "qfq")
@@ -258,6 +264,232 @@ class TushareRecapReportsTests(unittest.TestCase):
         content = json.dumps(card, ensure_ascii=False)
         self.assertIn("复权覆盖率不足", content)
         self.assertIn("Alpha", content)
+
+    def test_feishu_card_prioritizes_conclusion_and_research_candidates(self):
+        card = run.build_feishu_card(
+            {
+                "candidate_count": 151,
+                "candidates": [
+                    {
+                        "name": "回放甲",
+                        "ts_code": "600000.SH",
+                        "pct_change": 480,
+                    }
+                ],
+            },
+            {
+                "watch_count": 80,
+                "core_count": 0,
+                "full_universe_count": 5316,
+                "input_count": 5298,
+                "market_regime": "偏弱",
+                "candidates": [
+                    {
+                        "rank": 1,
+                        "name": "优先乙",
+                        "ts_code": "688001.SH",
+                        "tier": "B 重点观察",
+                        "archetype": "趋势龙头回踩",
+                        "industry": "半导体",
+                        "quality_score": 21,
+                        "setup_score": 25,
+                        "rise_drivers": ["行业共振", "成交活跃度抬升"],
+                        "financial_evidence": ["20260331净利润同比 +35.2%"],
+                        "first_rejection": "第一拒绝点：离高点过近，等待回踩",
+                    },
+                    {
+                        "rank": 2,
+                        "name": "次级丙",
+                        "ts_code": "000001.SZ",
+                        "tier": "C 观察名单",
+                    },
+                ],
+            },
+        )
+
+        content = json.dumps(card, ensure_ascii=False)
+
+        self.assertEqual(card["card"]["header"]["template"], "orange")
+        self.assertIn("本期结论｜市场偏弱｜暂无 A 级核心", content)
+        self.assertIn("本期优先研究", content)
+        self.assertIn("全量A股 5316", content)
+        self.assertIn("入围跟踪 80", content)
+        self.assertIn("优先乙", content)
+        self.assertIn("暂缓条件", content)
+        self.assertIn("半年强势回放", content)
+        self.assertNotIn("为什么现在", content)
+        self.assertNotIn("第一拒绝点", content)
+        self.assertNotIn("次级丙", content)
+
+    def test_full_chain_writes_every_report_into_one_output_directory(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output_dir = Path(tmp) / "tushare-recap-reports"
+            first_json = output_dir / "first_double" / "latest.json"
+            watch_json = output_dir / "tenbagger_watch" / "latest.json"
+            first_json.parent.mkdir(parents=True)
+            watch_json.parent.mkdir(parents=True)
+            first_json.write_text(
+                json.dumps({"candidate_count": 0, "candidates": []}),
+                encoding="utf-8",
+            )
+            watch_json.write_text(
+                json.dumps(
+                    {
+                        "watch_count": 0,
+                        "core_count": 0,
+                        "market_regime": "市场数据不足",
+                        "candidates": [],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            args = SimpleNamespace(output_dir=output_dir, source_report=None)
+            with patch.object(
+                run,
+                "run_first_double",
+                return_value={"json": str(first_json)},
+            ), patch.object(
+                run,
+                "run_tenbagger_watch",
+                return_value={"json": str(watch_json)},
+            ):
+                result = run.run_full_chain(args)
+
+            self.assertEqual(
+                result["card"], str(output_dir / "latest-card.json")
+            )
+            self.assertTrue((output_dir / "latest-card.json").exists())
+
+    def test_potential_task_passes_the_same_report_directory_to_full_chain(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output_dir = Path(tmp) / "reports"
+            report_dir = output_dir / "tushare-recap-reports"
+            report_dir.mkdir(parents=True)
+            (report_dir / "latest-card.json").write_text(
+                json.dumps({"msg_type": "interactive"}), encoding="utf-8"
+            )
+            with patch("recap_agent.cli.subprocess.run") as run_command, patch(
+                "recap_agent.cli.FeishuConfig.from_env",
+                side_effect=ValueError("no test webhook"),
+            ):
+                cli.run_potential_task(str(output_dir), dry_run=True)
+
+            command = run_command.call_args.args[0]
+            output_dir_index = command.index("--output-dir") + 1
+            self.assertEqual(command[output_dir_index], str(report_dir))
+
+    def test_watch_uses_full_research_universe_not_only_double_sample(self):
+        source = {
+            "price_mode": "raw",
+            "stock_count": 2,
+            "start_trade_date": "20260709",
+            "end_trade_date": "20260710",
+            "candidates": [
+                {
+                    "rank": 1,
+                    "ts_code": "600000.SH",
+                    "name": "复盘翻倍股",
+                    "industry": "软件服务",
+                    "market": "主板",
+                    "pct_change": 250,
+                    "pullback_from_high": -10,
+                    "industry_pct_change": 20,
+                    "industry_breadth_pct": 60,
+                    "amount_change_pct": 30,
+                    "recent_avg_amount_yi": 2,
+                    "positive_days_ratio": 60,
+                }
+            ],
+            "research_universe": [
+                {
+                    "rank": 1,
+                    "ts_code": "600000.SH",
+                    "name": "复盘翻倍股",
+                    "industry": "软件服务",
+                    "market": "主板",
+                    "pct_change": 250,
+                    "pullback_from_high": -10,
+                    "industry_pct_change": 20,
+                    "industry_breadth_pct": 60,
+                    "amount_change_pct": 30,
+                    "recent_avg_amount_yi": 2,
+                    "positive_days_ratio": 60,
+                },
+                {
+                    "rank": 2,
+                    "ts_code": "300000.SZ",
+                    "name": "早期趋势股",
+                    "industry": "软件服务",
+                    "market": "创业板",
+                    "pct_change": 40,
+                    "pullback_from_high": -10,
+                    "industry_pct_change": 20,
+                    "industry_breadth_pct": 60,
+                    "amount_change_pct": 30,
+                    "recent_avg_amount_yi": 2,
+                    "positive_days_ratio": 60,
+                },
+            ],
+        }
+
+        def daily(params):
+            ts_code = params["ts_code"]
+            end_close = 35 if ts_code == "600000.SH" else 14
+            return [
+                {"ts_code": ts_code, "trade_date": "20260709", "close": 10},
+                {"ts_code": ts_code, "trade_date": "20260710", "close": end_close},
+            ]
+
+        client = FakeTushareClient(
+            {
+                "daily_basic": [
+                    {
+                        "ts_code": "600000.SH",
+                        "turnover_rate_f": 5,
+                        "volume_ratio": 1,
+                        "pe_ttm": 20,
+                        "pb": 2,
+                        "total_mv": 1000000,
+                        "circ_mv": 500000,
+                    },
+                    {
+                        "ts_code": "300000.SZ",
+                        "turnover_rate_f": 5,
+                        "volume_ratio": 1,
+                        "pe_ttm": 20,
+                        "pb": 2,
+                        "total_mv": 1000000,
+                        "circ_mv": 500000,
+                    },
+                ],
+                "daily": daily,
+                "fina_indicator": [
+                    {
+                        "end_date": "20260331",
+                        "ann_date": "20260430",
+                        "netprofit_yoy": 40,
+                        "op_yoy": 30,
+                        "roe": 16,
+                        "ocf_yoy": 10,
+                        "grossprofit_margin": 30,
+                    }
+                ],
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as tmp:
+            report = run.build_watch_report(
+                source,
+                client=client,
+                source_report=Path(tmp) / "source.json",
+                cache_dir=Path(tmp) / "cache",
+            )
+
+        self.assertEqual(report.full_universe_count, 2)
+        self.assertEqual(report.input_count, 2)
+        self.assertEqual(report.strong_sample_count, 1)
+        self.assertEqual(report.candidates[0].ts_code, "300000.SZ")
+        self.assertEqual(report.candidates[0].tier, "B 重点观察")
 
     def test_fundamental_evidence_is_rendered_from_latest_indicator_row(self):
         client = FakeTushareClient(

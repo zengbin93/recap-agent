@@ -21,7 +21,7 @@ DEFAULT_CACHE_DIR = PROJECT_ROOT / "artifacts" / "cache" / "tushare"
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "artifacts" / "reports" / "tushare-recap-reports"
 DEFAULT_TUSHARE_URL = "http://api.tushare.pro"
 DATE_FMT = "%Y%m%d"
-SCORING_VERSION = "v3.0-quality-setup"
+SCORING_VERSION = "v4.0-full-universe"
 FUNDAMENTAL_FETCH_LIMIT = 80
 FUNDAMENTAL_PENDING_DRIVER = f"财务质量证据仅对排序前 {FUNDAMENTAL_FETCH_LIMIT} 名补拉"
 A_SHARE_MARKETS = {"主板", "创业板", "科创板", "北交所"}
@@ -182,6 +182,8 @@ class FirstDoubleReport:
     min_trading_days: int = 80
     adjustment_coverage: float = 0.0
     data_warnings: list[str] = field(default_factory=list)
+    universe_count: int = 0
+    research_universe: list[FirstDoubleCandidate] = field(default_factory=list)
 
 
 @dataclass
@@ -254,6 +256,8 @@ class WatchReport:
     candidates: list[WatchCandidate] = field(default_factory=list)
     market_regime: str = "市场数据不足"
     market_evidence: str = ""
+    full_universe_count: int = 0
+    strong_sample_count: int = 0
 
 
 THEME_SCORES: dict[str, tuple[int, str]] = {
@@ -624,7 +628,7 @@ def build_first_double_report(
                 )
 
     industry_stats = industry_stats_for_prices(by_stock, stock_basic, min_trading_days)
-    candidates: list[FirstDoubleCandidate] = []
+    research_universe: list[FirstDoubleCandidate] = []
     for ts_code, prices in by_stock.items():
         prices.sort(key=lambda item: str(item["trade_date"]))
         if len(prices) < min_trading_days or parse_float(prices[0].get("close")) <= 0:
@@ -634,10 +638,6 @@ def build_first_double_report(
         end_trade_date = str(prices[-1]["trade_date"])
         end_close = parse_float(prices[-1].get("close"))
         pct_change = (end_close / start_close - 1.0) * 100.0
-        if pct_change < min_pct_change or (
-            max_pct_change is not None and pct_change > max_pct_change
-        ):
-            continue
         max_point = max(prices, key=lambda item: parse_float(item.get("close")))
         max_trade_date = str(max_point["trade_date"])
         max_close = parse_float(max_point.get("close"))
@@ -645,7 +645,7 @@ def build_first_double_report(
         industry = str(basic.get("industry") or "行业未标注")
         activity = price_activity_metrics(prices)
         industry_stat = industry_stats.get(industry, {})
-        candidates.append(
+        research_universe.append(
             FirstDoubleCandidate(
                 rank=0,
                 ts_code=ts_code,
@@ -672,9 +672,18 @@ def build_first_double_report(
             )
         )
 
-    candidates.sort(key=lambda item: item.pct_change, reverse=True)
-    for index, candidate in enumerate(candidates, start=1):
+    research_universe.sort(key=lambda item: item.pct_change, reverse=True)
+    for index, candidate in enumerate(research_universe, start=1):
         candidate.rank = index
+    candidates = [
+        candidate
+        for candidate in research_universe
+        if candidate.pct_change >= min_pct_change
+        and (
+            max_pct_change is None
+            or candidate.pct_change <= max_pct_change
+        )
+    ]
 
     if adjustment_warning_samples:
         data_warnings.extend(adjustment_warning_samples)
@@ -713,6 +722,8 @@ def build_first_double_report(
         min_trading_days=min_trading_days,
         adjustment_coverage=adjustment_coverage,
         data_warnings=list(dict.fromkeys(data_warnings)),
+        universe_count=len(research_universe),
+        research_universe=research_universe,
     )
 
 
@@ -1115,13 +1126,26 @@ def what_would_kill() -> str:
 
 
 def stage_score(pct_change: float) -> int:
-    if 120 <= pct_change <= 350:
+    """Reward emerging and established trends without making a double a gate.
+
+    The potential-stock queue starts from all eligible A shares. A 20%-120%
+    six-month gain is often earlier in the trend than a name that has already
+    doubled, so it receives the highest stage credit. The buy-point score still
+    controls whether a strong trend is actionable rather than overheated.
+    """
+    if 20 <= pct_change <= 120:
         return 25
-    if 100 <= pct_change < 120:
+    if 5 <= pct_change < 20:
+        return 18
+    if -10 <= pct_change < 5:
         return 15
-    if 350 < pct_change <= 500:
+    if 120 < pct_change <= 250:
         return 12
-    return 5
+    if 250 < pct_change:
+        return 5
+    if -25 <= pct_change < -10:
+        return 3
+    return 0
 
 
 def size_score(circ_mv_yi: float) -> int:
@@ -1209,11 +1233,21 @@ def tier_for_score(
         and market_regime != "偏弱"
     ):
         return "A 核心跟踪"
-    if score >= 105:
+    if score >= 105 and quality_score >= 8:
         return "B 重点观察"
     if score >= 80:
         return "C 观察名单"
     return "D 暂缓"
+
+
+def tier_priority(tier: str) -> int:
+    if tier.startswith("A"):
+        return 0
+    if tier.startswith("B"):
+        return 1
+    if tier.startswith("C"):
+        return 2
+    return 3
 
 
 def build_rise_drivers(
@@ -1329,6 +1363,21 @@ def refresh_watch_thesis(candidate: WatchCandidate) -> None:
         candidate.thesis += f" 待核实：{unresolved}。"
 
 
+def research_universe_from_report(
+    first_double_report: dict[str, Any],
+) -> tuple[list[dict[str, Any]], bool]:
+    """Return the full A-share research universe when the source supports it.
+
+    Older first-double artifacts only contain stocks that had already doubled.
+    They remain readable, but are explicitly marked as a legacy fallback rather
+    than silently masquerading as an all-market potential-stock screen.
+    """
+    universe = first_double_report.get("research_universe")
+    if isinstance(universe, list) and universe:
+        return universe, True
+    return list(first_double_report.get("candidates") or []), False
+
+
 def build_watch_report(
     first_double_report: dict[str, Any],
     *,
@@ -1362,12 +1411,19 @@ def build_watch_report(
     if cache_needs_backfill:
         data_warnings.append("日线缓存缺少复权因子，已对候选股按区间自动补拉")
 
+    research_universe, has_full_universe = research_universe_from_report(
+        first_double_report
+    )
+    if not has_full_universe:
+        data_warnings.append(
+            "源报告缺少全量 A 股研究池，当前回退到半年强势样本；请先重跑 full-chain"
+        )
     source_by_code = {
         str(item.get("ts_code")): item
-        for item in first_double_report.get("candidates", [])
+        for item in research_universe
     }
     scored: list[WatchCandidate] = []
-    for source in first_double_report.get("candidates", []):
+    for source in research_universe:
         ts_code = source["ts_code"]
         if len(price_series.get(ts_code, [])) < 2 or cache_needs_backfill:
             batch = load_daily_range(
@@ -1568,22 +1624,30 @@ def build_watch_report(
         candidate.unverified_drivers.insert(0, FUNDAMENTAL_PENDING_DRIVER)
         refresh_watch_thesis(candidate)
     data_warnings.extend(fundamental_warning_samples)
-    scored.sort(key=lambda item: (item.score, item.quality_score, item.pct_change), reverse=True)
-    for index, candidate in enumerate(scored, start=1):
-        candidate.rank = index
+    for candidate in scored:
         candidate.tier = tier_for_score(
             candidate.score,
             quality_score=candidate.quality_score,
             setup_score=candidate.setup_score,
             market_regime=candidate.market_regime,
         )
+    scored.sort(
+        key=lambda item: (
+            tier_priority(item.tier),
+            -item.score,
+            -item.quality_score,
+            -item.pct_change,
+        )
+    )
+    for index, candidate in enumerate(scored, start=1):
+        candidate.rank = index
     limited = scored[:limit] if limit > 0 else scored
     return WatchReport(
         generated_at=datetime.now().isoformat(timespec="seconds"),
         source_report=str(source_report),
         start_trade_date=first_double_report["start_trade_date"],
         end_trade_date=end_trade_date,
-        input_count=len(first_double_report.get("candidates", [])),
+        input_count=len(research_universe),
         watch_count=len(limited),
         core_count=sum(1 for item in limited if item.tier.startswith("A")),
         scoring_version=SCORING_VERSION,
@@ -1592,6 +1656,10 @@ def build_watch_report(
         candidates=limited,
         market_regime=str(market["label"]),
         market_evidence=str(market["evidence"]),
+        full_universe_count=int(
+            first_double_report.get("stock_count") or len(research_universe)
+        ),
+        strong_sample_count=len(first_double_report.get("candidates") or []),
     )
 
 
@@ -1658,8 +1726,8 @@ def render_first_double_html(report: FirstDoubleReport) -> str:
     if len(report.data_warnings) > 3:
         warning_note += f"；另有 {len(report.data_warnings) - 3} 条数据提示请查看 JSON"
     return render_page(
-        "半年强势股初筛",
-        "先筛出过去半年表现强势的 A 股，再进入财报、公告和后验收益验证。该模块是研究池，不是买入建议。",
+        "半年强势股复盘样本",
+        "从全量 A 股行情中抽取过去半年表现强势的复盘样本；它用于验证和回看，不是潜力研究池的入池门槛。",
         [
             ("统计区间", f"{report.start_trade_date} - {report.end_trade_date}"),
             ("自然日回看", str(report.lookback_days)),
@@ -1667,8 +1735,9 @@ def render_first_double_html(report: FirstDoubleReport) -> str:
             ("最低交易日", str(report.min_trading_days)),
             ("复权覆盖率", fmt_pct(report.adjustment_coverage)),
             ("A 股股票数", str(report.stock_count)),
+            ("可研究样本", str(report.universe_count)),
             ("有行情股票数", str(report.stocks_with_prices)),
-            ("入选股票数", str(report.candidate_count)),
+            ("强势复盘样本", str(report.candidate_count)),
         ],
         "<table><thead><tr><th>排名</th><th>股票</th><th>行业</th><th>市场</th><th>区间起点</th><th>区间终点</th><th>区间涨幅</th><th>期间高点</th><th>高点回撤</th><th>行业共振</th><th>成交额变化</th><th>上涨日占比</th></tr></thead>"
         f"<tbody>{table_body}</tbody></table>",
@@ -1708,11 +1777,13 @@ def render_watch_html(report: WatchReport) -> str:
     if len(report.data_warnings) > 3:
         warning_note += f"；另有 {len(report.data_warnings) - 3} 条数据提示请查看 JSON"
     return render_page(
-        "二阶段研究跟踪池",
-        "从最近半年已翻倍的股票中，按质量、估值、行业阶段、市场状态和回踩结构筛选研究候选；不是买入建议。",
+        "全量 A 股潜力研究池",
+        "以全量 A 股为输入，按趋势、行业共振、成交活跃度、回踩结构与财务质量筛选研究候选；半年强势样本只作复盘验证，不是入池门槛。",
         [
             ("源区间", f"{report.start_trade_date} - {report.end_trade_date}"),
-            ("输入翻倍股", str(report.input_count)),
+            ("全量 A 股", str(report.full_universe_count)),
+            ("可研究样本", str(report.input_count)),
+            ("半年强势样本", str(report.strong_sample_count)),
             ("跟踪池数量", str(report.watch_count)),
             ("A 级核心", str(report.core_count)),
             ("评分版本", report.scoring_version),
@@ -1773,97 +1844,185 @@ def output_paths(base_dir: Path, topic: str) -> tuple[Path, Path, Path]:
     )
 
 
+def shorten_card_text(value: Any, limit: int = 96) -> str:
+    normalized = " ".join(str(value or "").split())
+    return normalized if len(normalized) <= limit else f"{normalized[: limit - 1]}…"
+
+
+def card_header_template(market_regime: str) -> str:
+    if market_regime == "偏强":
+        return "green"
+    if market_regime == "偏弱":
+        return "orange"
+    return "blue"
+
+
+def select_card_candidates(
+    watch_report: dict[str, Any], limit: int = 3
+) -> list[dict[str, Any]]:
+    candidates = list(watch_report.get("candidates") or [])
+    primary = [
+        item
+        for item in candidates
+        if str(item.get("tier") or "").startswith(("A", "B"))
+    ]
+    return (primary or candidates)[:limit]
+
+
+def card_conclusion(
+    watch_report: dict[str, Any], shown_candidates: list[dict[str, Any]]
+) -> str:
+    market_regime = str(watch_report.get("market_regime") or "市场数据不足")
+    core_count = int(watch_report.get("core_count") or 0)
+    if market_regime == "偏弱":
+        if core_count:
+            return f"市场偏弱｜仅跟踪 {core_count} 只 A 级候选的回踩确认"
+        if shown_candidates:
+            return "市场偏弱｜暂无 A 级核心，仅保留 B 级研究观察"
+        return "市场偏弱｜暂无优先研究候选"
+    if core_count:
+        return f"市场{market_regime}｜{core_count} 只 A 级候选优先补齐催化证据"
+    if shown_candidates:
+        return f"市场{market_regime}｜暂无 A 级核心，先跟踪 B 级验证信号"
+    return f"市场{market_regime}｜暂无优先研究候选"
+
+
+def card_research_action(
+    watch_report: dict[str, Any], shown_candidates: list[dict[str, Any]]
+) -> str:
+    market_regime = str(watch_report.get("market_regime") or "市场数据不足")
+    core_count = int(watch_report.get("core_count") or 0)
+    if market_regime == "偏弱":
+        return "研究动作：只观察，不追高；等待回踩和行业共振确认。"
+    if core_count:
+        return "研究动作：优先核对 A 级候选的催化与回踩确认。"
+    if shown_candidates:
+        return "研究动作：先验证 B 级候选的财务和行业信号。"
+    return "研究动作：保留数据跟踪，等待新的市场和行业信号。"
+
+
+def compact_card_candidate(item: dict[str, Any]) -> str:
+    drivers = [str(value) for value in item.get("rise_drivers") or [] if value]
+    evidence = [
+        str(value) for value in item.get("financial_evidence") or [] if value
+    ]
+    rejection = str(item.get("first_rejection") or "").replace(
+        "第一拒绝点：", ""
+    )
+    title = (
+        f"**{item.get('rank', 0)}. {item.get('name') or item.get('ts_code')}"
+        f"（{item.get('ts_code')}）** · {item.get('tier', '观察')}"
+    )
+    score_line = (
+        f"{item.get('archetype', '待分类')} · {item.get('industry') or '行业未标注'}\n"
+        f"`总分 {item.get('score', 0)}` · `质量 {item.get('quality_score', 0)}/30`"
+        f" · `结构 {item.get('setup_score', 0)}/30`"
+    )
+    lines = [title, score_line]
+    if drivers:
+        lines.append(f"**看点** {shorten_card_text('；'.join(drivers[:2]))}")
+    if evidence:
+        lines.append(f"**财务信号** {shorten_card_text(evidence[0], 72)}")
+    if rejection:
+        lines.append(f"> **暂缓条件** {shorten_card_text(rejection, 72)}")
+    return "\n".join(lines)
+
+
 def build_feishu_card(
     first_report: dict[str, Any], watch_report: dict[str, Any]
 ) -> dict[str, Any]:
-    first_candidates = first_report.get("candidates", [])[:5]
-    watch_candidates = watch_report.get("candidates", [])[:5]
-    first_lines = [
-        f"{item.get('rank', 0)}. {item.get('name') or item.get('ts_code')}（{item.get('ts_code')}）"
-        f" · 半年 {parse_float(item.get('pct_change')):.2f}% · {item.get('industry') or '行业未标注'}"
+    first_candidates = first_report.get("candidates", [])[:3]
+    focus_candidates = select_card_candidates(watch_report)
+    market_regime = str(watch_report.get("market_regime") or "市场数据不足")
+    core_count = int(watch_report.get("core_count") or 0)
+    recap_snapshot = " · ".join(
+        f"{item.get('name') or item.get('ts_code')} {parse_float(item.get('pct_change')):.0f}%"
         for item in first_candidates
-    ] or ["暂无符合条件的半年强势股"]
-    watch_lines = [
-        f"{item.get('rank', 0)}. {item.get('name') or item.get('ts_code')}（{item.get('ts_code')}）"
-        f" · {item.get('tier')} · {item.get('score')} 分 · {item.get('archetype', '待分类')} · {item.get('industry') or '行业未标注'}\n"
-        f"   质量：{item.get('quality_status', '未验证')} {item.get('quality_score', 0)} 分；结构 {item.get('setup_score', 0)} 分\n"
-        f"   驱动：{'；'.join(item.get('rise_drivers', [])[:2]) or '行情层未识别'}\n"
-        f"   为什么现在：{item.get('why_now') or '待补充'}\n"
-        f"   第一拒绝点：{item.get('first_rejection') or '待补充'}"
-        + (
-            f"\n   财务：{'；'.join(item.get('financial_evidence', [])[:2])}"
-            if item.get("financial_evidence")
-            else ""
-        )
-        for item in watch_candidates
-    ] or ["暂无二阶段跟踪候选"]
+    )
     warnings = list(
         dict.fromkeys(
             first_report.get("data_warnings", [])
             + watch_report.get("data_warnings", [])
         )
     )
-    warning_text = (
-        "\n".join(f"- {warning}" for warning in warnings[:3]) or "- 无数据质量提示"
-    )
     summary = (
-        f"**区间**: {first_report.get('start_trade_date')} - {first_report.get('end_trade_date')}\n"
-        f"**口径**: {'前复权' if first_report.get('price_mode') == 'qfq' else '未复权'}，"
-        f"最低交易日 {first_report.get('min_trading_days', 0)}\n"
-        f"**A 股样本**: {first_report.get('stock_count', 0)} · "
-        f"**半年强势股**: {first_report.get('candidate_count', 0)} · "
-        f"**二阶段跟踪池**: {watch_report.get('watch_count', 0)} · "
-        f"**A 级核心**: {watch_report.get('core_count', 0)}\n"
-        f"**市场状态**: {watch_report.get('market_regime', '市场数据不足')}"
+        f"**本期结论｜{card_conclusion(watch_report, focus_candidates)}**\n"
+        f"> 覆盖全量 A 股；{card_research_action(watch_report, focus_candidates)}\n\n"
+        f"`全量A股 {watch_report.get('full_universe_count') or first_report.get('stock_count', 0)}` · "
+        f"`可研究样本 {watch_report.get('input_count', 0)}` · "
+        f"`入围跟踪 {watch_report.get('watch_count', 0)}` · `A级 {core_count}`"
     )
-    return {
-        "msg_type": "interactive",
-        "card": {
-            "config": {"wide_screen_mode": True},
-            "header": {
-                "template": "blue",
-                "title": {"tag": "plain_text", "content": "过去半年潜力股复盘"},
+    focus_content = (
+        "\n\n".join(compact_card_candidate(item) for item in focus_candidates)
+        if focus_candidates
+        else "暂无优先候选；保留数据跟踪，等待市场和行业信号改善。"
+    )
+    elements: list[dict[str, Any]] = [
+        {"tag": "div", "text": {"tag": "lark_md", "content": summary}},
+        {"tag": "hr"},
+        {
+                "tag": "div",
+            "text": {
+                "tag": "lark_md",
+                "content": "**本期优先研究**\n> 仅展示 A/B 级；无 A 级时只作研究观察。\n\n"
+                + focus_content,
             },
-            "elements": [
-                {"tag": "div", "text": {"tag": "lark_md", "content": summary}},
-                {"tag": "hr"},
-                {
-                    "tag": "div",
-                    "text": {
-                        "tag": "lark_md",
-                        "content": "**半年强势股初筛 Top 5**\n"
-                        + "\n".join(first_lines),
-                    },
-                },
+        },
+    ]
+    if recap_snapshot:
+        elements.extend(
+            [
                 {"tag": "hr"},
                 {
                     "tag": "div",
                     "text": {
                         "tag": "lark_md",
                         "content": (
-                            f"**二阶段研究跟踪池 Top 5**（评分 {watch_report.get('scoring_version', 'unknown')}）\n"
-                            + "\n".join(watch_lines)
+                            "**半年强势回放**\n"
+                            "> 仅作复盘验证，不是研究池入池门槛。\n\n"
+                            + recap_snapshot
                         ),
                     },
                 },
+            ]
+        )
+    if warnings:
+        elements.extend(
+            [
                 {"tag": "hr"},
                 {
                     "tag": "div",
                     "text": {
                         "tag": "lark_md",
-                        "content": "**数据质量提示**\n" + warning_text,
+                        "content": "**数据提示**\n"
+                        + "\n".join(
+                            f"- {shorten_card_text(warning, 100)}"
+                            for warning in warnings[:2]
+                        ),
                     },
                 },
+            ]
+        )
+    elements.append(
+        {
+            "tag": "note",
+            "elements": [
                 {
-                    "tag": "note",
-                    "elements": [
-                        {
-                            "tag": "plain_text",
-                            "content": "研究复盘队列，不构成投资建议；基本面、催化和后验收益仍需验证。",
-                        }
-                    ],
-                },
+                    "tag": "plain_text",
+                    "content": "完整驱动、财务证据和证伪条件请查看报告产物；本卡只保留研究优先级。",
+                }
             ],
+        }
+    )
+    return {
+        "msg_type": "interactive",
+        "card": {
+            "config": {"wide_screen_mode": True},
+            "header": {
+                "template": card_header_template(market_regime),
+                "title": {"tag": "plain_text", "content": "过去半年潜力股复盘"},
+            },
+            "elements": elements,
         },
     }
 
@@ -1938,7 +2097,7 @@ def run_full_chain(args: argparse.Namespace) -> dict[str, Any]:
     first = run_first_double(args)
     args.source_report = Path(first["json"])
     watch = run_tenbagger_watch(args)
-    card_path = args.output_dir / "tushare-recap-reports" / "latest-card.json"
+    card_path = args.output_dir / "latest-card.json"
     first_report = json.loads(Path(first["json"]).read_text(encoding="utf-8"))
     watch_report = json.loads(Path(watch["json"]).read_text(encoding="utf-8"))
     write_text(
@@ -1993,7 +2152,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--min-pct-change",
         type=float,
         default=100.0,
-        help="Minimum interval gain percent",
+        help="Minimum interval gain percent for the strong replay sample",
     )
     first.add_argument(
         "--max-pct-change",
@@ -2055,7 +2214,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--min-pct-change",
         type=float,
         default=100.0,
-        help="Minimum interval gain percent",
+        help="Minimum interval gain percent for the strong replay sample",
     )
     full.add_argument(
         "--max-pct-change",
