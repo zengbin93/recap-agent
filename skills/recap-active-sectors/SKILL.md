@@ -10,10 +10,10 @@ Use this skill to build the daily "成交活跃板块" deep-dive report (SKZ-149
 活跃板块定义与分析口径：
 
 1. 用 Tushare `daily.amount` 取当日 A 股成交额排序前 100 的股票。
-2. 把这 100 只股票映射到其所属的同花顺概念/行业板块，统计每个板块被命中的次数，
-   保留命中 **≥ 3 次** 的板块作为「活跃板块」。
-3. 对每个活跃板块，用 `ths_daily` 分析板块指数今日与最近 5 日的表现。
-4. 对每个活跃板块，挑选落在成交额榜内的代表成分股，分析其近 5 日表现。
+2. 把这 100 只股票映射到其所属的同花顺概念/行业板块，保留命中 **≥ 5 次** 的候选板块。
+3. 用“命中数 / 板块成分数”的覆盖率和榜内成交额排序，并折叠成分股高度重合的标签为主题簇。
+4. 对每个主题簇代表，用 `ths_daily` 分析板块指数今日与最近 5 日的表现。
+5. 对每个主题簇代表，挑选落在成交额榜内的代表成分股，分析其近 5 日表现。
 
 脚本自包含，内置一个带缓存/重试的 Tushare 客户端，产出 HTML/CSV/JSON。
 需要环境变量 `TUSHARE_TOKEN`（或 repo 根 `.env`）；可用 `TUSHARE_URL` 指定兼容代理接口。
@@ -31,7 +31,7 @@ python3 skills/recap-active-sectors/scripts/run.py
 ```bash
 python3 skills/recap-active-sectors/scripts/run.py \
   --trade-date 20260710 \
-  --top-n 100 --min-count 3 --recent-days 5 \
+  --top-n 100 --min-count 5 --recent-days 5 \
   --sector-types N,I --rep-stocks 5 \
   --throttle 0.3 --progress
 ```
@@ -39,7 +39,7 @@ python3 skills/recap-active-sectors/scripts/run.py \
 - `--trade-date`：默认取最近开市日。
 - `--top-n`：成交额榜取前 N（默认 100）。
 - `--min-count`：板块判活跃的最少命中次数（默认 5）。
-- `--max-sectors`：最多输出的活跃板块数，按命中数取前 N（默认 40，`0` 为不限）。
+- `--max-sectors`：最多输出的去重主题数（默认 40，`0` 为不限）；候选总数会单独显示。
 - `--sector-types`：`N` 概念、`I` 行业，逗号分隔（默认 `N,I`）。
 - `--include-broad`：保留宽基指数/互联互通/交易属性类板块（默认剔除，见下）。
 - `--throttle`：`ths_member` 全量扫描的调用间隔秒数，用于规避分钟级限频。
