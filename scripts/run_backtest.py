@@ -38,11 +38,12 @@ class BacktestEngine:
         self.token = token or os.environ.get("TUSHARE_TOKEN", "")
         self.url = url or os.environ.get("TUSHARE_URL", "http://api.tushare.pro")
         self.cache_dir = cache_dir
+        self.api_enabled = True
 
     def get_trade_calendar(self, start_date: str, end_date: str) -> list[str]:
         """Fetch A-share trading calendar from Tushare or fallback to mock."""
-        if not self.token:
-            print("Warning: TUSHARE_TOKEN not configured. Using Mock calendar.")
+        if not self.token or not self.api_enabled:
+            print("Warning: TUSHARE_TOKEN not configured or API disabled. Using Mock calendar.")
             return self._generate_mock_calendar(start_date, end_date)
 
         cache_path = self.cache_dir / f"trade_cal-{start_date}-{end_date}.json"
@@ -68,6 +69,9 @@ class BacktestEngine:
                 return dates
         except Exception as exc:
             print(f"Error fetching calendar: {exc}. Falling back to Mock calendar.")
+            if "没有接口" in str(exc) or "权限" in str(exc):
+                print("Tushare API permission denied. Disabling API calls for subsequent runs.")
+                self.api_enabled = False
         
         return self._generate_mock_calendar(start_date, end_date)
 
@@ -80,7 +84,7 @@ class BacktestEngine:
             except Exception:
                 pass
 
-        if not self.token:
+        if not self.token or not self.api_enabled:
             return self._generate_mock_flow(trade_date)
 
         try:
@@ -96,6 +100,9 @@ class BacktestEngine:
                 return rows
         except Exception as exc:
             print(f"Error fetching moneyflow for {trade_date}: {exc}")
+            if "没有接口" in str(exc) or "权限" in str(exc):
+                print("Tushare API permission denied. Disabling API calls for subsequent runs.")
+                self.api_enabled = False
         
         return self._generate_mock_flow(trade_date)
 
@@ -304,14 +311,27 @@ def run_grid_search(engine: BacktestEngine, start_date: str, end_date: str, repo
                 "metrics": res
             })
 
-    # Find the best combination based on 5-day return & win rate
+    # Find the best combination based on multi-period win rate & return to avoid overfitting
     best_combo = None
     best_score = -float("inf")
     
     for r in grid_results:
+        m3 = r["metrics"][3]
         m5 = r["metrics"][5]
-        if m5["signal_count"] >= 5:  # Minimum signal count threshold
-            score = m5["win_rate"] * 0.5 + m5["avg_return"] * 10
+        m10 = r["metrics"][10]
+        
+        # 信号频次必须具有统计显著性，要求 5 日信号数至少有 15 个（避免低频过拟合噪音）
+        if m5["signal_count"] >= 15:
+            # 1. 计算多周期加权胜率（3日权重0.25，5日权重0.50，10日权重0.25）
+            weighted_win_rate = m3["win_rate"] * 0.25 + m5["win_rate"] * 0.50 + m10["win_rate"] * 0.25
+            # 2. 计算多周期加权平均收益率
+            weighted_avg_return = m3["avg_return"] * 0.25 + m5["avg_return"] * 0.50 + m10["avg_return"] * 0.25
+            # 3. 信号频次奖励项（信号多更具说服力，多于 50 次后不额外加分，最多奖励 3分）
+            freq_bonus = min(m5["signal_count"], 50) * 0.06
+            
+            # 综合评分：胜率加权 + 收益率加权 + 频次奖励
+            score = weighted_win_rate * 0.6 + weighted_avg_return * 6.0 + freq_bonus
+            
             if score > best_score:
                 best_score = score
                 best_combo = r
