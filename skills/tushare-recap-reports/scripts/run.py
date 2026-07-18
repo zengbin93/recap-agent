@@ -19,7 +19,7 @@ from urllib.request import Request, urlopen
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_CACHE_DIR = PROJECT_ROOT / "artifacts" / "cache" / "tushare"
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "artifacts" / "reports" / "tushare-recap-reports"
-TUSHARE_URL = "http://api.tushare.pro"
+DEFAULT_TUSHARE_URL = "http://api.tushare.pro"
 DATE_FMT = "%Y%m%d"
 SCORING_VERSION = "v4.0-full-universe"
 FUNDAMENTAL_FETCH_LIMIT = 80
@@ -45,6 +45,7 @@ class TushareClient:
         self,
         token: str | None = None,
         *,
+        url: str | None = None,
         cache_dir: Path = DEFAULT_CACHE_DIR,
         use_cache: bool = True,
         retries: int = 2,
@@ -56,6 +57,7 @@ class TushareClient:
             raise TushareError(
                 "Missing TUSHARE_TOKEN. Set it in the environment or repo-root .env."
             )
+        self.url = url or os.environ.get("TUSHARE_URL") or DEFAULT_TUSHARE_URL
         self.cache_dir = cache_dir
         self.use_cache = use_cache
         self.retries = retries
@@ -95,7 +97,7 @@ class TushareClient:
     def _post(self, payload: dict[str, Any]) -> dict[str, Any]:
         body = json.dumps(payload).encode("utf-8")
         request = Request(
-            TUSHARE_URL,
+            self.url,
             data=body,
             headers={"Content-Type": "application/json"},
             method="POST",
@@ -2028,7 +2030,10 @@ def build_feishu_card(
 def run_first_double(args: argparse.Namespace) -> dict[str, str]:
     load_dotenv(PROJECT_ROOT / ".env")
     client = TushareClient(
-        args.token, cache_dir=args.cache_dir, use_cache=not args.no_cache
+        args.token,
+        url=args.url,
+        cache_dir=args.cache_dir,
+        use_cache=not args.no_cache,
     )
     report = build_first_double_report(
         client,
@@ -2058,7 +2063,10 @@ def run_first_double(args: argparse.Namespace) -> dict[str, str]:
 def run_tenbagger_watch(args: argparse.Namespace) -> dict[str, str]:
     load_dotenv(PROJECT_ROOT / ".env")
     client = TushareClient(
-        args.token, cache_dir=args.cache_dir, use_cache=not args.no_cache
+        args.token,
+        url=args.url,
+        cache_dir=args.cache_dir,
+        use_cache=not args.no_cache,
     )
     source_report = (
         args.source_report or output_paths(args.output_dir, "first_double")[2]
@@ -2105,6 +2113,9 @@ def run_full_chain(args: argparse.Namespace) -> dict[str, Any]:
 def add_common_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--token", default=None, help="Tushare token; defaults to TUSHARE_TOKEN"
+    )
+    parser.add_argument(
+        "--url", default=None, help="Tushare API URL; defaults to TUSHARE_URL"
     )
     parser.add_argument(
         "--cache-dir",

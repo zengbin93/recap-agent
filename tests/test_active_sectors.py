@@ -4,9 +4,11 @@ Everything runs against a fake Tushare client, so no real ``TUSHARE_TOKEN`` or
 network access is required.
 """
 import importlib.util
+import os
 import pathlib
 import sys
 import unittest
+from unittest import mock
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -117,6 +119,15 @@ def make_client():
 
 
 class ActiveSectorsTests(unittest.TestCase):
+    def test_tushare_client_uses_url_from_environment(self):
+        with mock.patch.dict(os.environ, {"TUSHARE_TOKEN": "token", "TUSHARE_URL": "https://tushare.example/api"}):
+            client = run.TushareClient(use_cache=False)
+        with mock.patch.object(run, "urlopen") as urlopen:
+            urlopen.return_value.__enter__.return_value.read.return_value = b'{"code":0,"data":{"fields":[],"items":[]}}'
+            client.query("daily")
+
+        self.assertEqual(urlopen.call_args.args[0].full_url, "https://tushare.example/api")
+
     def test_top_amount_filters_st_and_bj(self):
         client = make_client()
         basic = run.load_stock_basic(client)
@@ -160,14 +171,41 @@ class ActiveSectorsTests(unittest.TestCase):
         )
         self.assertEqual(report.trade_date, "20260710")
         self.assertEqual(report.active_sector_count, 2)
+        self.assertEqual(report.theme_cluster_count, 1)
+        self.assertEqual(report.displayed_sector_count, 1)
         ai = report.sectors[0]
         self.assertEqual(ai.name, "人工智能")
         self.assertTrue(ai.quote_available)
+        self.assertEqual(ai.sector_size, 4)
+        self.assertEqual(ai.coverage_pct, 100.0)
+        self.assertEqual(ai.related_sectors, ["半导体"])
         self.assertEqual(ai.today_pct, 2.5)
         # 近 5 日 = (1100 - 980) / 980 * 100
         self.assertAlmostEqual(ai.recent_pct, (1100 - 980) / 980 * 100, places=1)
         self.assertTrue(ai.representatives)
         self.assertTrue(all(r.in_top for r in ai.representatives))
+
+    def test_candidate_count_is_not_replaced_by_display_limit(self):
+        client = make_client()
+        report = run.build_report(
+            client,
+            trade_date="20260710",
+            top_n=100,
+            min_count=3,
+            recent_days=5,
+            sector_types=["N", "I"],
+            rep_stocks=5,
+            throttle=0.0,
+            max_sectors=1,
+        )
+
+        self.assertEqual(report.active_sector_count, 2)
+        self.assertEqual(report.theme_cluster_count, 1)
+        self.assertEqual(report.displayed_sector_count, 1)
+        card = run.build_feishu_card(report, top=10)
+        card_text = __import__("json").dumps(card, ensure_ascii=False)
+        self.assertIn("候选板块", card_text)
+        self.assertIn("去重主题", card_text)
 
     def test_render_html_and_csv_smoke(self):
         client = make_client()
@@ -190,6 +228,8 @@ class ActiveSectorsTests(unittest.TestCase):
         self.assertTrue(run.is_broad_sector("融资融券"))
         self.assertTrue(run.is_broad_sector("沪深300样本股"))
         self.assertTrue(run.is_broad_sector("深股通"))
+        self.assertTrue(run.is_broad_sector("国家大基金持股"))
+        self.assertTrue(run.is_broad_sector("同花顺漂亮100"))
         self.assertFalse(run.is_broad_sector("半导体"))
         tables = {
             "ths_index": lambda p: [

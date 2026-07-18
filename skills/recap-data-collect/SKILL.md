@@ -16,7 +16,7 @@ not copied into this skill as separate market knowledge.
 python3 skills/recap-data-collect/scripts/collect.py --task daily --output-dir artifacts/data
 ```
 
-Required secret: `TUSHARE_TOKEN`.
+Required secret: `TUSHARE_TOKEN`. Optional `TUSHARE_URL` selects a Tushare-compatible proxy.
 
 Outputs are JSON files under the chosen output directory. Cache files live under
 `artifacts/cache` by default and fallback fixtures may be placed under `fallback-data`.

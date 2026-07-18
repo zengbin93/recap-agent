@@ -13,7 +13,8 @@ Use this skill for the Tushare stock recap chain:
 
 The skill is self-contained under `skills/tushare-recap-reports` and writes HTML,
 CSV, JSON, and (for `full-chain`) a Feishu interactive card payload. It expects
-`TUSHARE_TOKEN` in the environment or in a repo-root `.env` file.
+`TUSHARE_TOKEN` in the environment or in a repo-root `.env` file. Set
+`TUSHARE_URL` to use a Tushare-compatible proxy.
 
 The default first-double screen uses Tushare `daily` prices multiplied by
 `adj_factor` and normalized by the interval-end factor (the `qfq` price mode), requires at least 80 available trading days,
