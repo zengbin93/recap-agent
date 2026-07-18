@@ -36,8 +36,8 @@ class FeishuConfig:
             values.get("FEISHU_WEBHOOK_URL"), values.get("FEISHU_WEBHOOK_SECRET")
         )
         tasks = _targets_from_json(values.get("FEISHU_WEBHOOKS_JSON"))
-        for task in ("daily", "weekly", "monthly", "potential"):
-            prefix = f"FEISHU_{task.upper()}_"
+        for task in ("daily", "weekly", "monthly", "potential", "hk-weekly"):
+            prefix = f"FEISHU_{task.upper().replace('-', '_')}_"
             target = _target_from_values(
                 values.get(prefix + "WEBHOOK_URL"),
                 values.get(prefix + "WEBHOOK_SECRET"),
@@ -51,6 +51,8 @@ class FeishuConfig:
             return self.tasks[task]
         if task == "potential" and "daily" in self.tasks:
             return self.tasks["daily"]
+        if task == "hk-weekly" and "weekly" in self.tasks:
+            return self.tasks["weekly"]
         if self.default:
             return self.default
         raise ValueError(f"no feishu webhook configured for task {task}")

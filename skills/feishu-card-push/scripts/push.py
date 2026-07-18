@@ -12,7 +12,9 @@ from recap_agent.feishu import FeishuConfig, FeishuSender
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--task", choices=["daily", "weekly", "monthly", "potential"], required=True
+        "--task",
+        choices=["daily", "weekly", "monthly", "potential", "hk-weekly"],
+        required=True,
     )
     parser.add_argument("--card", required=True)
     parser.add_argument("--dry-run", action="store_true")
