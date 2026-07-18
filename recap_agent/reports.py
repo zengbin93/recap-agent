@@ -75,10 +75,10 @@ def _process_stealth_flow(rows: list[Mapping[str, Any]]) -> dict[str, list[dict[
             "领涨个股": c["lead_stock"]
         })
         
-    # 3. 主力潜伏（悄悄建仓）板块 (默认净买入 > 0.5亿 且 -1.5% <= 涨幅 <= 2.0%)
-    min_amount = 0.5
-    lower_pct = -1.5
-    upper_pct = 2.0
+    # 3. 主力潜伏（悄悄建仓）板块 (默认使用回测出的最优经验保底参数：净买入 > 5.0亿 且 0.0% <= 涨幅 <= 3.0%)
+    min_amount = 5.0
+    lower_pct = 0.0
+    upper_pct = 3.0
     try:
         best_cfg_path = Path("artifacts/reports/backtest_best.json")
         if best_cfg_path.exists():
