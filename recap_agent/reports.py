@@ -15,6 +15,105 @@ class ReportResult:
     snapshot: dict[str, Any] = field(default_factory=dict)
 
 
+def _process_stealth_flow(rows: list[Mapping[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+    # 提取主力净流入额和涨幅
+    cleaned = []
+    for r in rows:
+        # 获取 net_amount
+        net_amt = None
+        for k in ("net_amount", "net_amt"):
+            if r.get(k) is not None:
+                try:
+                    net_amt = float(r[k])
+                except (ValueError, TypeError):
+                    pass
+        if net_amt is None:
+            continue
+            
+        # 获取 pct_change
+        pct = None
+        for k in ("pct_change", "pct_chg", "change_pct"):
+            if r.get(k) is not None:
+                try:
+                    pct = float(r[k])
+                except (ValueError, TypeError):
+                    pass
+                    
+        # 获取板块名
+        name = r.get("industry") or r.get("name") or r.get("con_name") or "未知板块"
+        lead = r.get("lead_stock") or r.get("lead") or "—"
+        
+        cleaned.append({
+            "industry": name,
+            "net_amount": net_amt,
+            "pct_change": pct,
+            "lead_stock": lead,
+            "raw_row": r
+        })
+        
+    # 1. 净流入排行 (降序)
+    inflows_sorted = sorted([c for c in cleaned if c["net_amount"] > 0], key=lambda x: x["net_amount"], reverse=True)
+    top_inflows = []
+    for i, c in enumerate(inflows_sorted[:5], 1):
+        top_inflows.append({
+            "排名": i,
+            "板块名称": c["industry"],
+            "主力净流入 (亿元)": f"{c['net_amount']:.2f}",
+            "今日涨幅": f"{c['pct_change']:.2f}%" if c["pct_change"] is not None else "—",
+            "领涨个股": c["lead_stock"]
+        })
+        
+    # 2. 净流出排行 (升序)
+    outflows_sorted = sorted([c for c in cleaned if c["net_amount"] < 0], key=lambda x: x["net_amount"])
+    top_outflows = []
+    for i, c in enumerate(outflows_sorted[:5], 1):
+        top_outflows.append({
+            "排名": i,
+            "板块名称": c["industry"],
+            "主力净流出 (亿元)": f"{abs(c['net_amount']):.2f}",
+            "今日涨幅": f"{c['pct_change']:.2f}%" if c["pct_change"] is not None else "—",
+            "领涨个股": c["lead_stock"]
+        })
+        
+    # 3. 主力潜伏（悄悄建仓）板块 (默认净买入 > 0.5亿 且 -1.5% <= 涨幅 <= 2.0%)
+    min_amount = 0.5
+    lower_pct = -1.5
+    upper_pct = 2.0
+    try:
+        best_cfg_path = Path("artifacts/reports/backtest_best.json")
+        if best_cfg_path.exists():
+            import json as _json
+            best_cfg = _json.loads(best_cfg_path.read_text(encoding="utf-8"))
+            min_amount = float(best_cfg.get("min_amount", min_amount))
+            lower_pct = float(best_cfg.get("lower_pct", lower_pct))
+            upper_pct = float(best_cfg.get("upper_pct", upper_pct))
+    except Exception:
+        pass
+
+    stealth_list = []
+    for c in cleaned:
+        if c["net_amount"] > min_amount and c["pct_change"] is not None and lower_pct <= c["pct_change"] <= upper_pct:
+            stealth_list.append(c)
+    stealth_sorted = sorted(stealth_list, key=lambda x: x["net_amount"], reverse=True)
+    stealth_inflows = []
+    for i, c in enumerate(stealth_sorted[:5], 1):
+        stealth_inflows.append({
+            "排名": i,
+            "板块名称": c["industry"],
+            "主力净买入 (亿元)": f"{c['net_amount']:.2f}",
+            "今日涨幅": f"{c['pct_change']:.2f}%",
+            "领涨个股": c["lead_stock"]
+        })
+        
+    return {
+        "top_inflows": top_inflows,
+        "top_outflows": top_outflows,
+        "stealth_inflows": stealth_inflows,
+        "raw_top_inflows": [x["raw_row"] for x in inflows_sorted[:5]],
+        "raw_stealth_inflows": [x["raw_row"] for x in stealth_sorted[:5]]
+    }
+
+
 def render_recap_report(
     *,
     task: str,
@@ -32,7 +131,34 @@ def render_recap_report(
         period=period,
         sources=sources,
     )
-    sections = "\n".join(
+    
+    # 提取主力板块资金流数据，生成精简特制表格展示在正文头部
+    hot_sectors_rows = datasets.get("hot_sectors", [])
+    extra_sections = ""
+    stealth_summary_md = ""
+    if hot_sectors_rows:
+        rankings = _process_stealth_flow(hot_sectors_rows)
+        extra_sections += _render_table("主力资金净流入排行 (Top 5)", rankings["top_inflows"])
+        extra_sections += _render_table("主力资金净流出排行 (Top 5)", rankings["top_outflows"])
+        extra_sections += _render_table("主力潜伏板块 (资金悄悄建仓)", rankings["stealth_inflows"])
+        
+        # 飞书卡片主力流向文本提炼
+        inflow_txt = "、".join(
+            f"{x.get('industry') or x.get('name') or '未知'}(+{float(x.get('net_amount') or x.get('net_amt') or 0.0):.1f}亿)"
+            for x in rankings["raw_top_inflows"][:3]
+        )
+        stealth_txt = "、".join(
+            f"{x.get('industry') or x.get('name') or '未知'}(+{float(x.get('net_amount') or x.get('net_amt') or 0.0):.1f}亿, 涨{float(x.get('pct_change') or x.get('pct_chg') or 0.0):.1f}%)"
+            for x in rankings["raw_stealth_inflows"][:3]
+        )
+        
+        stealth_summary_md = f"🔥 **今日主力净买入前三**：{inflow_txt or '无'}\n"
+        if stealth_txt:
+            stealth_summary_md += f"🕵️ **主力暗中建仓（潜伏）板块**：{stealth_txt}\n"
+        else:
+            stealth_summary_md += f"🕵️ **主力暗中建仓（潜伏）板块**：暂无满足条件板块\n"
+
+    sections = extra_sections + "\n".join(
         _render_table(name, rows)
         for name, rows in datasets.items()
         if name != "a_share_daily"
@@ -71,27 +197,64 @@ def render_recap_report(
 </body>
 </html>
 """
+    
+    card_elements = [
+        {
+            "tag": "div",
+            "text": {
+                "tag": "lark_md",
+                "content": f"**区间**: {period_text}\n**市场状态**: {snapshot['summary']['trend']}\n**生成时间**: {generated_at}",
+            },
+        }
+    ]
+    if stealth_summary_md:
+        card_elements.append({"tag": "hr"})
+        card_elements.append({
+            "tag": "div",
+            "text": {
+                "tag": "lark_md",
+                "content": stealth_summary_md,
+            }
+        })
+    card_elements.extend([
+        {"tag": "hr"},
+        {
+            "tag": "div",
+            "text": {"tag": "lark_md", "content": _card_summary(snapshot)},
+        }
+    ])
+
     card = {
         "msg_type": "interactive",
         "card": {
             "config": {"wide_screen_mode": True},
             "header": {"title": {"tag": "plain_text", "content": title}},
-            "elements": [
-                {
-                    "tag": "div",
-                    "text": {
-                        "tag": "lark_md",
-                        "content": f"**区间**: {period_text}\n**市场状态**: {snapshot['summary']['trend']}\n**生成时间**: {generated_at}",
-                    },
-                },
-                {"tag": "hr"},
-                {
-                    "tag": "div",
-                    "text": {"tag": "lark_md", "content": _card_summary(snapshot)},
-                },
-            ],
+            "elements": card_elements,
         },
     }
+    import os
+    pages_url = os.environ.get("RECAP_PAGES_URL")
+    if pages_url:
+        base_url = pages_url.rstrip("/")
+        report_url = f"{base_url}/{task}-recap.html"
+        card["card"]["elements"].append(
+            {
+                "tag": "action",
+                "actions": [
+                    {
+                        "tag": "button",
+                        "text": {"tag": "plain_text", "content": "🌐 查看网页版详细报告"},
+                        "type": "primary",
+                        "multi_url": {
+                            "url": report_url,
+                            "android_url": report_url,
+                            "ios_url": report_url,
+                            "pc_url": report_url,
+                        }
+                    }
+                ]
+            }
+        )
     return ReportResult(html=html_doc, card=card, snapshot=snapshot)
 
 

@@ -1,0 +1,70 @@
+name: Sector Moneyflow Backtest
+
+on:
+  schedule:
+    # Run every Sunday at 15:00 UTC (23:00 Asia/Shanghai)
+    - cron: "0 15 * * 0"
+  workflow_dispatch:
+    inputs:
+      start_date:
+        description: "Start Date (YYYYMMDD); defaults to 1 year ago"
+        required: false
+        default: ""
+      end_date:
+        description: "End Date (YYYYMMDD); defaults to today"
+        required: false
+        default: ""
+
+permissions:
+  contents: write  # Need write access to publish to gh-pages branch
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TUSHARE_TOKEN: ${{ secrets.TUSHARE_TOKEN }}
+      TUSHARE_URL: ${{ secrets.TUSHARE_URL }}
+      START_DATE: ${{ github.event.inputs.start_date }}
+      END_DATE: ${{ github.event.inputs.end_date }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+
+      - name: Run backtest grid search
+        run: |
+          args=(--output-report artifacts/reports/backtest-report.md)
+          if [ -n "$START_DATE" ]; then
+            args+=(--start-date "$START_DATE")
+          fi
+          if [ -n "$END_DATE" ]; then
+            args+=(--end-date "$END_DATE")
+          fi
+          python3 scripts/run_backtest.py "${args[@]}"
+
+      - name: Upload backtest artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backtest-report-${{ github.run_id }}
+          path: artifacts/reports/backtest-report.md
+          if-no-files-found: warn
+
+      - name: Deploy report to GitHub Pages
+        if: success() && env.TUSHARE_TOKEN != ''
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./artifacts/reports
+          keep_files: true
