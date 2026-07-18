@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import math
 import os
 import time
 from collections import defaultdict
@@ -50,6 +51,10 @@ BROAD_SECTOR_KEYWORDS = (
     "沪深300", "中证500", "中证1000", "中证100", "中证800", "上证50", "上证180",
     "上证380", "创业板指", "创业板50", "科创50", "科创100", "深证100", "MSCI",
     "富时", "标普", "QFII", "AH股", "AB股", "预盈预增", "预亏预减",
+    # 选股名单、持仓标签和统计指数会天然复用大成交股，但不能解释当日资金正在
+    # 围绕什么产业主题交易；将它们和宽基一样排除。
+    "持股", "漂亮100", "新质50", "出海50", "果指数", "中国AI 50",
+    "年报", "季报", "预增", "预减", "高股息", "国企改革", "百强", "金股",
 )
 
 
@@ -170,10 +175,17 @@ class ActiveSector:
     type_label: str  # 概念 / 行业
     hit_count: int
     hit_stocks: list[str]  # 命中的成交额榜个股名称
+    sector_size: int  # 同花顺该板块的有效成分股数
+    coverage_pct: float  # 成交额榜对板块成分的覆盖率
+    turnover_yi: float  # 命中个股在成交额榜内的成交额合计
+    turnover_share_pct: float  # 占成交额榜 Top N 的成交额比例
+    baseline_hit_count: float | None  # 过去 N-1 个交易日的平均命中数
+    hit_change: float | None  # 相对上述平均命中数的变化
     today_pct: float  # 板块今日涨跌幅
     recent_pct: float  # 板块近 N 日累计涨跌幅
     amplitude: float  # 近 N 日振幅
     quote_available: bool
+    related_sectors: list[str] = field(default_factory=list)  # 高重合、已折叠的标签
     representatives: list[RepStock] = field(default_factory=list)
 
 
@@ -186,7 +198,9 @@ class ActiveSectorsReport:
     recent_days: int
     sector_types: list[str]
     top_stock_count: int
-    active_sector_count: int
+    active_sector_count: int  # 所有满足阈值的候选板块数（未截断）
+    theme_cluster_count: int  # 按成分股重合度聚类后的主题数（未截断）
+    displayed_sector_count: int  # 当前 artifacts 中实际输出的主题数
     sectors: list[ActiveSector] = field(default_factory=list)
 
 
@@ -365,11 +379,17 @@ def build_membership(
             if progress:
                 progress(f"skip {index_code}: {error}")
             continue
-        meta = {"index_code": index_code, "name": str(sector.get("name") or index_code), "type": str(sector.get("type") or "")}
-        for member in members:
-            con_code = member.get("con_code")
-            if con_code:
-                membership[con_code].append(meta)
+        member_codes = {str(member["con_code"]) for member in members if member.get("con_code")}
+        meta = {
+            "index_code": index_code,
+            "name": str(sector.get("name") or index_code),
+            "type": str(sector.get("type") or ""),
+            # THS 的 ths_index.count 并非所有行业分类都提供；直接用成员表的
+            # 去重计数，保证概念和行业使用同一分母。
+            "member_count": str(len(member_codes)),
+        }
+        for con_code in member_codes:
+            membership[con_code].append(meta)
         if progress and pos % 50 == 0:
             progress(f"membership {pos}/{total}")
         if throttle:
@@ -380,24 +400,156 @@ def build_membership(
 # --------------------------------------------------------------------------- #
 # Step 3 — aggregate active sectors
 # --------------------------------------------------------------------------- #
+def aggregate_sector_hits(
+    top_stocks: list[TopStock],
+    membership: dict[str, list[dict[str, str]]],
+) -> list[dict[str, Any]]:
+    """Return one unfiltered bucket per THS label for a turnover leaderboard."""
+    hits: dict[str, dict[str, Any]] = {}
+    top_turnover_yi = sum(stock.amount_yi for stock in top_stocks)
+    for stock in top_stocks:
+        for meta in membership.get(stock.ts_code, []):
+            index_code = meta["index_code"]
+            bucket = hits.setdefault(
+                index_code,
+                {
+                    "index_code": index_code,
+                    "name": meta["name"],
+                    "type": meta["type"],
+                    "sector_size": int(meta.get("member_count") or 0),
+                    "stocks": [],
+                },
+            )
+            if all(existing.ts_code != stock.ts_code for existing in bucket["stocks"]):
+                bucket["stocks"].append(stock)
+
+    result: list[dict[str, Any]] = []
+    for bucket in hits.values():
+        stocks: list[TopStock] = bucket["stocks"]
+        hit_count = len(stocks)
+        turnover_yi = round(sum(stock.amount_yi for stock in stocks), 2)
+        sector_size = int(bucket["sector_size"])
+        coverage_pct = round(hit_count / sector_size * 100, 2) if sector_size else 0.0
+        turnover_share_pct = round(turnover_yi / top_turnover_yi * 100, 2) if top_turnover_yi else 0.0
+        # 覆盖率将天然很大的父行业降权；sqrt(hit_count) 保留成交集中度，避免
+        # 仅由少数小盘股组成的极小概念获得不成比例的高分。
+        activity_score = round(
+            coverage_pct * math.sqrt(hit_count) * math.sqrt(max(turnover_share_pct, 0.1)),
+            4,
+        )
+        result.append(
+            {
+                **bucket,
+                "hit_count": hit_count,
+                "hit_codes": [stock.ts_code for stock in stocks],
+                "hit_stocks": [stock.name for stock in stocks],
+                "turnover_yi": turnover_yi,
+                "turnover_share_pct": turnover_share_pct,
+                "coverage_pct": coverage_pct,
+                "activity_score": activity_score,
+            }
+        )
+    return result
+
+
 def aggregate_active_sectors(
     top_stocks: list[TopStock],
     membership: dict[str, list[dict[str, str]]],
     *,
     min_count: int,
 ) -> list[dict[str, Any]]:
-    hits: dict[str, dict[str, Any]] = {}
-    for stock in top_stocks:
-        for meta in membership.get(stock.ts_code, []):
-            index_code = meta["index_code"]
-            bucket = hits.setdefault(
-                index_code,
-                {"index_code": index_code, "name": meta["name"], "type": meta["type"], "stocks": []},
-            )
-            bucket["stocks"].append(stock.name)
-    active = [h for h in hits.values() if len(h["stocks"]) >= min_count]
-    active.sort(key=lambda h: len(h["stocks"]), reverse=True)
+    """Keep sufficiently represented labels and rank them by normalized activity."""
+    hits = aggregate_sector_hits(top_stocks, membership)
+    active = [h for h in hits if h["hit_count"] >= min_count]
+    active.sort(key=lambda h: (h["activity_score"], h["hit_count"], h["turnover_yi"]), reverse=True)
     return active
+
+
+def annotate_historical_activity(
+    client: TushareClient,
+    active: list[dict[str, Any]],
+    membership: dict[str, list[dict[str, str]]],
+    *,
+    open_dates: list[str],
+    top_n: int,
+    basic: dict[str, dict[str, Any]],
+) -> None:
+    """Attach prior-day average leaderboard hits without failing the daily report."""
+    prior_dates = open_dates[:-1]
+    if not prior_dates:
+        for item in active:
+            item["baseline_hit_count"] = None
+            item["hit_change"] = None
+        return
+    history: dict[str, list[int]] = {item["index_code"]: [] for item in active}
+    for trade_date in prior_dates:
+        try:
+            historical_top = load_top_amount_stocks(
+                client,
+                trade_date,
+                top_n=top_n,
+                exclude_st=True,
+                exclude_bj=False,
+                basic=basic,
+            )
+        except (RuntimeError, TushareError):
+            continue
+        counts = {
+            item["index_code"]: item["hit_count"]
+            for item in aggregate_sector_hits(historical_top, membership)
+        }
+        for index_code, values in history.items():
+            values.append(counts.get(index_code, 0))
+    for item in active:
+        values = history[item["index_code"]]
+        if not values:
+            item["baseline_hit_count"] = None
+            item["hit_change"] = None
+            continue
+        baseline = round(sum(values) / len(values), 2)
+        item["baseline_hit_count"] = baseline
+        item["hit_change"] = round(item["hit_count"] - baseline, 2)
+
+
+def jaccard(left: list[str], right: list[str]) -> float:
+    left_set, right_set = set(left), set(right)
+    if not left_set or not right_set:
+        return 0.0
+    return len(left_set & right_set) / len(left_set | right_set)
+
+
+def cluster_overlapping_sectors(
+    active: list[dict[str, Any]], *, overlap_threshold: float = 0.5
+) -> list[dict[str, Any]]:
+    """Greedily keep one representative for strongly overlapping THS labels."""
+    clusters: list[dict[str, Any]] = []
+    for candidate in active:
+        best_cluster: dict[str, Any] | None = None
+        best_overlap = 0.0
+        for cluster in clusters:
+            overlap = max(
+                jaccard(candidate["hit_codes"], label["hit_codes"])
+                for label in cluster["labels"]
+            )
+            if overlap > best_overlap:
+                best_overlap, best_cluster = overlap, cluster
+        if best_cluster and best_overlap >= overlap_threshold:
+            best_cluster["labels"].append(candidate)
+            best_cluster["related"].append(candidate)
+            continue
+        clusters.append(
+            {
+                "representative": candidate,
+                "labels": [candidate],
+                "related": [],
+            }
+        )
+    collapsed: list[dict[str, Any]] = []
+    for cluster in clusters:
+        representative = dict(cluster["representative"])
+        representative["related_sectors"] = [item["name"] for item in cluster["related"]]
+        collapsed.append(representative)
+    return collapsed
 
 
 # --------------------------------------------------------------------------- #
@@ -538,15 +690,28 @@ def build_report(
     membership = build_membership(
         client, sector_index, trade_date=resolved_date, throttle=throttle, progress=progress
     )
-    active = aggregate_active_sectors(top_stocks, membership, min_count=min_count)
-    if max_sectors is not None and max_sectors > 0:
-        active = active[:max_sectors]
-    if progress:
-        progress(f"active sectors={len(active)}")
-
     open_dates = recent_open_dates(client, resolved_date, recent_days)
+    active = aggregate_active_sectors(top_stocks, membership, min_count=min_count)
+    annotate_historical_activity(
+        client,
+        active,
+        membership,
+        open_dates=open_dates,
+        top_n=top_n,
+        basic=basic,
+    )
+    clusters = cluster_overlapping_sectors(active)
+    if max_sectors is not None and max_sectors > 0:
+        visible = clusters[:max_sectors]
+    else:
+        visible = clusters
+    if progress:
+        progress(
+            f"active candidates={len(active)} theme clusters={len(clusters)} displayed={len(visible)}"
+        )
+
     sectors: list[ActiveSector] = []
-    for rank, item in enumerate(active, start=1):
+    for rank, item in enumerate(visible, start=1):
         quote = analyze_sector_quote(client, item["index_code"], open_dates)
         reps = pick_representatives(
             client, item["index_code"], top_lookup, open_dates=open_dates, limit=rep_stocks, basic=basic
@@ -559,12 +724,19 @@ def build_report(
                 name=item["name"],
                 sector_type=stype,
                 type_label=SECTOR_TYPE_LABELS.get(stype, stype or "-"),
-                hit_count=len(item["stocks"]),
-                hit_stocks=item["stocks"],
+                hit_count=item["hit_count"],
+                hit_stocks=item["hit_stocks"],
+                sector_size=item["sector_size"],
+                coverage_pct=item["coverage_pct"],
+                turnover_yi=item["turnover_yi"],
+                turnover_share_pct=item["turnover_share_pct"],
+                baseline_hit_count=item["baseline_hit_count"],
+                hit_change=item["hit_change"],
                 today_pct=quote["today_pct"],
                 recent_pct=quote["recent_pct"],
                 amplitude=quote["amplitude"],
                 quote_available=quote["available"],
+                related_sectors=item["related_sectors"],
                 representatives=reps,
             )
         )
@@ -577,7 +749,9 @@ def build_report(
         recent_days=recent_days,
         sector_types=sector_types,
         top_stock_count=len(top_stocks),
-        active_sector_count=len(sectors),
+        active_sector_count=len(active),
+        theme_cluster_count=len(clusters),
+        displayed_sector_count=len(sectors),
         sectors=sectors,
     )
 
@@ -597,8 +771,10 @@ def write_json_report(report: ActiveSectorsReport, path: Path) -> None:
 def write_csv_report(report: ActiveSectorsReport, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     columns = [
-        "rank", "index_code", "name", "type_label", "hit_count",
-        "today_pct", "recent_pct", "amplitude", "hit_stocks", "representatives",
+        "rank", "index_code", "name", "type_label", "hit_count", "sector_size",
+        "coverage_pct", "turnover_yi", "turnover_share_pct", "baseline_hit_count",
+        "hit_change", "today_pct", "recent_pct", "amplitude", "related_sectors",
+        "hit_stocks", "representatives",
     ]
     with path.open("w", encoding="utf-8", newline="") as file:
         writer = csv.DictWriter(file, fieldnames=columns)
@@ -611,9 +787,16 @@ def write_csv_report(report: ActiveSectorsReport, path: Path) -> None:
                     "name": s.name,
                     "type_label": s.type_label,
                     "hit_count": s.hit_count,
+                    "sector_size": s.sector_size,
+                    "coverage_pct": s.coverage_pct,
+                    "turnover_yi": s.turnover_yi,
+                    "turnover_share_pct": s.turnover_share_pct,
+                    "baseline_hit_count": s.baseline_hit_count,
+                    "hit_change": s.hit_change,
                     "today_pct": s.today_pct,
                     "recent_pct": s.recent_pct,
                     "amplitude": s.amplitude,
+                    "related_sectors": "、".join(s.related_sectors),
                     "hit_stocks": "、".join(s.hit_stocks),
                     "representatives": "、".join(f"{r.name}({fmt_pct(r.recent_pct)})" for r in s.representatives),
                 }
@@ -633,11 +816,25 @@ def render_html(report: ActiveSectorsReport) -> str:
             if s.quote_available
             else "<span>板块行情不可用</span>"
         )
+        activity = (
+            f"{s.hit_count} / {s.sector_size or '—'}"
+            f"<span>覆盖 {fmt_pct(s.coverage_pct)} · 成交 {s.turnover_yi:g} 亿（榜内 {fmt_pct(s.turnover_share_pct)}）</span>"
+        )
+        change = (
+            f"较前{max(report.recent_days - 1, 1)}日均值 {s.hit_change:+.1f}"
+            if s.hit_change is not None
+            else "历史命中数据不可用"
+        )
+        merged = (
+            f"<span>已合并：{escape('、'.join(s.related_sectors[:3]))}</span>"
+            if s.related_sectors
+            else ""
+        )
         rows.append(
             "<tr>"
             f"<td>{s.rank}</td>"
-            f"<td><strong>{escape(s.name)}</strong><span>{escape(s.index_code)} · {escape(s.type_label)}</span></td>"
-            f"<td class='gain'>{s.hit_count}</td>"
+            f"<td><strong>{escape(s.name)}</strong><span>{escape(s.index_code)} · {escape(s.type_label)} · {change}</span>{merged}</td>"
+            f"<td class='gain'>{activity}</td>"
             f"<td>{quote}</td>"
             f"<td>{escape('、'.join(s.hit_stocks))}</td>"
             f"<td><ul>{reps or '<li>无榜内成分股</li>'}</ul></td>"
@@ -645,7 +842,7 @@ def render_html(report: ActiveSectorsReport) -> str:
         )
     table_body = "\n".join(rows) or "<tr><td colspan='6' class='empty'>今日无满足阈值的活跃板块。</td></tr>"
     table = (
-        "<table><thead><tr><th>排名</th><th>板块</th><th>命中数</th>"
+        "<table><thead><tr><th>排名</th><th>主题簇代表</th><th>命中 / 覆盖</th>"
         f"<th>今日/{report.recent_days}日</th><th>命中个股</th><th>代表成分股</th></tr></thead>"
         f"<tbody>{table_body}</tbody></table>"
     )
@@ -653,14 +850,17 @@ def render_html(report: ActiveSectorsReport) -> str:
         ("交易日", report.trade_date),
         ("成交额榜", f"前 {report.top_n}"),
         ("活跃阈值", f"≥ {report.min_count} 次"),
-        ("活跃板块数", str(report.active_sector_count)),
+        ("候选板块", str(report.active_sector_count)),
+        ("去重主题", str(report.theme_cluster_count)),
+        ("实际输出", str(report.displayed_sector_count)),
         ("板块口径", "/".join(SECTOR_TYPE_LABELS.get(t, t) for t in report.sector_types)),
     ]
     cards_html = "".join(
         f"<div class='card'><span>{escape(label)}</span><strong>{escape(value)}</strong></div>" for label, value in cards
     )
     note = (
-        "活跃板块 = 成交额榜前 N 只个股在同花顺概念/行业板块上的命中次数达阈值。"
+        "候选板块 = 成交额榜前 N 只个股在同花顺概念/行业板块中的命中次数达阈值；"
+        "输出按板块覆盖率与榜内成交额综合排序，并将成分股高度重合的标签折叠为主题簇。"
         "板块与个股行情来自 Tushare（未做复权），用于复盘研究，不构成投资建议。"
     )
     return f"""<!doctype html>
@@ -705,9 +905,20 @@ def _color_pct(value: float) -> str:
 def _sector_row(s: "ActiveSector", recent_days: int, shaded: bool) -> dict[str, Any]:
     """一个板块 = 一行两列 column_set：左侧板块/代表股，右侧今日/近N日涨跌。"""
     reps = " · ".join(r.name for r in s.representatives[:3]) or "—"
+    history = (
+        f"较前{max(recent_days - 1, 1)}日均值 {s.hit_change:+.1f}"
+        if s.hit_change is not None
+        else "历史命中不可用"
+    )
+    merged = (
+        f"\n<font color='grey'>已合并</font> {' · '.join(s.related_sectors[:2])}"
+        if s.related_sectors
+        else ""
+    )
     left = (
-        f"**{s.rank}. {s.name}**　<font color='grey'>{s.type_label} · 命中 {s.hit_count}</font>\n"
-        f"<font color='grey'>代表</font> {reps}"
+        f"**{s.rank}. {s.name}**　<font color='grey'>{s.type_label} · 命中 {s.hit_count}/{s.sector_size or '—'} · 覆盖 {s.coverage_pct:.1f}%</font>\n"
+        f"<font color='grey'>榜内成交</font> {s.turnover_yi:g} 亿（{s.turnover_share_pct:.1f}%） · {history}\n"
+        f"<font color='grey'>代表</font> {reps}{merged}"
     )
     right = (
         f"今日 {_color_pct(s.today_pct)}\n{recent_days}日 {_color_pct(s.recent_pct)}"
@@ -738,14 +949,15 @@ def build_feishu_card(report: ActiveSectorsReport, *, top: int = 10) -> dict[str
     Shape matches ``recap_agent.reports`` / ``feishu-card-push`` (``msg_type``
     ``interactive`` with a ``card`` body), so it can be pushed as-is.
     """
-    shown = min(top, report.active_sector_count)
+    shown = min(top, report.displayed_sector_count)
     overview = {
         "tag": "div",
         "fields": [
             {"is_short": True, "text": {"tag": "lark_md", "content": f"📅 **交易日**\n{report.trade_date}"}},
             {"is_short": True, "text": {"tag": "lark_md", "content": f"💰 **成交额榜**\n前 {report.top_n}"}},
             {"is_short": True, "text": {"tag": "lark_md", "content": f"🎯 **活跃阈值**\n≥ {report.min_count} 次"}},
-            {"is_short": True, "text": {"tag": "lark_md", "content": f"🔥 **活跃板块**\n{report.active_sector_count} 个（展示前 {shown}）"}},
+            {"is_short": True, "text": {"tag": "lark_md", "content": f"🧩 **候选板块**\n{report.active_sector_count} 个"}},
+            {"is_short": True, "text": {"tag": "lark_md", "content": f"🔥 **去重主题**\n{report.theme_cluster_count} 个（展示前 {shown}）"}},
         ],
     }
     rows = [_sector_row(s, report.recent_days, shaded=(i % 2 == 1)) for i, s in enumerate(report.sectors[:top])]
@@ -759,7 +971,7 @@ def build_feishu_card(report: ActiveSectorsReport, *, top: int = 10) -> dict[str
             "elements": [
                 {
                     "tag": "lark_md",
-                    "content": "活跃板块 = 成交额榜前 N 个股在同花顺概念/行业上的命中次数达阈值（已剔宽基）。数据来自 Tushare，仅供复盘研究，不构成投资建议。",
+                    "content": "候选板块按命中阈值生成；展示按覆盖率与榜内成交额排序，并折叠成分股高度重合的同花顺标签。数据来自 Tushare，仅供复盘研究，不构成投资建议。",
                 }
             ],
         }
