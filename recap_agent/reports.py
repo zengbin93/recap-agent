@@ -343,6 +343,7 @@ def render_recap_report(
     # 提取主力板块资金流数据，生成精简特制表格展示在正文头部
     hot_sectors_rows = datasets.get("hot_sectors", [])
     extra_sections = ""
+    active_sectors_section = ""
     stealth_summary_md = ""
     if hot_sectors_rows:
         rankings = _process_stealth_flow(hot_sectors_rows, datasets)
@@ -387,13 +388,42 @@ def render_recap_report(
             stealth_items.append(f"• **{name}** (+{amt:.1f}亿, 今日涨 {pct:.1f}%)\n  🔸 核心流入：{stocks_str}{etf_str}")
         stealth_txt = "\n".join(stealth_items)
         
+        # 拼入活跃人气板块数据
+        active_data = _parse_active_sectors_data()
+        active_sectors_section = ""
+        active_sectors_card_md = ""
+        if active_data:
+            active_sectors_section = _render_active_sectors_table(active_data)
+            
+            active_items = []
+            for s in active_data.get("sectors", [])[:2]:
+                s_name = s.get("name") or "未知"
+                hit_count = s.get("hit_count") or 0
+                cov = float(s.get("coverage_pct") or 0.0)
+                today_pct = float(s.get("today_pct") or 0.0)
+                
+                # 今日人气股 (前3)
+                stks = s.get("hit_stocks", [])[:3]
+                stk_str = "、".join(stks) if stks else "—"
+                
+                pct_str = f"+{today_pct:.1f}%" if today_pct > 0 else f"{today_pct:.1f}%"
+                active_items.append(
+                    f"• **{s_name}** (覆盖 {cov*100.0:.1f}% | 今日 {pct_str})\n"
+                    f"  🔸 今日人气股：{stk_str}"
+                )
+            if active_items:
+                active_sectors_card_md = f"📊 **成交活跃人气板块 (热度前二)**：\n" + "\n".join(active_items) + "\n\n"
+
         stealth_summary_md = f"🔥 **今日主力净买入前三**：\n{inflow_txt or '无'}\n\n"
         if stealth_txt:
-            stealth_summary_md += f"🕵️ **主力暗中建仓（潜伏）板块**：\n{stealth_txt}\n"
+            stealth_summary_md += f"🕵️ **主力暗中建仓（潜伏）板块**：\n{stealth_txt}\n\n"
         else:
-            stealth_summary_md += f"🕵️ **主力暗中建仓（潜伏）板块**：\n暂无满足条件板块\n"
+            stealth_summary_md += f"🕵️ **主力暗中建仓（潜伏）板块**：\n暂无满足条件板块\n\n"
+            
+        if active_sectors_card_md:
+            stealth_summary_md += active_sectors_card_md
 
-    sections = extra_sections + "\n".join(
+    sections = active_sectors_section + extra_sections + "\n".join(
         _render_table(name, rows)
         for name, rows in datasets.items()
         if name != "a_share_daily"
@@ -1110,3 +1140,94 @@ def write_report_files(
     if task == "daily":
         results["index"] = str(directory / "index.html")
     return results
+
+
+def _parse_active_sectors_data() -> dict[str, Any] | None:
+    # 活跃板块 json 的输出路径
+    json_path = Path("artifacts/reports/recap-active-sectors/latest.json")
+    if not json_path.exists():
+        return None
+    try:
+        import json as _json
+        return _json.loads(json_path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+
+
+def _render_active_sectors_table(active_data: dict[str, Any]) -> str:
+    sectors = active_data.get("sectors", [])
+    recent_days = active_data.get("recent_days", 5)
+    if not sectors:
+        return ""
+        
+    rows = []
+    for s in sectors[:15]:  # 最多显示 15 个活跃板块
+        name = s.get("name") or "未知板块"
+        rank = s.get("rank") or "—"
+        today_pct = float(s.get("today_pct") or 0.0)
+        recent_pct = float(s.get("recent_pct") or 0.0)
+        amp = float(s.get("amplitude") or 0.0)
+        
+        flow_tag = ""
+        if s.get("quote_available"):
+            if today_pct > 0:
+                flow_tag = "<span class='tag-up'>主力流入</span>"
+            elif today_pct < 0:
+                flow_tag = "<span class='tag-down'>主力流出</span>"
+            else:
+                flow_tag = "<span class='tag-flat'>多空平衡</span>"
+        else:
+            flow_tag = "<span class='tag-flat'>方向未知</span>"
+            
+        today_class = "text-up" if today_pct > 0 else "text-down" if today_pct < 0 else ""
+        recent_class = "text-up" if recent_pct > 0 else "text-down" if recent_pct < 0 else ""
+        
+        quote = (
+            f"<strong class='{today_class}' style='font-size:16px;'>{today_pct:+.2f}%</strong>"
+            f"<span>{recent_days}日 <strong class='{recent_class}'>{recent_pct:+.2f}%</strong> / 振幅 {amp:.2f}%</span>"
+            if s.get("quote_available")
+            else "<span>板块行情不可用</span>"
+        )
+        
+        activity = (
+            f"<span class='gain'>{s.get('hit_count', 0)}</span> <span style='display:inline; color:var(--text-muted); font-size:14px;'>/ {s.get('sector_size') or '—'}</span>"
+            f"<span>覆盖 {float(s.get('coverage_pct', 0))*100.0:.1f}% · 成交 {s.get('turnover_yi', 0):g} 亿</span>"
+        )
+        
+        hit_badges = "".join(f"<span class='badge'>{html.escape(stk)}</span>" for stk in s.get("hit_stocks", [])[:15])
+        
+        reps_items = []
+        for r in s.get("representatives", [])[:4]:
+            r_pct = float(r.get("pct_chg") or 0.0)
+            r_rec = float(r.get("recent_pct") or 0.0)
+            r_today_class = "text-up" if r_pct > 0 else "text-down" if r_pct < 0 else ""
+            r_recent_class = "text-up" if r_rec > 0 else "text-down" if r_rec < 0 else ""
+            reps_items.append(
+                f"<li><strong>{html.escape(r.get('name', ''))}</strong> 今日 <span class='{r_today_class}'>{r_pct:+.2f}%</span> / {recent_days}日 <span class='{r_recent_class}'>{r_rec:+.2f}%</span>"
+                f"<span>{html.escape(r.get('ts_code', ''))} · 成交 {r.get('amount_yi', 0):g} 亿</span></li>"
+            )
+        reps = "".join(reps_items)
+        
+        change_val = s.get("hit_change")
+        change = f"较均值 {change_val:+.1f}" if change_val is not None else ""
+        merged = f"<div style='margin-top:8px; font-size:12px; color:var(--text-muted);'>已合并：{'、'.join(s.get('related_sectors', [])[:2])}</div>" if s.get("related_sectors") else ""
+        
+        rows.append(
+            "<tr>"
+            f"<td style='font-weight:bold; font-size:16px; color:var(--text-muted);'>{rank}</td>"
+            f"<td><strong style='font-size:16px; color:#ffffff;'>{html.escape(name)}</strong>{flow_tag}<span style='font-size:12px; margin-top:6px;'>{html.escape(s.get('index_code', ''))} · {change}</span>{merged}</td>"
+            f"<td>{activity}</td>"
+            f"<td>{quote}</td>"
+            f"<td><div style='max-width:320px;'>{hit_badges}</div></td>"
+            f"<td><ul>{reps or '<li>无榜内成分股</li>'}</ul></td>"
+            "</tr>"
+        )
+        
+    table_body = "\n".join(rows)
+    table = (
+        f"<section class='table-section'><h2>🔥 人气成交活跃板块复盘 (热度聚类)</h2>"
+        f"<div class='table-wrapper'><table><thead><tr><th style='width:50px;'>排名</th><th>主题簇代表</th><th>命中 / 覆盖</th>"
+        f"<th>今日/{recent_days}日</th><th style='width:320px;'>今日人气股</th><th>代表成分股</th></tr></thead>"
+        f"<tbody>{table_body}</tbody></table></div></section>"
+    )
+    return table

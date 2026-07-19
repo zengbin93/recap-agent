@@ -80,6 +80,19 @@ jobs:
           fi
           exit "$missing"
 
+      - name: Active sectors recap (Claude-driven)
+        if: env.RECAP_TASK == 'daily'
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Use the recap-active-sectors skill to build today's active-sectors recap (data calculations).
+            Run this command (dry-run flag comes from RECAP_DRY_RUN):
+            python3 skills/recap-active-sectors/scripts/run.py --output-dir artifacts/reports/recap-active-sectors --throttle 0.1
+            Leave the generated HTML/CSV/JSON and card under artifacts/reports/recap-active-sectors.
+          claude_args: |
+            --allowedTools Bash
+
       - name: Claude Code recap orchestration
         if: env.RECAP_TASK != 'potential'
         uses: anthropics/claude-code-action@v1
@@ -90,22 +103,6 @@ jobs:
             Execute the deterministic script exactly once:
             python3 scripts/run_recap.py --task "$RECAP_TASK" --output-dir artifacts/reports $([ "$RECAP_DRY_RUN" = "true" ] && echo "--dry-run")
             Leave generated HTML reports and Feishu card JSON under artifacts/reports.
-          claude_args: |
-            --allowedTools Bash
-
-      - name: Active sectors recap (Claude-driven)
-        if: env.RECAP_TASK == 'daily'
-        uses: anthropics/claude-code-action@v1
-        with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          prompt: |
-            Use the recap-active-sectors skill to build today's active-sectors recap and push its Feishu card.
-            Run these commands (dry-run flag comes from RECAP_DRY_RUN):
-            1. python3 skills/recap-active-sectors/scripts/run.py --output-dir artifacts/reports/recap-active-sectors --throttle 0.1
-            2. If a Feishu webhook is configured ($FEISHU_WEBHOOK_URL or $FEISHU_DAILY_WEBHOOK_URL or $FEISHU_WEBHOOKS_JSON is non-empty), push the card:
-               python3 skills/feishu-card-push/scripts/push.py --task daily --card artifacts/reports/recap-active-sectors/latest-card.json $([ "$RECAP_DRY_RUN" = "true" ] && echo "--dry-run")
-               Otherwise skip the push and note it.
-            Leave the generated HTML/CSV/JSON and card under artifacts/reports/recap-active-sectors.
           claude_args: |
             --allowedTools Bash
 
