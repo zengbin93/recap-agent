@@ -408,18 +408,18 @@ def render_recap_report(
   <title>{html.escape(title)}</title>
   <style>
     :root {{
-      --primary: #0f172a;
+      --primary: #151c2c;
       --primary-light: #1e293b;
       --accent: #3b82f6;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --border: rgba(226, 232, 240, 0.8);
-      --text-main: #334155;
-      --text-muted: #64748b;
-      --up-color: #ef4444;
-      --up-bg: #fef2f2;
-      --down-color: #10b981;
-      --down-bg: #ecfdf5;
+      --bg: #0b0f19;
+      --card-bg: #111827;
+      --border: rgba(56, 189, 248, 0.08);
+      --text-main: #e2e8f0;
+      --text-muted: #94a3b8;
+      --up-color: #ff4a6b;
+      --up-bg: rgba(255, 74, 107, 0.06);
+      --down-color: #00e676;
+      --down-bg: rgba(0, 230, 118, 0.06);
     }}
     
     * {{ box-sizing: border-box; }}
@@ -439,12 +439,13 @@ def render_recap_report(
     }}
     
     header {{
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
       border-radius: 16px;
       padding: 32px 40px;
       color: #ffffff;
       margin-bottom: 32px;
-      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15), 0 8px 10px -6px rgba(15, 23, 42, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.15);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
     }}
     
     header h1 {{
@@ -452,6 +453,9 @@ def render_recap_report(
       font-weight: 800;
       margin: 0 0 12px 0;
       letter-spacing: -0.025em;
+      background: linear-gradient(to right, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }}
     
     header .meta {{
@@ -464,10 +468,10 @@ def render_recap_report(
     }}
     
     header .meta span {{
-      background: rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
       padding: 4px 14px;
       border-radius: 9999px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.06);
     }}
     
     .summary {{
@@ -482,13 +486,13 @@ def render_recap_report(
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 20px 24px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
-      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s, border-color 0.2s;
     }}
     
     .summary-card:hover {{
       transform: translateY(-2px);
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+      border-color: rgba(56, 189, 248, 0.25);
     }}
     
     .summary-card span {{
@@ -504,7 +508,7 @@ def render_recap_report(
     .summary-card strong {{
       font-size: 28px;
       font-weight: 700;
-      color: var(--primary);
+      color: #ffffff;
     }}
     
     .text-up {{
@@ -521,7 +525,7 @@ def render_recap_report(
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 24px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
       margin-bottom: 32px;
     }}
     
@@ -529,7 +533,7 @@ def render_recap_report(
       margin: 0 0 16px 0;
       font-size: 18px;
       font-weight: 700;
-      color: var(--primary);
+      color: #ffffff;
       border-left: 4px solid var(--accent);
       padding-left: 12px;
     }}
@@ -540,14 +544,14 @@ def render_recap_report(
       border-radius: 16px;
       padding: 24px;
       margin-bottom: 32px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
     }}
     
     .table-section h2 {{
       margin: 0 0 20px 0;
       font-size: 20px;
       font-weight: 700;
-      color: var(--primary);
+      color: #ffffff;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -582,7 +586,7 @@ def render_recap_report(
     }}
     
     th {{
-      background-color: #f8fafc;
+      background-color: #1e293b;
       color: var(--text-muted);
       font-weight: 600;
       text-transform: uppercase;
@@ -599,24 +603,25 @@ def render_recap_report(
     }}
     
     tr:hover td {{
-      background-color: #f1f5f9;
+      background-color: rgba(255, 255, 255, 0.02);
     }}
     
     .badge {{
       display: inline-block;
-      padding: 3px 8px;
+      padding: 4px 10px;
       font-size: 12px;
       font-weight: 500;
       border-radius: 6px;
-      background-color: #f1f5f9;
-      color: #475569;
-      border: 1px solid #e2e8f0;
+      background-color: #1e293b;
+      color: #cbd5e1;
+      border: 1px solid rgba(255, 255, 255, 0.08);
       margin-right: 4px;
       margin-bottom: 4px;
+      transition: background-color 0.15s;
     }}
     
     .badge:hover {{
-      background-color: #e2e8f0;
+      background-color: #334155;
     }}
     
     .no-data {{
@@ -801,9 +806,9 @@ def _get_color_class(col_name: str, val_str: str) -> str:
     if not is_metric:
         return ""
         
-    if val.startswith("+"):
+    if val.startswith("+") or val.startswith("▲"):
         return "text-up"
-    if val.startswith("-"):
+    if val.startswith("-") or val.startswith("▼"):
         return "text-down"
         
     clean_val = val.replace("%", "").replace("亿", "").replace("万", "").strip()
@@ -849,6 +854,18 @@ def _render_table(name: str, rows: list[Mapping[str, Any]]) -> str:
         "amount": "成交额",
     }
     
+    max_val = 1.0
+    for row in rows:
+        for col in columns:
+            if any(k in col for k in ("主力净流入", "主力净流出", "主力净买入", "资金买入额", "net_amount", "net_amt")):
+                try:
+                    val_str = str(row.get(col, 0)).replace("亿", "").replace("万", "").replace("+", "").replace("-", "").strip()
+                    val_num = abs(float(val_str))
+                    if val_num > max_val:
+                        max_val = val_num
+                except Exception:
+                    pass
+                    
     header = "".join(f"<th>{html.escape(column_labels.get(col, str(col)))}</th>" for col in columns if col != "raw_row")
     
     body_rows = []
@@ -864,8 +881,30 @@ def _render_table(name: str, rows: list[Mapping[str, Any]]) -> str:
                 parts = val.split("、") if "、" in val else [val]
                 badges = []
                 for p in parts:
-                    badges.append(f"<span class='badge'>{html.escape(p)}</span>")
+                    icon = "⚡️ " if "ETF" in p else ""
+                    badges.append(f"<span class='badge'>{icon}{html.escape(p)}</span>")
                 td_elements.append(f"<td>{' '.join(badges)}</td>")
+                
+            elif color_class in ("text-up", "text-down") and any(k in col for k in ("主力净流入", "主力净流出", "主力净买入", "资金买入额", "net_amount", "net_amt")):
+                try:
+                    val_clean = val.replace("亿", "").replace("万", "").replace("+", "").replace("-", "").strip()
+                    val_num = abs(float(val_clean))
+                    pct = min(100.0, (val_num / max_val) * 100.0)
+                except Exception:
+                    pct = 0.0
+                
+                bar_color = "linear-gradient(90deg, rgba(255,74,107,0.2) 0%, rgba(255,74,107,0.8) 100%)" if color_class == "text-up" else "linear-gradient(90deg, rgba(0,230,118,0.2) 0%, rgba(0,230,118,0.8) 100%)"
+                
+                bar_html = f"""
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span class="{color_class}" style="min-width: 65px; font-variant-numeric: tabular-nums;">{html.escape(val)}</span>
+                  <div style="flex-grow: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; max-width: 100px;">
+                    <div style="width: {pct:.1f}%; height: 100%; background: {bar_color}; border-radius: 3px;"></div>
+                  </div>
+                </div>
+                """
+                td_elements.append(f"<td>{bar_html}</td>")
+                
             else:
                 span_class = f" class='{color_class}'" if color_class else ""
                 td_elements.append(f"<td><span{span_class}>{html.escape(val)}</span></td>")
@@ -933,14 +972,14 @@ def _render_snapshot_summary(snapshot: Mapping[str, Any]) -> str:
     
     gainers = (
         "".join(
-            f"<li style='margin-bottom: 8px; list-style-type: none;'><strong>{html.escape(item['label'])}</strong> <span class='text-up' style='margin-left: 8px;'>+{item['pct_change']:.2f}%</span></li>"
+            f"<li style='margin-bottom: 10px; list-style-type: none; display: flex; justify-content: space-between; font-size: 14px;'><strong>{html.escape(item['label'])}</strong> <span class='text-up'>+{item['pct_change']:.2f}%</span></li>"
             for item in snapshot["top_gainers"]
         )
         or "<li style='list-style-type: none; color: var(--text-muted);'>暂无</li>"
     )
     losers = (
         "".join(
-            f"<li style='margin-bottom: 8px; list-style-type: none;'><strong>{html.escape(item['label'])}</strong> <span class='text-down' style='margin-left: 8px;'>{item['pct_change']:.2f}%</span></li>"
+            f"<li style='margin-bottom: 10px; list-style-type: none; display: flex; justify-content: space-between; font-size: 14px;'><strong>{html.escape(item['label'])}</strong> <span class='text-down'>{item['pct_change']:.2f}%</span></li>"
             for item in snapshot["top_losers"]
         )
         or "<li style='list-style-type: none; color: var(--text-muted);'>暂无</li>"
@@ -948,37 +987,74 @@ def _render_snapshot_summary(snapshot: Mapping[str, Any]) -> str:
     
     trend = summary["trend"]
     trend_class = "text-up" if any(x in trend for x in ("强", "多", "涨", "牛")) else "text-down" if any(x in trend for x in ("弱", "空", "跌", "熊")) else ""
+    indicator = "🔴" if "强" in trend or "多" in trend or "涨" in trend else "🟢" if "弱" in trend or "空" in trend or "跌" in trend else "🟡"
+    
+    pos = int(summary.get("positive_rows", 0))
+    neg = int(summary.get("negative_rows", 0))
+    flat = int(summary.get("flat_rows", 0))
+    total = pos + neg + flat
+    if total <= 0:
+        total = 1
+    pos_pct = (pos / total) * 100.0
+    neg_pct = (neg / total) * 100.0
+    flat_pct = (flat / total) * 100.0
     
     return f"""
   <section class="summary">
     <div class="summary-card">
-      <span>市场研判状态</span>
-      <strong class="{trend_class}">{html.escape(trend)}</strong>
+      <span>盘面研判信号</span>
+      <strong class="{trend_class}" style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 18px; line-height: 1;">{indicator}</span> {html.escape(trend)}
+      </strong>
     </div>
     <div class="summary-card">
-      <span>A股监测样本</span>
+      <span>监测股票样本</span>
       <strong>{summary["stock_count"]} <span style="font-size: 14px; font-weight: normal; color: var(--text-muted);">只</span></strong>
     </div>
     <div class="summary-card">
-      <span>A股上涨家数</span>
+      <span>多头上涨家数</span>
       <strong class="text-up">▲ {summary["positive_rows"]}</strong>
     </div>
     <div class="summary-card">
-      <span>A股下跌家数</span>
+      <span>空头下跌家数</span>
       <strong class="text-down">▼ {summary["negative_rows"]}</strong>
     </div>
   </section>
-  <section class="movers">
-    <h3>今日 A 股盘面宽幅异动股</h3>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-top: 16px;">
+  
+  <section class="movers" style="padding: 24px;">
+    <h3>A 股盘面情绪多空温度计 & 异动监控</h3>
+    
+    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 12px; padding: 18px 24px; margin-bottom: 24px;">
+      <div style="display: flex; justify-content: space-between; font-size: 14px; color: var(--text-muted); margin-bottom: 10px; font-weight: 500;">
+        <span class="text-up">上涨 {pos} 家 ({pos_pct:.1f}%)</span>
+        <span style="color: #f8fafc; font-weight: 600;">市场赚钱效应：{pos_pct:.1f}%</span>
+        <span class="text-down">下跌 {neg} 家 ({neg_pct:.1f}%)</span>
+      </div>
+      <div style="display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.05);">
+        <div style="width: {pos_pct:.1f}%; background: linear-gradient(90deg, #ff4a6b, #e11d48);" title="上涨"></div>
+        <div style="width: {flat_pct:.1f}%; background: #475569;" title="平盘"></div>
+        <div style="width: {neg_pct:.1f}%; background: linear-gradient(90deg, #059669, #00e676);" title="下跌"></div>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-top: 6px;">
+        <span>多头主导区</span>
+        <span>平盘 {flat} 家</span>
+        <span>空头主导区</span>
+      </div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 32px; margin-top: 16px;">
       <div>
-        <h4 style="margin: 0 0 12px 0; color: var(--up-color); font-size: 15px; border-bottom: 2px solid var(--up-bg); padding-bottom: 4px;">🔥 涨幅靠前榜单</h4>
+        <h4 style="margin: 0 0 16px 0; color: #ff4a6b; font-size: 15px; border-bottom: 1px solid rgba(255,74,107,0.15); padding-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+          <span>🔥</span> 涨幅偏离榜首个股
+        </h4>
         <ul style="padding: 0; margin: 0;">
           {gainers}
         </ul>
       </div>
       <div>
-        <h4 style="margin: 0 0 12px 0; color: var(--down-color); font-size: 15px; border-bottom: 2px solid var(--down-bg); padding-bottom: 4px;">❄️ 跌幅靠前榜单</h4>
+        <h4 style="margin: 0 0 16px 0; color: #00e676; font-size: 15px; border-bottom: 1px solid rgba(0,230,118,0.15); padding-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+          <span>❄️</span> 跌幅偏离榜首个股
+        </h4>
         <ul style="padding: 0; margin: 0;">
           {losers}
         </ul>
