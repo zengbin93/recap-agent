@@ -2,8 +2,8 @@ name: Daily Global Market Recap
 
 on:
   schedule:
-    # 00:00 UTC = 08:00 Asia/Shanghai.
-    - cron: "0 0 * * *"
+    # UTC 11:00 = 19:00 Asia/Shanghai, running only on Monday to Friday (trading days).
+    - cron: "0 11 * * 1-5"
   workflow_dispatch:
     inputs:
       task:
