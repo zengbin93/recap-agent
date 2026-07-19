@@ -1,7 +1,7 @@
 {
   "task": "daily",
   "title": "全球市场日报",
-  "generated_at": "2026-07-19T04:40:38+00:00",
+  "generated_at": "2026-07-19T05:21:50+00:00",
   "period": {
     "task": "daily",
     "start_date": "20260717",
@@ -113,13 +113,6 @@
       "warning": null,
       "raw_rows": 5195
     },
-    "members_881155.TI": {
-      "rows": 42,
-      "label": "members_881155.TI",
-      "source": null,
-      "warning": null,
-      "raw_rows": 42
-    },
     "members_881145.TI": {
       "rows": 110,
       "label": "members_881145.TI",
@@ -133,6 +126,13 @@
       "source": null,
       "warning": null,
       "raw_rows": 62
+    },
+    "members_881155.TI": {
+      "rows": 42,
+      "label": "members_881155.TI",
+      "source": null,
+      "warning": null,
+      "raw_rows": 42
     }
   }
 }
