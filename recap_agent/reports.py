@@ -59,11 +59,155 @@ def get_matched_etf(sector_name: str) -> str:
     return "暂无匹配ETF"
 
 
-def _process_stealth_flow(rows: list[Mapping[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+def _get_real_etf_data(
+    sector_name: str, 
+    fund_basics: list[dict[str, Any]], 
+    fund_dailies: list[dict[str, Any]]
+) -> dict[str, Any] | None:
+    if not fund_basics or not fund_dailies:
+        return None
+        
+    # 定义关键字匹配规则，映射特制行业
+    keywords = [sector_name]
+    if "元器件" in sector_name or "电子" in sector_name or "元件" in sector_name:
+        keywords = ["电子", "元器件", "半导体", "芯片"]
+    elif "半导体" in sector_name or "芯片" in sector_name or "存储芯片" in sector_name or "先进封装" in sector_name:
+        keywords = ["芯片", "半导体", "科创芯片"]
+    elif "证券" in sector_name or "券商" in sector_name:
+        keywords = ["证券", "券商"]
+    elif "酿酒" in sector_name or "白酒" in sector_name:
+        keywords = ["酒", "食品饮料"]
+    elif "通信" in sector_name or "共封装光学" in sector_name:
+        keywords = ["5G", "通信"]
+    elif "人工智能" in sector_name:
+        keywords = ["AI", "人工智能", "软件"]
+    elif len(sector_name) >= 2:
+        keywords = [sector_name[:2], sector_name]
+
+    # 1. 过滤出名字包含关键字且包含 "ETF" 的基金
+    matched_basics = []
+    for f in fund_basics:
+        fname = f.get("name") or ""
+        if "ETF" in fname and any(kw in fname for kw in keywords):
+            matched_basics.append(f)
+            
+    if not matched_basics:
+        return None
+        
+    # 2. 匹配当日行情
+    basic_map = {f["ts_code"]: f for f in matched_basics}
+    matched_dailies = []
+    for d in fund_dailies:
+        code = d.get("ts_code")
+        if code in basic_map:
+            matched_dailies.append({
+                "ts_code": code,
+                "name": basic_map[code]["name"],
+                "pct_chg": d.get("pct_chg", 0.0),
+                "amount": d.get("amount", 0.0) # 单位：千元
+            })
+            
+    if not matched_dailies:
+        return None
+        
+    # 3. 取出成交额最大的 ETF 作为流动性最好的代表
+    best_etf = max(matched_dailies, key=lambda x: x["amount"])
+    return {
+        "ts_code": best_etf["ts_code"],
+        "name": best_etf["name"],
+        "pct_chg": float(best_etf["pct_chg"]),
+        "amount_yi": float(best_etf["amount"]) / 100000.0
+    }
+
+
+def _get_top_member_stocks(
+    ts_code: str,
+    datasets: Mapping[str, list[Mapping[str, Any]]]
+) -> list[dict[str, Any]]:
+    members = datasets.get(f"members_{ts_code}", [])
+    individual_mf = datasets.get("individual_moneyflow", [])
+    a_share_daily = datasets.get("a_share_daily", [])
+    
+    if not members or not individual_mf:
+        return []
+        
+    # 建立个股行情和资金流的快速查询 map
+    mf_map = {}
+    for r in individual_mf:
+        code = r.get("ts_code")
+        if code:
+            mf_map[code] = r
+            
+    daily_map = {}
+    for r in a_share_daily:
+        code = r.get("ts_code")
+        if code:
+            daily_map[code] = r
+            
+    scored_stocks = []
+    for m in members:
+        code = m.get("con_code")
+        name = m.get("con_name") or "未知个股"
+        if not code:
+            continue
+            
+        mf_info = mf_map.get(code)
+        daily_info = daily_map.get(code)
+        
+        # 主力资金净流入 (万元)
+        net_amt = 0.0
+        if mf_info:
+            try:
+                net_amt = float(mf_info.get("net_mf_amount") or 0.0)
+            except (ValueError, TypeError):
+                pass
+                
+        # 涨幅 (%)
+        pct = 0.0
+        if daily_info:
+            try:
+                pct = float(daily_info.get("pct_change") or daily_info.get("pct_chg") or 0.0)
+            except (ValueError, TypeError):
+                pass
+                
+        scored_stocks.append({
+            "code": code,
+            "name": name,
+            "net_amount_wan": net_amt,
+            "pct_change": pct
+        })
+        
+    # 按主力净流入降序，选出前三名
+    top_stocks = sorted(scored_stocks, key=lambda x: x["net_amount_wan"], reverse=True)[:3]
+    
+    formatted = []
+    for x in top_stocks:
+        net_str = f"+{x['net_amount_wan']/10000.0:.2f}亿" if abs(x["net_amount_wan"]) >= 10000 else f"+{x['net_amount_wan']:.1f}万"
+        if x["net_amount_wan"] < 0:
+            net_str = f"-{abs(x['net_amount_wan'])/10000.0:.2f}亿" if abs(x["net_amount_wan"]) >= 10000 else f"-{abs(x['net_amount_wan']):.1f}万"
+            
+        formatted.append({
+            "name": x["name"],
+            "net_amount_str": net_str,
+            "pct_change_str": f"{x['pct_change']:.2f}%",
+            "desc": f"{x['name']}({net_str}, 涨{x['pct_change']:.1f}%)"
+        })
+    return formatted
+
+
+def _process_stealth_flow(
+    rows: list[Mapping[str, Any]], 
+    datasets: Mapping[str, list[Mapping[str, Any]]] = None
+) -> dict[str, list[dict[str, Any]]]:
+    if datasets is None:
+        datasets = {}
+        
+    fund_basics = datasets.get("fund_basics", [])
+    fund_dailies = datasets.get("fund_dailies", [])
+
     # 提取主力净流入额和涨幅
     cleaned = []
     for r in rows:
-        # 获取 net_amount
         net_amt = None
         for k in ("net_amount", "net_amt"):
             if r.get(k) is not None:
@@ -74,7 +218,6 @@ def _process_stealth_flow(rows: list[Mapping[str, Any]]) -> dict[str, list[dict[
         if net_amt is None:
             continue
             
-        # 获取 pct_change
         pct = None
         for k in ("pct_change", "pct_chg", "change_pct"):
             if r.get(k) is not None:
@@ -83,15 +226,16 @@ def _process_stealth_flow(rows: list[Mapping[str, Any]]) -> dict[str, list[dict[
                 except (ValueError, TypeError):
                     pass
                     
-        # 获取板块名
         name = r.get("industry") or r.get("name") or r.get("con_name") or "未知板块"
         lead = r.get("lead_stock") or r.get("lead") or "—"
+        ts_code = r.get("ts_code") or r.get("code") or ""
         
         cleaned.append({
             "industry": name,
             "net_amount": net_amt,
             "pct_change": pct,
             "lead_stock": lead,
+            "ts_code": ts_code,
             "raw_row": r
         })
         
@@ -99,26 +243,36 @@ def _process_stealth_flow(rows: list[Mapping[str, Any]]) -> dict[str, list[dict[
     inflows_sorted = sorted([c for c in cleaned if c["net_amount"] > 0], key=lambda x: x["net_amount"], reverse=True)
     top_inflows = []
     for i, c in enumerate(inflows_sorted[:5], 1):
+        etf_info = _get_real_etf_data(c["industry"], fund_basics, fund_dailies)
+        etf_str = f"{etf_info['name']} ({etf_info['ts_code']}) [成交:{etf_info['amount_yi']:.2f}亿, 涨:{etf_info['pct_chg']:.2f}%]" if etf_info else "暂无对应ETF"
+        
+        top_stocks = _get_top_member_stocks(c["ts_code"], datasets)
+        stocks_str = "、".join(x["desc"] for x in top_stocks) or "—"
+        
         top_inflows.append({
             "排名": i,
             "板块名称": c["industry"],
             "主力净流入 (亿元)": f"{c['net_amount']:.2f}",
             "今日涨幅": f"{c['pct_change']:.2f}%" if c["pct_change"] is not None else "—",
             "领涨个股": c["lead_stock"],
-            "对应ETF": get_matched_etf(c["industry"])
+            "核心买入个股": stocks_str,
+            "真实代表ETF": etf_str
         })
         
     # 2. 净流出排行 (升序)
     outflows_sorted = sorted([c for c in cleaned if c["net_amount"] < 0], key=lambda x: x["net_amount"])
     top_outflows = []
     for i, c in enumerate(outflows_sorted[:5], 1):
+        etf_info = _get_real_etf_data(c["industry"], fund_basics, fund_dailies)
+        etf_str = f"{etf_info['name']} ({etf_info['ts_code']}) [成交:{etf_info['amount_yi']:.2f}亿, 涨:{etf_info['pct_chg']:.2f}%]" if etf_info else "暂无对应ETF"
+        
         top_outflows.append({
             "排名": i,
             "板块名称": c["industry"],
             "主力净流出 (亿元)": f"{abs(c['net_amount']):.2f}",
             "今日涨幅": f"{c['pct_change']:.2f}%" if c["pct_change"] is not None else "—",
             "领涨个股": c["lead_stock"],
-            "对应ETF": get_matched_etf(c["industry"])
+            "真实代表ETF": etf_str
         })
         
     # 3. 主力潜伏（悄悄建仓）板块 (默认使用回测出的最优经验保底参数：净买入 > 5.0亿 且 0.0% <= 涨幅 <= 3.0%)
@@ -143,21 +297,28 @@ def _process_stealth_flow(rows: list[Mapping[str, Any]]) -> dict[str, list[dict[
     stealth_sorted = sorted(stealth_list, key=lambda x: x["net_amount"], reverse=True)
     stealth_inflows = []
     for i, c in enumerate(stealth_sorted[:5], 1):
+        etf_info = _get_real_etf_data(c["industry"], fund_basics, fund_dailies)
+        etf_str = f"{etf_info['name']} ({etf_info['ts_code']}) [成交:{etf_info['amount_yi']:.2f}亿, 涨:{etf_info['pct_chg']:.2f}%]" if etf_info else "暂无对应ETF"
+        
+        top_stocks = _get_top_member_stocks(c["ts_code"], datasets)
+        stocks_str = "、".join(x["desc"] for x in top_stocks) or "—"
+        
         stealth_inflows.append({
             "排名": i,
             "板块名称": c["industry"],
             "主力净买入 (亿元)": f"{c['net_amount']:.2f}",
             "今日涨幅": f"{c['pct_change']:.2f}%",
             "领涨个股": c["lead_stock"],
-            "对应ETF": get_matched_etf(c["industry"])
+            "核心买入个股": stocks_str,
+            "真实代表ETF": etf_str
         })
         
     return {
         "top_inflows": top_inflows,
         "top_outflows": top_outflows,
         "stealth_inflows": stealth_inflows,
-        "raw_top_inflows": [x for x in inflows_sorted[:5]],
-        "raw_stealth_inflows": [x for x in stealth_sorted[:5]]
+        "raw_top_inflows": inflows_sorted[:5],
+        "raw_stealth_inflows": stealth_sorted[:5]
     }
 
 
@@ -184,38 +345,53 @@ def render_recap_report(
     extra_sections = ""
     stealth_summary_md = ""
     if hot_sectors_rows:
-        rankings = _process_stealth_flow(hot_sectors_rows)
+        rankings = _process_stealth_flow(hot_sectors_rows, datasets)
         extra_sections += _render_table("主力资金净流入排行 (Top 5)", rankings["top_inflows"])
         extra_sections += _render_table("主力资金净流出排行 (Top 5)", rankings["top_outflows"])
         extra_sections += _render_table("主力潜伏板块 (资金悄悄建仓)", rankings["stealth_inflows"])
         
-        # 飞书卡片主力流向文本提炼 (集成个股及 ETF 推荐)
+        fund_basics = datasets.get("fund_basics", [])
+        fund_dailies = datasets.get("fund_dailies", [])
+        
+        # 飞书卡片主力流向文本提炼 (集成个股及 ETF 推荐，分行树状排版可读性升级)
         inflow_items = []
         for x in rankings["raw_top_inflows"][:3]:
-            name = x.get('industry') or x.get('name') or '未知'
-            amt = float(x.get('net_amount') or x.get('net_amt') or 0.0)
-            lead = x.get('lead_stock') or x.get('lead') or '—'
-            etf = get_matched_etf(name)
-            etf_str = f" | ETF: {etf}" if etf != "暂无匹配ETF" else ""
-            inflow_items.append(f"{name}(+{amt:.1f}亿 | 领涨: {lead}{etf_str})")
-        inflow_txt = "、".join(inflow_items)
+            name = x.get('industry') or '未知'
+            amt = float(x.get('net_amount') or 0.0)
+            lead = x.get('lead_stock') or '—'
+            ts_code = x.get('ts_code') or ''
+            
+            etf_info = _get_real_etf_data(name, fund_basics, fund_dailies)
+            etf_str = f" | ETF: **{etf_info['name']}** (成交 {etf_info['amount_yi']:.1f}亿, 涨 {etf_info['pct_chg']:.1f}%)" if etf_info else ""
+            
+            top_stocks = _get_top_member_stocks(ts_code, datasets)
+            stocks_str = "、".join(s['desc'] for s in top_stocks) if top_stocks else f"领涨: {lead}"
+            
+            inflow_items.append(f"• **{name}** (+{amt:.1f}亿)\n  * 核心流入股：{stocks_str}{etf_str}")
+        inflow_txt = "\n".join(inflow_items)
 
         stealth_items = []
         for x in rankings["raw_stealth_inflows"][:3]:
-            name = x.get('industry') or x.get('name') or '未知'
-            amt = float(x.get('net_amount') or x.get('net_amt') or 0.0)
-            pct = float(x.get('pct_change') or x.get('pct_chg') or 0.0)
-            lead = x.get('lead_stock') or x.get('lead') or '—'
-            etf = get_matched_etf(name)
-            etf_str = f" | ETF: {etf}" if etf != "暂无匹配ETF" else ""
-            stealth_items.append(f"{name}(+{amt:.1f}亿, 涨{pct:.1f}% | 领涨: {lead}{etf_str})")
-        stealth_txt = "、".join(stealth_items)
+            name = x.get('industry') or '未知'
+            amt = float(x.get('net_amount') or 0.0)
+            pct = float(x.get('pct_change') or 0.0)
+            lead = x.get('lead_stock') or '—'
+            ts_code = x.get('ts_code') or ''
+            
+            etf_info = _get_real_etf_data(name, fund_basics, fund_dailies)
+            etf_str = f" | ETF: **{etf_info['name']}** (成交 {etf_info['amount_yi']:.1f}亿, 涨 {etf_info['pct_chg']:.1f}%)" if etf_info else ""
+            
+            top_stocks = _get_top_member_stocks(ts_code, datasets)
+            stocks_str = "、".join(s['desc'] for s in top_stocks) if top_stocks else f"领涨: {lead}"
+            
+            stealth_items.append(f"• **{name}** (+{amt:.1f}亿, 今日涨 {pct:.1f}%)\n  * 核心流入股：{stocks_str}{etf_str}")
+        stealth_txt = "\n".join(stealth_items)
         
-        stealth_summary_md = f"🔥 **今日主力净买入前三**：{inflow_txt or '无'}\n"
+        stealth_summary_md = f"🔥 **今日主力净买入前三**：\n{inflow_txt or '无'}\n\n"
         if stealth_txt:
-            stealth_summary_md += f"🕵️ **主力暗中建仓（潜伏）板块**：{stealth_txt}\n"
+            stealth_summary_md += f"🕵️ **主力暗中建仓（潜伏）板块**：\n{stealth_txt}\n"
         else:
-            stealth_summary_md += f"🕵️ **主力暗中建仓（潜伏）板块**：暂无满足条件板块\n"
+            stealth_summary_md += f"🕵️ **主力暗中建仓（潜伏）板块**：\n暂无满足条件板块\n"
 
     sections = extra_sections + "\n".join(
         _render_table(name, rows)

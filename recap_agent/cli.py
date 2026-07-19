@@ -16,7 +16,7 @@ from .data import (
     resolve_latest_trade_date,
 )
 from .feishu import FeishuConfig, FeishuSender
-from .reports import render_recap_report, write_report_files
+from .reports import render_recap_report, write_report_files, _process_stealth_flow
 
 
 TASK_TITLES = {
@@ -103,6 +103,27 @@ def run_task(
             "warning": result.warning,
             "raw_rows": len(result.rows),
         }
+
+    # 提取主力流入大额板块的代码，拉取它们的成份股并塞入 datasets
+    hot_sectors_rows = datasets.get("hot_sectors", [])
+    if hot_sectors_rows and task == "daily":
+        try:
+            rankings = _process_stealth_flow(hot_sectors_rows)
+            target_codes = []
+            for x in rankings["raw_top_inflows"][:3] + rankings["raw_stealth_inflows"][:3]:
+                raw = x.get("raw_row") or {}
+                code = raw.get("ts_code") or raw.get("code")
+                if code:
+                    target_codes.append(code)
+            
+            for code in set(target_codes):
+                try:
+                    res_members = collector.fetch_table("ths_member", {"ts_code": code})
+                    datasets[f"members_{code}"] = res_members.rows
+                except Exception as exc:
+                    print(f"Warning: failed to fetch members for {code}: {exc}")
+        except Exception as exc:
+            print(f"Warning: failed to fetch active sector members: {exc}")
 
     report = render_recap_report(
         task=task,

@@ -187,7 +187,13 @@ def default_market_requests(
         "hot_sectors": ("moneyflow_ind_ths", params),
     }
     if task == "daily":
-        return {**common, "a_share_daily": ("daily", params)}
+        return {
+            **common, 
+            "a_share_daily": ("daily", params),
+            "fund_basics": ("fund_basic", {"market": "E"}),
+            "fund_dailies": ("fund_daily", params),
+            "individual_moneyflow": ("moneyflow", params)
+        }
     if task == "weekly":
         return {**common, "weekly_moneyflow": ("moneyflow", params)}
     if task == "monthly":
