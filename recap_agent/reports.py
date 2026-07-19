@@ -362,12 +362,12 @@ def render_recap_report(
             ts_code = x.get('ts_code') or ''
             
             etf_info = _get_real_etf_data(name, fund_basics, fund_dailies)
-            etf_str = f" | ETF: **{etf_info['name']}** (成交 {etf_info['amount_yi']:.1f}亿, 涨 {etf_info['pct_chg']:.1f}%)" if etf_info else ""
+            etf_str = f"\n  🔹 代表ETF：**{etf_info['name']}** (成交 {etf_info['amount_yi']:.1f}亿, 涨 {etf_info['pct_chg']:.1f}%)" if etf_info else ""
             
             top_stocks = _get_top_member_stocks(ts_code, datasets)
             stocks_str = "、".join(s['desc'] for s in top_stocks) if top_stocks else f"领涨: {lead}"
             
-            inflow_items.append(f"• **{name}** (+{amt:.1f}亿)\n  * 核心流入股：{stocks_str}{etf_str}")
+            inflow_items.append(f"• **{name}** (+{amt:.1f}亿)\n  🔸 核心流入：{stocks_str}{etf_str}")
         inflow_txt = "\n".join(inflow_items)
 
         stealth_items = []
@@ -379,12 +379,12 @@ def render_recap_report(
             ts_code = x.get('ts_code') or ''
             
             etf_info = _get_real_etf_data(name, fund_basics, fund_dailies)
-            etf_str = f" | ETF: **{etf_info['name']}** (成交 {etf_info['amount_yi']:.1f}亿, 涨 {etf_info['pct_chg']:.1f}%)" if etf_info else ""
+            etf_str = f"\n  🔹 代表ETF：**{etf_info['name']}** (成交 {etf_info['amount_yi']:.1f}亿, 涨 {etf_info['pct_chg']:.1f}%)" if etf_info else ""
             
             top_stocks = _get_top_member_stocks(ts_code, datasets)
             stocks_str = "、".join(s['desc'] for s in top_stocks) if top_stocks else f"领涨: {lead}"
             
-            stealth_items.append(f"• **{name}** (+{amt:.1f}亿, 今日涨 {pct:.1f}%)\n  * 核心流入股：{stocks_str}{etf_str}")
+            stealth_items.append(f"• **{name}** (+{amt:.1f}亿, 今日涨 {pct:.1f}%)\n  🔸 核心流入：{stocks_str}{etf_str}")
         stealth_txt = "\n".join(stealth_items)
         
         stealth_summary_md = f"🔥 **今日主力净买入前三**：\n{inflow_txt or '无'}\n\n"
