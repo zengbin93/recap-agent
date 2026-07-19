@@ -637,7 +637,7 @@ def build_feishu_card(report: HkWeeklyReport) -> dict[str, Any]:
         f"**交易周** `{period.start_trade_date} - {period.end_trade_date}`  ·  截止 `{period.end_trade_date}`",
         f"**本周结论：{report.market_state}**  {report.market_conclusion}",
         "",
-        "### 市场温度",
+        "📊 **市场温度**",
         f"- **可计算样本** {breadth['sample_count']} · **上涨 / 下跌 / 平盘** {breadth['up_count']} / {breadth['down_count']} / {breadth['flat_count']}",
         f"- **上涨占比** {breadth['up_ratio_pct']:.1f}% · **收益中位数** {pct(breadth['median_return_pct'])}",
     ]
@@ -650,7 +650,7 @@ def build_feishu_card(report: HkWeeklyReport) -> dict[str, Any]:
     else:
         lines.append("- **港股通活动** 数据不可用，未作资金方向判断")
 
-    candidate_lines = ["### 强势研究池（流动性筛选后，非买入建议）"]
+    candidate_lines = ["🔥 **强势研究池（流动性筛选后，非买入建议）**"]
     if report.candidates:
         for item in report.candidates[:3]:
             candidate_lines.extend(
@@ -662,10 +662,10 @@ def build_feishu_card(report: HkWeeklyReport) -> dict[str, Any]:
             )
     else:
         candidate_lines.append("本周无同时满足上涨、持续性和成交活跃度门槛的标的。")
-    check_lines = ["### 下周先看什么", *[f"- {item}" for item in report.next_week_checks[:3]]]
+    check_lines = ["🕵️ **下周先看什么**", *[f"- {item}" for item in report.next_week_checks[:3]]]
     warning_lines = []
     if report.data_warnings:
-        warning_lines = ["### 数据状态", *[f"- ⚠️ {item}" for item in report.data_warnings[:3]]]
+        warning_lines = ["⚠️ **数据状态**", *[f"- ⚠️ {item}" for item in report.data_warnings[:3]]]
     return {
         "msg_type": "interactive",
         "card": {

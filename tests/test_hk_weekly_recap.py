@@ -110,7 +110,7 @@ class HongKongWeeklyRecapTests(unittest.TestCase):
 
         self.assertEqual(card["msg_type"], "interactive")
         self.assertEqual(card["card"]["header"]["title"]["content"], "港股周复盘")
-        self.assertIn("### 市场温度", json.dumps(card, ensure_ascii=False))
+        self.assertIn("📊 **市场温度**", json.dumps(card, ensure_ascii=False))
         self.assertIn("强势研究池", html)
         self.assertIn("不是买入建议", html)
         self.assertEqual(snapshot["period"]["end_trade_date"], "20260717")
