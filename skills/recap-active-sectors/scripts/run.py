@@ -807,26 +807,36 @@ def render_html(report: ActiveSectorsReport) -> str:
     rows = []
     for s in report.sectors:
         if not s.quote_available:
-            flow_tag_html = "<span style='display:inline; color:#667085; font-weight:bold; margin-left:8px;'>[方向未知]</span>"
+            flow_tag_html = "<span class='tag-flat'>方向未知</span>"
         elif s.today_pct > 0:
-            flow_tag_html = "<span style='display:inline; color:#b42318; font-weight:bold; margin-left:8px;'>[主力流入]</span>"
+            flow_tag_html = "<span class='tag-up'>主力流入</span>"
         elif s.today_pct < 0:
-            flow_tag_html = "<span style='display:inline; color:#17b423; font-weight:bold; margin-left:8px;'>[主力流出]</span>"
+            flow_tag_html = "<span class='tag-down'>主力流出</span>"
         else:
-            flow_tag_html = "<span style='display:inline; color:#667085; font-weight:bold; margin-left:8px;'>[多空平衡]</span>"
+            flow_tag_html = "<span class='tag-flat'>多空平衡</span>"
 
-        reps = "".join(
-            f"<li><strong>{escape(r.name)}</strong> 今日 {fmt_pct(r.pct_chg)} / {report.recent_days}日 {fmt_pct(r.recent_pct)}"
-            f"<span>{escape(r.ts_code)} · 成交 {r.amount_yi:g} 亿</span></li>"
-            for r in s.representatives
-        )
-        quote = (
-            f"{fmt_pct(s.today_pct)}<span>{report.recent_days}日 {fmt_pct(s.recent_pct)} / 振幅 {fmt_pct(s.amplitude)}</span>"
-            if s.quote_available
-            else "<span>板块行情不可用</span>"
-        )
+        reps_items = []
+        for r in s.representatives:
+            r_today_class = "text-up" if r.pct_chg > 0 else "text-down" if r.pct_chg < 0 else ""
+            r_recent_class = "text-up" if r.recent_pct > 0 else "text-down" if r.recent_pct < 0 else ""
+            reps_items.append(
+                f"<li><strong>{escape(r.name)}</strong> 今日 <span class='{r_today_class}'>{fmt_pct(r.pct_chg)}</span> / {report.recent_days}日 <span class='{r_recent_class}'>{fmt_pct(r.recent_pct)}</span>"
+                f"<span>{escape(r.ts_code)} · 成交 {r.amount_yi:g} 亿</span></li>"
+            )
+        reps = "".join(reps_items)
+
+        if s.quote_available:
+            today_class = "text-up" if s.today_pct > 0 else "text-down" if s.today_pct < 0 else ""
+            recent_class = "text-up" if s.recent_pct > 0 else "text-down" if s.recent_pct < 0 else ""
+            quote = (
+                f"<strong class='{today_class}' style='font-size:16px;'>{fmt_pct(s.today_pct)}</strong>"
+                f"<span>{report.recent_days}日 <strong class='{recent_class}'>{fmt_pct(s.recent_pct)}</strong> / 振幅 {fmt_pct(s.amplitude)}</span>"
+            )
+        else:
+            quote = "<span>板块行情不可用</span>"
+
         activity = (
-            f"{s.hit_count} / {s.sector_size or '—'}"
+            f"<span class='gain'>{s.hit_count}</span> <span style='display:inline; color:var(--text-muted); font-size:14px;'>/ {s.sector_size or '—'}</span>"
             f"<span>覆盖 {fmt_pct(s.coverage_pct)} · 成交 {s.turnover_yi:g} 亿（榜内 {fmt_pct(s.turnover_share_pct)}）</span>"
         )
         change = (
@@ -835,24 +845,27 @@ def render_html(report: ActiveSectorsReport) -> str:
             else "历史命中数据不可用"
         )
         merged = (
-            f"<span>已合并：{escape('、'.join(s.related_sectors[:3]))}</span>"
+            f"<div style='margin-top:8px; font-size:12px; color:var(--text-muted);'>已合并：{escape('、'.join(s.related_sectors[:3]))}</div>"
             if s.related_sectors
             else ""
         )
+        
+        hit_badges = "".join(f"<span class='badge'>{escape(stk)}</span>" for stk in s.hit_stocks)
+        
         rows.append(
             "<tr>"
-            f"<td>{s.rank}</td>"
-            f"<td><strong>{escape(s.name)}</strong>{flow_tag_html}<span>{escape(s.index_code)} · {escape(s.type_label)} · {change}</span>{merged}</td>"
-            f"<td class='gain'>{activity}</td>"
+            f"<td style='font-weight:bold; font-size:16px; color:var(--text-muted);'>{s.rank}</td>"
+            f"<td><strong style='font-size:16px; color:#ffffff;'>{escape(s.name)}</strong>{flow_tag_html}<span style='font-size:12px; margin-top:6px;'>{escape(s.index_code)} · {escape(s.type_label)} · {change}</span>{merged}</td>"
+            f"<td>{activity}</td>"
             f"<td>{quote}</td>"
-            f"<td>{escape('、'.join(s.hit_stocks))}</td>"
+            f"<td><div style='max-width:320px;'>{hit_badges}</div></td>"
             f"<td><ul>{reps or '<li>无榜内成分股</li>'}</ul></td>"
             "</tr>"
         )
     table_body = "\n".join(rows) or "<tr><td colspan='6' class='empty'>今日无满足阈值的活跃板块。</td></tr>"
     table = (
-        "<table><thead><tr><th>排名</th><th>主题簇代表</th><th>命中 / 覆盖</th>"
-        f"<th>今日/{report.recent_days}日</th><th>命中个股</th><th>代表成分股</th></tr></thead>"
+        "<table><thead><tr><th style='width:50px;'>排名</th><th>主题簇代表</th><th>命中 / 覆盖</th>"
+        f"<th>今日/{report.recent_days}日</th><th style='width:320px;'>命中个股</th><th>代表成分股</th></tr></thead>"
         f"<tbody>{table_body}</tbody></table>"
     )
     cards = [
@@ -879,26 +892,262 @@ def render_html(report: ActiveSectorsReport) -> str:
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>成交活跃板块复盘 {escape(report.trade_date)}</title>
   <style>
-    :root {{ --bg:#f6f7f9; --panel:#fff; --text:#20242a; --muted:#667085; --line:#dde2e8; --gain:#b42318; }}
-    * {{ box-sizing:border-box; }}
-    body {{ margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; }}
-    header {{ padding:28px 36px 18px; background:var(--panel); border-bottom:1px solid var(--line); }}
-    h1 {{ margin:0 0 8px; font-size:28px; }} .subtitle {{ margin:0; color:var(--muted); line-height:1.7; }}
-    main {{ padding:22px 36px 42px; }} .cards {{ display:grid; grid-template-columns:repeat(5,minmax(140px,1fr)); gap:12px; margin-bottom:18px; }}
-    .card {{ background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:14px 16px; }}
-    .card span, td span {{ display:block; color:var(--muted); font-size:12px; margin-top:4px; }} .card strong {{ font-size:22px; }}
-    .table-wrap {{ overflow-x:auto; background:var(--panel); border:1px solid var(--line); border-radius:8px; }}
-    table {{ width:100%; min-width:1080px; border-collapse:collapse; }}
-    th,td {{ padding:12px 14px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; font-size:14px; }}
-    th {{ background:#f9fafb; color:#475467; font-size:13px; }} tr:last-child td {{ border-bottom:0; }}
-    .gain {{ color:var(--gain); font-weight:750; font-size:18px; }} ul {{ margin:0; padding-left:18px; }} li {{ margin-bottom:6px; }}
-    .empty {{ text-align:center; color:var(--muted); padding:32px; }} .note {{ margin-top:14px; color:var(--muted); font-size:13px; line-height:1.7; }}
-    @media (max-width:900px) {{ header,main {{ padding-left:18px; padding-right:18px; }} .cards {{ grid-template-columns:repeat(2,minmax(140px,1fr)); }} }}
+    :root {{
+      --primary: #151c2c;
+      --primary-light: #1e293b;
+      --accent: #3b82f6;
+      --bg: #0b0f19;
+      --card-bg: #111827;
+      --border: rgba(56, 189, 248, 0.08);
+      --text-main: #e2e8f0;
+      --text-muted: #94a3b8;
+      
+      --up-color: #ff4a6b;
+      --up-bg: rgba(255, 74, 107, 0.1);
+      --down-color: #00e676;
+      --down-bg: rgba(0, 230, 118, 0.1);
+      --flat-color: #94a3b8;
+      --flat-bg: rgba(148, 163, 184, 0.1);
+    }}
+    
+    * {{ box-sizing: border-box; }}
+    
+    body {{
+      margin: 0;
+      background: var(--bg);
+      color: var(--text-main);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.6;
+    }}
+    
+    header {{
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      padding: 32px 40px;
+      border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }}
+    
+    header h1 {{
+      margin: 0 0 8px;
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      background: linear-gradient(to right, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }}
+    
+    .subtitle {{
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 14px;
+    }}
+    
+    main {{
+      padding: 32px 40px;
+      max-width: 1500px;
+      margin: 0 auto;
+    }}
+    
+    .cards {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }}
+    
+    .card {{
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s, border-color 0.2s;
+    }}
+    
+    .card:hover {{
+      transform: translateY(-2px);
+      border-color: rgba(56, 189, 248, 0.25);
+    }}
+    
+    .card span, td span {{
+      display: block;
+      color: var(--text-muted);
+      font-size: 12px;
+      margin-top: 4px;
+    }}
+    
+    .card span {{
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }}
+    
+    .card strong {{
+      font-size: 24px;
+      font-weight: 700;
+      color: #ffffff;
+    }}
+    
+    .table-wrap {{
+      overflow-x: auto;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
+    }}
+    
+    table {{
+      width: 100%;
+      min-width: 1100px;
+      border-collapse: collapse;
+      font-size: 14px;
+      text-align: left;
+    }}
+    
+    th, td {{
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }}
+    
+    th {{
+      background-color: #1e293b;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }}
+    
+    tr:last-child td {{
+      border-bottom: none;
+    }}
+    
+    tr {{
+      transition: background-color 0.15s;
+    }}
+    
+    tr:hover td {{
+      background-color: rgba(255, 255, 255, 0.02);
+    }}
+    
+    .text-up {{ color: var(--up-color) !important; font-weight: bold; }}
+    .text-down {{ color: var(--down-color) !important; font-weight: bold; }}
+    
+    .gain {{
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--up-color);
+      font-variant-numeric: tabular-nums;
+    }}
+    
+    .tag-up {{
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-weight: bold;
+      border-radius: 4px;
+      background-color: var(--up-bg);
+      color: var(--up-color);
+      margin-left: 8px;
+    }}
+    .tag-down {{
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-weight: bold;
+      border-radius: 4px;
+      background-color: var(--down-bg);
+      color: var(--down-color);
+      margin-left: 8px;
+    }}
+    .tag-flat {{
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-weight: bold;
+      border-radius: 4px;
+      background-color: var(--flat-bg);
+      color: var(--flat-color);
+      margin-left: 8px;
+    }}
+    
+    .badge {{
+      display: inline-block;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 500;
+      border-radius: 6px;
+      background-color: #1e293b;
+      color: #cbd5e1;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      margin-right: 4px;
+      margin-bottom: 6px;
+      transition: background-color 0.15s;
+    }}
+    
+    .badge:hover {{
+      background-color: #334155;
+    }}
+    
+    ul {{
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }}
+    
+    li {{
+      margin-bottom: 12px;
+      border-bottom: 1px dashed rgba(255,255,255,0.04);
+      padding-bottom: 8px;
+    }}
+    li:last-child {{
+      border-bottom: none;
+      padding-bottom: 0;
+      margin-bottom: 0;
+    }}
+    
+    li strong {{
+      color: #ffffff;
+      font-size: 14px;
+    }}
+    
+    .empty {{
+      text-align: center;
+      color: var(--text-muted);
+      padding: 60px;
+      font-size: 15px;
+    }}
+    
+    .note {{
+      margin-top: 24px;
+      color: var(--text-muted);
+      font-size: 13px;
+      line-height: 1.8;
+      border-top: 1px solid var(--border);
+      padding-top: 20px;
+    }}
+    
+    @media (max-width: 900px) {{
+      header, main {{ padding-left: 20px; padding-right: 20px; }}
+      .cards {{ grid-template-columns: repeat(2, minmax(140px, 1fr)); }}
+    }}
   </style>
 </head>
-<body><header><h1>成交活跃板块复盘 · {escape(report.trade_date)}</h1>
-<p class="subtitle">成交额榜前 {report.top_n} 只个股聚合出的同花顺活跃概念/行业板块，及其行情与代表成分股。</p></header>
-<main><section class="cards">{cards_html}</section><section class="table-wrap">{table}</section><p class="note">{escape(note)}</p></main></body></html>
+<body>
+  <header>
+    <h1>成交活跃板块复盘 · {escape(report.trade_date)}</h1>
+    <p class="subtitle">成交额榜前 {report.top_n} 只个股聚合出的同花顺活跃概念/行业板块，及其行情与代表成分股。</p>
+  </header>
+  <main>
+    <section class="cards">{cards_html}</section>
+    <section class="table-wrap">{table}</section>
+    <p class="note">{escape(note)}</p>
+  </main>
+</body>
+</html>
 """
 
 
