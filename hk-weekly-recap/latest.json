@@ -1,0 +1,255 @@
+{
+  "generated_at": "2026-07-19T22:38:18+08:00",
+  "period": {
+    "start_trade_date": "20260713",
+    "end_trade_date": "20260717",
+    "prior_trade_date": "20260710",
+    "trade_dates": [
+      "20260713",
+      "20260714",
+      "20260715",
+      "20260716",
+      "20260717"
+    ]
+  },
+  "market_state": "结构分化",
+  "market_conclusion": "市场并非单边：强势标的需要同时通过流动性和持续性筛选，不能只按涨幅追踪。",
+  "coverage": {
+    "week_end_rows": 3227,
+    "prior_close_rows": 3225,
+    "computable_sample": 3224,
+    "basic_coverage": 2783
+  },
+  "breadth": {
+    "sample_count": 3224,
+    "up_count": 1069,
+    "down_count": 1456,
+    "flat_count": 699,
+    "up_ratio_pct": 33.2,
+    "median_return_pct": 0.0
+  },
+  "indices": [
+    {
+      "name": "恒生指数",
+      "ts_code": "HSI",
+      "start_trade_date": "20260710",
+      "end_trade_date": "20260717",
+      "week_return_pct": 1.6
+    }
+  ],
+  "industries": [],
+  "southbound": {
+    "days": 5,
+    "buy_amount_yi": 2139.93,
+    "sell_amount_yi": 1895.05,
+    "net_buy_yi": 244.88,
+    "source": "ggt_daily"
+  },
+  "connect_leaders": [
+    {
+      "ts_code": "00700.HK",
+      "name": "腾讯控股",
+      "net_amount": 0.0,
+      "amount": 0.0,
+      "market_type": 2
+    },
+    {
+      "ts_code": "00700.HK",
+      "name": "腾讯控股",
+      "net_amount": 0.0,
+      "amount": 0.0,
+      "market_type": 4
+    },
+    {
+      "ts_code": "00981.HK",
+      "name": "中芯国际",
+      "net_amount": 0.0,
+      "amount": 0.0,
+      "market_type": 2
+    },
+    {
+      "ts_code": "00981.HK",
+      "name": "中芯国际",
+      "net_amount": 0.0,
+      "amount": 0.0,
+      "market_type": 4
+    },
+    {
+      "ts_code": "01347.HK",
+      "name": "华虹宏力",
+      "net_amount": 0.0,
+      "amount": 0.0,
+      "market_type": 2
+    }
+  ],
+  "candidates": [
+    {
+      "ts_code": "01815.HK",
+      "name": "珠峰黄金",
+      "industry": "未分类",
+      "market": "主板",
+      "score": 85.0,
+      "week_return_pct": 65.08,
+      "positive_days": 5,
+      "active_days": 5,
+      "liquidity_ratio": 61.12,
+      "why_now": "周涨幅 +65.1%；5/5 个交易日上涨；成交活跃度为样本中位数的 61.1 倍。",
+      "first_rejection": "若下周跌破本周低点且成交活跃度回落至样本中位数以下，移出研究池。",
+      "risk": "驱动待核验：行情与港股通数据不能替代公告、业绩或新闻证据。",
+      "next_check": "核验业绩披露、公司公告和真实催化；确认相对强度与成交活跃度是否延续。",
+      "rank": 1
+    },
+    {
+      "ts_code": "01417.HK",
+      "name": "浦江中国",
+      "industry": "未分类",
+      "market": "主板",
+      "score": 85.0,
+      "week_return_pct": 41.69,
+      "positive_days": 5,
+      "active_days": 5,
+      "liquidity_ratio": 52.63,
+      "why_now": "周涨幅 +41.7%；5/5 个交易日上涨；成交活跃度为样本中位数的 52.6 倍。",
+      "first_rejection": "若下周跌破本周低点且成交活跃度回落至样本中位数以下，移出研究池。",
+      "risk": "驱动待核验：行情与港股通数据不能替代公告、业绩或新闻证据。",
+      "next_check": "核验业绩披露、公司公告和真实催化；确认相对强度与成交活跃度是否延续。",
+      "rank": 2
+    },
+    {
+      "ts_code": "02687.HK",
+      "name": "卓越睿新",
+      "industry": "未分类",
+      "market": "主板",
+      "score": 85.0,
+      "week_return_pct": 40.03,
+      "positive_days": 5,
+      "active_days": 5,
+      "liquidity_ratio": 115.77,
+      "why_now": "周涨幅 +40.0%；5/5 个交易日上涨；成交活跃度为样本中位数的 115.8 倍。",
+      "first_rejection": "若下周跌破本周低点且成交活跃度回落至样本中位数以下，移出研究池。",
+      "risk": "驱动待核验：行情与港股通数据不能替代公告、业绩或新闻证据。",
+      "next_check": "核验业绩披露、公司公告和真实催化；确认相对强度与成交活跃度是否延续。",
+      "rank": 3
+    },
+    {
+      "ts_code": "01180.HK",
+      "name": "汇彩控股",
+      "industry": "未分类",
+      "market": "主板",
+      "score": 85.0,
+      "week_return_pct": 34.21,
+      "positive_days": 5,
+      "active_days": 5,
+      "liquidity_ratio": 6.72,
+      "why_now": "周涨幅 +34.2%；5/5 个交易日上涨；成交活跃度为样本中位数的 6.7 倍。",
+      "first_rejection": "若下周跌破本周低点且成交活跃度回落至样本中位数以下，移出研究池。",
+      "risk": "驱动待核验：行情与港股通数据不能替代公告、业绩或新闻证据。",
+      "next_check": "核验业绩披露、公司公告和真实催化；确认相对强度与成交活跃度是否延续。",
+      "rank": 4
+    },
+    {
+      "ts_code": "00133.HK",
+      "name": "招商局中国基金",
+      "industry": "未分类",
+      "market": "主板",
+      "score": 85.0,
+      "week_return_pct": 19.21,
+      "positive_days": 5,
+      "active_days": 5,
+      "liquidity_ratio": 65.93,
+      "why_now": "周涨幅 +19.2%；5/5 个交易日上涨；成交活跃度为样本中位数的 65.9 倍。",
+      "first_rejection": "若下周跌破本周低点且成交活跃度回落至样本中位数以下，移出研究池。",
+      "risk": "驱动待核验：行情与港股通数据不能替代公告、业绩或新闻证据。",
+      "next_check": "核验业绩披露、公司公告和真实催化；确认相对强度与成交活跃度是否延续。",
+      "rank": 5
+    },
+    {
+      "ts_code": "02657.HK",
+      "name": "林清轩",
+      "industry": "未分类",
+      "market": "主板",
+      "score": 85.0,
+      "week_return_pct": 16.03,
+      "positive_days": 5,
+      "active_days": 5,
+      "liquidity_ratio": 30.63,
+      "why_now": "周涨幅 +16.0%；5/5 个交易日上涨；成交活跃度为样本中位数的 30.6 倍。",
+      "first_rejection": "若下周跌破本周低点且成交活跃度回落至样本中位数以下，移出研究池。",
+      "risk": "驱动待核验：行情与港股通数据不能替代公告、业绩或新闻证据。",
+      "next_check": "核验业绩披露、公司公告和真实催化；确认相对强度与成交活跃度是否延续。",
+      "rank": 6
+    },
+    {
+      "ts_code": "00918.HK",
+      "name": "龙翼航空科技",
+      "industry": "未分类",
+      "market": "主板",
+      "score": 82.0,
+      "week_return_pct": 91.84,
+      "positive_days": 4,
+      "active_days": 5,
+      "liquidity_ratio": 42.37,
+      "why_now": "周涨幅 +91.8%；4/5 个交易日上涨；成交活跃度为样本中位数的 42.4 倍。",
+      "first_rejection": "若下周跌破本周低点且成交活跃度回落至样本中位数以下，移出研究池。",
+      "risk": "驱动待核验：行情与港股通数据不能替代公告、业绩或新闻证据。",
+      "next_check": "核验业绩披露、公司公告和真实催化；确认相对强度与成交活跃度是否延续。",
+      "rank": 7
+    },
+    {
+      "ts_code": "00139.HK",
+      "name": "小鱼盈通",
+      "industry": "未分类",
+      "market": "主板",
+      "score": 82.0,
+      "week_return_pct": 50.0,
+      "positive_days": 4,
+      "active_days": 5,
+      "liquidity_ratio": 14.58,
+      "why_now": "周涨幅 +50.0%；4/5 个交易日上涨；成交活跃度为样本中位数的 14.6 倍。",
+      "first_rejection": "若下周跌破本周低点且成交活跃度回落至样本中位数以下，移出研究池。",
+      "risk": "驱动待核验：行情与港股通数据不能替代公告、业绩或新闻证据。",
+      "next_check": "核验业绩披露、公司公告和真实催化；确认相对强度与成交活跃度是否延续。",
+      "rank": 8
+    },
+    {
+      "ts_code": "06090.HK",
+      "name": "不同集团",
+      "industry": "未分类",
+      "market": "主板",
+      "score": 82.0,
+      "week_return_pct": 35.18,
+      "positive_days": 4,
+      "active_days": 5,
+      "liquidity_ratio": 427.83,
+      "why_now": "周涨幅 +35.2%；4/5 个交易日上涨；成交活跃度为样本中位数的 427.8 倍。",
+      "first_rejection": "若下周跌破本周低点且成交活跃度回落至样本中位数以下，移出研究池。",
+      "risk": "驱动待核验：行情与港股通数据不能替代公告、业绩或新闻证据。",
+      "next_check": "核验业绩披露、公司公告和真实催化；确认相对强度与成交活跃度是否延续。",
+      "rank": 9
+    },
+    {
+      "ts_code": "02685.HK",
+      "name": "量化派",
+      "industry": "未分类",
+      "market": "主板",
+      "score": 82.0,
+      "week_return_pct": 25.09,
+      "positive_days": 4,
+      "active_days": 5,
+      "liquidity_ratio": 1834.43,
+      "why_now": "周涨幅 +25.1%；4/5 个交易日上涨；成交活跃度为样本中位数的 1834.4 倍。",
+      "first_rejection": "若下周跌破本周低点且成交活跃度回落至样本中位数以下，移出研究池。",
+      "risk": "驱动待核验：行情与港股通数据不能替代公告、业绩或新闻证据。",
+      "next_check": "核验业绩披露、公司公告和真实催化；确认相对强度与成交活跃度是否延续。",
+      "rank": 10
+    }
+  ],
+  "next_week_checks": [
+    "观察上涨家数是否继续高于 55%，避免只由少数权重股带动。",
+    "确认强势研究池能否守住本周低点，并维持不低于样本中位数的成交活跃度。",
+    "比较下周港股通买卖差额与本周，避免把单周成交变化当作长期资金趋势。",
+    "对照恒生、国企与科技指数的相对表现，判断风险偏好是否从局部扩散。"
+  ],
+  "data_warnings": [],
+  "methodology": "v1.0-hk-liquidity-strength"
+}
