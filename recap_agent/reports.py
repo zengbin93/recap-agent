@@ -407,28 +407,250 @@ def render_recap_report(
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{html.escape(title)}</title>
   <style>
-    body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 32px; color: #202124; background: #fafbfc; }}
-    h1 {{ font-size: 28px; margin-bottom: 4px; }}
-    h2 {{ margin-top: 28px; }}
-    .meta {{ color: #5f6368; margin-bottom: 24px; }}
-    .summary {{ display: grid; grid-template-columns: repeat(4, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }}
-    .summary-card {{ background: white; border: 1px solid #dadce0; border-radius: 8px; padding: 14px; }}
-    .summary-card span {{ display: block; color: #5f6368; font-size: 12px; margin-bottom: 6px; }}
-    .summary-card strong {{ font-size: 20px; }}
-    .movers {{ background: white; border: 1px solid #dadce0; border-radius: 8px; padding: 14px 18px; margin-bottom: 26px; }}
-    .movers ul {{ margin: 8px 0 0; padding-left: 20px; }}
-    .warning {{ color: #9a3412; }}
-    table {{ border-collapse: collapse; width: 100%; margin-bottom: 28px; background: white; }}
-    th, td {{ border: 1px solid #dadce0; padding: 8px 10px; text-align: left; }}
-    th {{ background: #f8fafd; }}
-    @media (max-width: 760px) {{ .summary {{ grid-template-columns: repeat(2, minmax(140px, 1fr)); }} }}
+    :root {{
+      --primary: #0f172a;
+      --primary-light: #1e293b;
+      --accent: #3b82f6;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: rgba(226, 232, 240, 0.8);
+      --text-main: #334155;
+      --text-muted: #64748b;
+      --up-color: #ef4444;
+      --up-bg: #fef2f2;
+      --down-color: #10b981;
+      --down-bg: #ecfdf5;
+    }}
+    
+    * {{ box-sizing: border-box; }}
+    
+    body {{
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      margin: 0;
+      padding: 40px 24px;
+      color: var(--text-main);
+      background-color: var(--bg);
+      line-height: 1.6;
+    }}
+    
+    .container {{
+      max-width: 1200px;
+      margin: 0 auto;
+    }}
+    
+    header {{
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      border-radius: 16px;
+      padding: 32px 40px;
+      color: #ffffff;
+      margin-bottom: 32px;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15), 0 8px 10px -6px rgba(15, 23, 42, 0.15);
+    }}
+    
+    header h1 {{
+      font-size: 32px;
+      font-weight: 800;
+      margin: 0 0 12px 0;
+      letter-spacing: -0.025em;
+    }}
+    
+    header .meta {{
+      font-size: 13px;
+      color: #94a3b8;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+    }}
+    
+    header .meta span {{
+      background: rgba(255, 255, 255, 0.08);
+      padding: 4px 14px;
+      border-radius: 9999px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }}
+    
+    .summary {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 32px;
+    }}
+    
+    .summary-card {{
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }}
+    
+    .summary-card:hover {{
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+    }}
+    
+    .summary-card span {{
+      display: block;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }}
+    
+    .summary-card strong {{
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--primary);
+    }}
+    
+    .text-up {{
+      color: var(--up-color) !important;
+      font-weight: 700;
+    }}
+    .text-down {{
+      color: var(--down-color) !important;
+      font-weight: 700;
+    }}
+    
+    .movers {{
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+      margin-bottom: 32px;
+    }}
+    
+    .movers h3 {{
+      margin: 0 0 16px 0;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary);
+      border-left: 4px solid var(--accent);
+      padding-left: 12px;
+    }}
+    
+    .table-section {{
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 32px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+    }}
+    
+    .table-section h2 {{
+      margin: 0 0 20px 0;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }}
+    
+    .table-section h2::before {{
+      content: "";
+      display: inline-block;
+      width: 6px;
+      height: 20px;
+      background-color: var(--accent);
+      border-radius: 3px;
+    }}
+    
+    .table-wrapper {{
+      overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }}
+    
+    table {{
+      border-collapse: collapse;
+      width: 100%;
+      background: var(--card-bg);
+      font-size: 14px;
+      text-align: left;
+    }}
+    
+    th, td {{
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+    }}
+    
+    th {{
+      background-color: #f8fafc;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 0.05em;
+    }}
+    
+    tr:last-child td {{
+      border-bottom: none;
+    }}
+    
+    tr {{
+      transition: background-color 0.15s;
+    }}
+    
+    tr:hover td {{
+      background-color: #f1f5f9;
+    }}
+    
+    .badge {{
+      display: inline-block;
+      padding: 3px 8px;
+      font-size: 12px;
+      font-weight: 500;
+      border-radius: 6px;
+      background-color: #f1f5f9;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+      margin-right: 4px;
+      margin-bottom: 4px;
+    }}
+    
+    .badge:hover {{
+      background-color: #e2e8f0;
+    }}
+    
+    .no-data {{
+      color: var(--text-muted);
+      padding: 40px;
+      text-align: center;
+      font-size: 15px;
+    }}
+    
+    @media (max-width: 768px) {{
+      body {{ padding: 20px 12px; }}
+      header {{ padding: 24px 20px; }}
+      header h1 {{ font-size: 24px; }}
+      .table-section {{ padding: 16px; }}
+      th, td {{ padding: 10px 12px; }}
+    }}
   </style>
 </head>
 <body>
-  <h1>{html.escape(title)}</h1>
-  <div class="meta">task={html.escape(task)} · {html.escape(period_text)} · generated_at={html.escape(generated_at)}<br>{html.escape(source_text)}</div>
-  {_render_snapshot_summary(snapshot)}
-  {sections}
+  <div class="container">
+    <header>
+      <h1>{html.escape(title)}</h1>
+      <div class="meta">
+        <span>任务：{html.escape(task)}</span>
+        <span>区间：{html.escape(period_text)}</span>
+        <span>生成时间：{html.escape(generated_at)}</span>
+      </div>
+    </header>
+    {_render_snapshot_summary(snapshot)}
+    {sections}
+    <div style="text-align: center; margin-top: 40px; font-size: 12px; color: var(--text-muted);">
+      {html.escape(source_text)}
+    </div>
+  </div>
 </body>
 </html>
 """
@@ -570,18 +792,88 @@ def build_market_snapshot(
     }
 
 
+def _get_color_class(col_name: str, val_str: str) -> str:
+    val = val_str.strip()
+    if not val or val in ("—", "暂无", "暂无对应ETF"):
+        return ""
+    
+    is_metric = any(k in col_name for k in ("涨幅", "跌幅", "涨跌", "流入", "流出", "净买入", "pct_chg", "pct_change"))
+    if not is_metric:
+        return ""
+        
+    if val.startswith("+"):
+        return "text-up"
+    if val.startswith("-"):
+        return "text-down"
+        
+    clean_val = val.replace("%", "").replace("亿", "").replace("万", "").strip()
+    try:
+        num = float(clean_val)
+        if num > 0:
+            return "text-up"
+        if num < 0:
+            return "text-down"
+    except ValueError:
+        pass
+        
+    return ""
+
+
 def _render_table(name: str, rows: list[Mapping[str, Any]]) -> str:
     if not rows:
-        return f"<section><h2>{html.escape(name)}</h2><p>暂无数据</p></section>"
+        return f"<section class='table-section'><h2>{html.escape(name)}</h2><div class='no-data'>暂无数据</div></section>"
+        
     columns = list(rows[0].keys())
-    header = "".join(f"<th>{html.escape(str(col))}</th>" for col in columns)
-    body = "\n".join(
-        "<tr>"
-        + "".join(f"<td>{html.escape(str(row.get(col, '')))}</td>" for col in columns)
-        + "</tr>"
-        for row in rows[:20]
-    )
-    return f"<section><h2>{html.escape(name)}</h2><table><thead><tr>{header}</tr></thead><tbody>{body}</tbody></table></section>"
+    
+    column_labels = {
+        "排名": "排名",
+        "板块名称": "行业板块",
+        "主力净流入 (亿元)": "主力资金流入",
+        "主力净流出 (亿元)": "主力资金流出",
+        "主力净买入 (亿元)": "主力资金买入",
+        "今日涨幅": "今日涨跌幅",
+        "领涨个股": "主力领涨股",
+        "核心买入个股": "主力大额买入股 (前三)",
+        "真实代表ETF": "真实代表场内 ETF",
+        "ts_code": "代码",
+        "symbol": "代号",
+        "name": "名称",
+        "open": "开盘价",
+        "high": "最高价",
+        "low": "最低价",
+        "close": "收盘价",
+        "pre_close": "昨收价",
+        "change": "涨跌额",
+        "pct_chg": "涨跌幅",
+        "vol": "成交量",
+        "amount": "成交额",
+    }
+    
+    header = "".join(f"<th>{html.escape(column_labels.get(col, str(col)))}</th>" for col in columns if col != "raw_row")
+    
+    body_rows = []
+    for row in rows[:20]:
+        td_elements = []
+        for col in columns:
+            if col == "raw_row":
+                continue
+            val = str(row.get(col, ''))
+            color_class = _get_color_class(col, val)
+            
+            if col in ("核心买入个股", "真实代表ETF") and val not in ("", "—", "暂无对应ETF"):
+                parts = val.split("、") if "、" in val else [val]
+                badges = []
+                for p in parts:
+                    badges.append(f"<span class='badge'>{html.escape(p)}</span>")
+                td_elements.append(f"<td>{' '.join(badges)}</td>")
+            else:
+                span_class = f" class='{color_class}'" if color_class else ""
+                td_elements.append(f"<td><span{span_class}>{html.escape(val)}</span></td>")
+                
+        body_rows.append("<tr>" + "".join(td_elements) + "</tr>")
+        
+    body = "\n".join(body_rows)
+    return f"<section class='table-section'><h2>{html.escape(name)}</h2><div class='table-wrapper'><table><thead><tr>{header}</tr></thead><tbody>{body}</tbody></table></div></section>"
 
 
 def _pct_change(row: Mapping[str, Any]) -> float | None:
@@ -638,30 +930,60 @@ def _source_text(snapshot: Mapping[str, Any]) -> str:
 
 def _render_snapshot_summary(snapshot: Mapping[str, Any]) -> str:
     summary = snapshot["summary"]
+    
     gainers = (
         "".join(
-            f"<li>{html.escape(item['label'])}：{item['pct_change']:.2f}%</li>"
+            f"<li style='margin-bottom: 8px; list-style-type: none;'><strong>{html.escape(item['label'])}</strong> <span class='text-up' style='margin-left: 8px;'>+{item['pct_change']:.2f}%</span></li>"
             for item in snapshot["top_gainers"]
         )
-        or "<li>暂无</li>"
+        or "<li style='list-style-type: none; color: var(--text-muted);'>暂无</li>"
     )
     losers = (
         "".join(
-            f"<li>{html.escape(item['label'])}：{item['pct_change']:.2f}%</li>"
+            f"<li style='margin-bottom: 8px; list-style-type: none;'><strong>{html.escape(item['label'])}</strong> <span class='text-down' style='margin-left: 8px;'>{item['pct_change']:.2f}%</span></li>"
             for item in snapshot["top_losers"]
         )
-        or "<li>暂无</li>"
+        or "<li style='list-style-type: none; color: var(--text-muted);'>暂无</li>"
     )
+    
+    trend = summary["trend"]
+    trend_class = "text-up" if any(x in trend for x in ("强", "多", "涨", "牛")) else "text-down" if any(x in trend for x in ("弱", "空", "跌", "熊")) else ""
+    
     return f"""
   <section class="summary">
-    <div class="summary-card"><span>市场状态</span><strong>{html.escape(summary["trend"])}</strong></div>
-    <div class="summary-card"><span>A股样本</span><strong>{summary["stock_count"]}</strong></div>
-    <div class="summary-card"><span>A股上涨</span><strong>{summary["positive_rows"]}</strong></div>
-    <div class="summary-card"><span>A股下跌</span><strong>{summary["negative_rows"]}</strong></div>
+    <div class="summary-card">
+      <span>市场研判状态</span>
+      <strong class="{trend_class}">{html.escape(trend)}</strong>
+    </div>
+    <div class="summary-card">
+      <span>A股监测样本</span>
+      <strong>{summary["stock_count"]} <span style="font-size: 14px; font-weight: normal; color: var(--text-muted);">只</span></strong>
+    </div>
+    <div class="summary-card">
+      <span>A股上涨家数</span>
+      <strong class="text-up">▲ {summary["positive_rows"]}</strong>
+    </div>
+    <div class="summary-card">
+      <span>A股下跌家数</span>
+      <strong class="text-down">▼ {summary["negative_rows"]}</strong>
+    </div>
   </section>
   <section class="movers">
-    <strong>规则化摘要</strong>
-    <ul><li>A股涨幅靠前：<ul>{gainers}</ul></li><li>A股跌幅靠前：<ul>{losers}</ul></li></ul>
+    <h3>今日 A 股盘面宽幅异动股</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-top: 16px;">
+      <div>
+        <h4 style="margin: 0 0 12px 0; color: var(--up-color); font-size: 15px; border-bottom: 2px solid var(--up-bg); padding-bottom: 4px;">🔥 涨幅靠前榜单</h4>
+        <ul style="padding: 0; margin: 0;">
+          {gainers}
+        </ul>
+      </div>
+      <div>
+        <h4 style="margin: 0 0 12px 0; color: var(--down-color); font-size: 15px; border-bottom: 2px solid var(--down-bg); padding-bottom: 4px;">❄️ 跌幅靠前榜单</h4>
+        <ul style="padding: 0; margin: 0;">
+          {losers}
+        </ul>
+      </div>
+    </div>
   </section>
 """
 
