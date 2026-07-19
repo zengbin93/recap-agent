@@ -18,7 +18,7 @@ on:
         type: boolean
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: hk-weekly-recap-${{ github.ref }}
