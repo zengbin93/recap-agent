@@ -329,7 +329,7 @@ class RecapEngineeringTests(unittest.TestCase):
 
         text = workflow.read_text(encoding="utf-8")
 
-        self.assertIn("0 0 * * *", text)
+        self.assertIn("0 11 * * 1-5", text)
         self.assertIn("workflow_dispatch", text)
         self.assertIn("dry_run", text)
         self.assertIn("ANTHROPIC_API_KEY", text)

@@ -1,6 +1,9 @@
 name: Potential Stock Recap
 
 on:
+  schedule:
+    # UTC 02:00 = 10:00 Asia/Shanghai, running every Saturday morning.
+    - cron: "0 2 * * 6"
   workflow_dispatch:
     inputs:
       end_date:
