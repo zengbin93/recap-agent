@@ -6,18 +6,18 @@
   <title>全球市场日报</title>
   <style>
     :root {
-      --primary: #0f172a;
+      --primary: #151c2c;
       --primary-light: #1e293b;
       --accent: #3b82f6;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --border: rgba(226, 232, 240, 0.8);
-      --text-main: #334155;
-      --text-muted: #64748b;
-      --up-color: #ef4444;
-      --up-bg: #fef2f2;
-      --down-color: #10b981;
-      --down-bg: #ecfdf5;
+      --bg: #0b0f19;
+      --card-bg: #111827;
+      --border: rgba(56, 189, 248, 0.08);
+      --text-main: #e2e8f0;
+      --text-muted: #94a3b8;
+      --up-color: #ff4a6b;
+      --up-bg: rgba(255, 74, 107, 0.06);
+      --down-color: #00e676;
+      --down-bg: rgba(0, 230, 118, 0.06);
     }
     
     * { box-sizing: border-box; }
@@ -37,12 +37,13 @@
     }
     
     header {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
       border-radius: 16px;
       padding: 32px 40px;
       color: #ffffff;
       margin-bottom: 32px;
-      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15), 0 8px 10px -6px rgba(15, 23, 42, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.15);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
     }
     
     header h1 {
@@ -50,6 +51,9 @@
       font-weight: 800;
       margin: 0 0 12px 0;
       letter-spacing: -0.025em;
+      background: linear-gradient(to right, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
     
     header .meta {
@@ -62,10 +66,10 @@
     }
     
     header .meta span {
-      background: rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
       padding: 4px 14px;
       border-radius: 9999px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.06);
     }
     
     .summary {
@@ -80,13 +84,13 @@
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 20px 24px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
-      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s, border-color 0.2s;
     }
     
     .summary-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+      border-color: rgba(56, 189, 248, 0.25);
     }
     
     .summary-card span {
@@ -102,7 +106,7 @@
     .summary-card strong {
       font-size: 28px;
       font-weight: 700;
-      color: var(--primary);
+      color: #ffffff;
     }
     
     .text-up {
@@ -119,7 +123,7 @@
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 24px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
       margin-bottom: 32px;
     }
     
@@ -127,7 +131,7 @@
       margin: 0 0 16px 0;
       font-size: 18px;
       font-weight: 700;
-      color: var(--primary);
+      color: #ffffff;
       border-left: 4px solid var(--accent);
       padding-left: 12px;
     }
@@ -138,14 +142,14 @@
       border-radius: 16px;
       padding: 24px;
       margin-bottom: 32px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
     }
     
     .table-section h2 {
       margin: 0 0 20px 0;
       font-size: 20px;
       font-weight: 700;
-      color: var(--primary);
+      color: #ffffff;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -180,7 +184,7 @@
     }
     
     th {
-      background-color: #f8fafc;
+      background-color: #1e293b;
       color: var(--text-muted);
       font-weight: 600;
       text-transform: uppercase;
@@ -197,24 +201,25 @@
     }
     
     tr:hover td {
-      background-color: #f1f5f9;
+      background-color: rgba(255, 255, 255, 0.02);
     }
     
     .badge {
       display: inline-block;
-      padding: 3px 8px;
+      padding: 4px 10px;
       font-size: 12px;
       font-weight: 500;
       border-radius: 6px;
-      background-color: #f1f5f9;
-      color: #475569;
-      border: 1px solid #e2e8f0;
+      background-color: #1e293b;
+      color: #cbd5e1;
+      border: 1px solid rgba(255, 255, 255, 0.08);
       margin-right: 4px;
       margin-bottom: 4px;
+      transition: background-color 0.15s;
     }
     
     .badge:hover {
-      background-color: #e2e8f0;
+      background-color: #334155;
     }
     
     .no-data {
@@ -240,56 +245,166 @@
       <div class="meta">
         <span>任务：daily</span>
         <span>区间：20260717</span>
-        <span>生成时间：2026-07-19T08:01:33+00:00</span>
+        <span>生成时间：2026-07-19T08:15:49+00:00</span>
       </div>
     </header>
     
   <section class="summary">
     <div class="summary-card">
-      <span>市场研判状态</span>
-      <strong class="text-down">偏弱</strong>
+      <span>盘面研判信号</span>
+      <strong class="text-down" style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 18px; line-height: 1;">🟢</span> 偏弱
+      </strong>
     </div>
     <div class="summary-card">
-      <span>A股监测样本</span>
+      <span>监测股票样本</span>
       <strong>5522 <span style="font-size: 14px; font-weight: normal; color: var(--text-muted);">只</span></strong>
     </div>
     <div class="summary-card">
-      <span>A股上涨家数</span>
+      <span>多头上涨家数</span>
       <strong class="text-up">▲ 482</strong>
     </div>
     <div class="summary-card">
-      <span>A股下跌家数</span>
+      <span>空头下跌家数</span>
       <strong class="text-down">▼ 5001</strong>
     </div>
   </section>
-  <section class="movers">
-    <h3>今日 A 股盘面宽幅异动股</h3>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-top: 16px;">
+  
+  <section class="movers" style="padding: 24px;">
+    <h3>A 股盘面情绪多空温度计 & 异动监控</h3>
+    
+    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 12px; padding: 18px 24px; margin-bottom: 24px;">
+      <div style="display: flex; justify-content: space-between; font-size: 14px; color: var(--text-muted); margin-bottom: 10px; font-weight: 500;">
+        <span class="text-up">上涨 482 家 (8.7%)</span>
+        <span style="color: #f8fafc; font-weight: 600;">市场赚钱效应：8.7%</span>
+        <span class="text-down">下跌 5001 家 (90.6%)</span>
+      </div>
+      <div style="display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.05);">
+        <div style="width: 8.7%; background: linear-gradient(90deg, #ff4a6b, #e11d48);" title="上涨"></div>
+        <div style="width: 0.7%; background: #475569;" title="平盘"></div>
+        <div style="width: 90.6%; background: linear-gradient(90deg, #059669, #00e676);" title="下跌"></div>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-top: 6px;">
+        <span>多头主导区</span>
+        <span>平盘 39 家</span>
+        <span>空头主导区</span>
+      </div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 32px; margin-top: 16px;">
       <div>
-        <h4 style="margin: 0 0 12px 0; color: var(--up-color); font-size: 15px; border-bottom: 2px solid var(--up-bg); padding-bottom: 4px;">🔥 涨幅靠前榜单</h4>
+        <h4 style="margin: 0 0 16px 0; color: #ff4a6b; font-size: 15px; border-bottom: 1px solid rgba(255,74,107,0.15); padding-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+          <span>🔥</span> 涨幅偏离榜首个股
+        </h4>
         <ul style="padding: 0; margin: 0;">
-          <li style='margin-bottom: 8px; list-style-type: none;'><strong>920305.BJ</strong> <span class='text-up' style='margin-left: 8px;'>+29.49%</span></li><li style='margin-bottom: 8px; list-style-type: none;'><strong>300795.SZ</strong> <span class='text-up' style='margin-left: 8px;'>+20.05%</span></li><li style='margin-bottom: 8px; list-style-type: none;'><strong>300577.SZ</strong> <span class='text-up' style='margin-left: 8px;'>+19.98%</span></li><li style='margin-bottom: 8px; list-style-type: none;'><strong>300317.SZ</strong> <span class='text-up' style='margin-left: 8px;'>+16.01%</span></li><li style='margin-bottom: 8px; list-style-type: none;'><strong>301609.SZ</strong> <span class='text-up' style='margin-left: 8px;'>+14.67%</span></li>
+          <li style='margin-bottom: 10px; list-style-type: none; display: flex; justify-content: space-between; font-size: 14px;'><strong>920305.BJ</strong> <span class='text-up'>+29.49%</span></li><li style='margin-bottom: 10px; list-style-type: none; display: flex; justify-content: space-between; font-size: 14px;'><strong>300795.SZ</strong> <span class='text-up'>+20.05%</span></li><li style='margin-bottom: 10px; list-style-type: none; display: flex; justify-content: space-between; font-size: 14px;'><strong>300577.SZ</strong> <span class='text-up'>+19.98%</span></li><li style='margin-bottom: 10px; list-style-type: none; display: flex; justify-content: space-between; font-size: 14px;'><strong>300317.SZ</strong> <span class='text-up'>+16.01%</span></li><li style='margin-bottom: 10px; list-style-type: none; display: flex; justify-content: space-between; font-size: 14px;'><strong>301609.SZ</strong> <span class='text-up'>+14.67%</span></li>
         </ul>
       </div>
       <div>
-        <h4 style="margin: 0 0 12px 0; color: var(--down-color); font-size: 15px; border-bottom: 2px solid var(--down-bg); padding-bottom: 4px;">❄️ 跌幅靠前榜单</h4>
+        <h4 style="margin: 0 0 16px 0; color: #00e676; font-size: 15px; border-bottom: 1px solid rgba(0,230,118,0.15); padding-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+          <span>❄️</span> 跌幅偏离榜首个股
+        </h4>
         <ul style="padding: 0; margin: 0;">
-          <li style='margin-bottom: 8px; list-style-type: none;'><strong>920117.BJ</strong> <span class='text-down' style='margin-left: 8px;'>-22.24%</span></li><li style='margin-bottom: 8px; list-style-type: none;'><strong>300137.SZ</strong> <span class='text-down' style='margin-left: 8px;'>-20.03%</span></li><li style='margin-bottom: 8px; list-style-type: none;'><strong>300688.SZ</strong> <span class='text-down' style='margin-left: 8px;'>-20.02%</span></li><li style='margin-bottom: 8px; list-style-type: none;'><strong>688371.SH</strong> <span class='text-down' style='margin-left: 8px;'>-20.01%</span></li><li style='margin-bottom: 8px; list-style-type: none;'><strong>688218.SH</strong> <span class='text-down' style='margin-left: 8px;'>-20.01%</span></li>
+          <li style='margin-bottom: 10px; list-style-type: none; display: flex; justify-content: space-between; font-size: 14px;'><strong>920117.BJ</strong> <span class='text-down'>-22.24%</span></li><li style='margin-bottom: 10px; list-style-type: none; display: flex; justify-content: space-between; font-size: 14px;'><strong>300137.SZ</strong> <span class='text-down'>-20.03%</span></li><li style='margin-bottom: 10px; list-style-type: none; display: flex; justify-content: space-between; font-size: 14px;'><strong>300688.SZ</strong> <span class='text-down'>-20.02%</span></li><li style='margin-bottom: 10px; list-style-type: none; display: flex; justify-content: space-between; font-size: 14px;'><strong>688371.SH</strong> <span class='text-down'>-20.01%</span></li><li style='margin-bottom: 10px; list-style-type: none; display: flex; justify-content: space-between; font-size: 14px;'><strong>688218.SH</strong> <span class='text-down'>-20.01%</span></li>
         </ul>
       </div>
     </div>
   </section>
 
-    <section class='table-section'><h2>主力资金净流入排行 (Top 5)</h2><div class='table-wrapper'><table><thead><tr><th>排名</th><th>行业板块</th><th>主力资金流入</th><th>今日涨跌幅</th><th>主力领涨股</th><th>主力大额买入股 (前三)</th><th>真实代表场内 ETF</th></tr></thead><tbody><tr><td><span>1</span></td><td><span>银行</span></td><td><span class='text-up'>43.00</span></td><td><span class='text-up'>0.40%</span></td><td><span>建设银行</span></td><td><span class='badge'>招商银行(+11.75亿, 涨0.9%)</span> <span class='badge'>农业银行(+10.47亿, 涨1.4%)</span> <span class='badge'>工商银行(+9.47亿, 涨2.4%)</span></td><td><span class='badge'>华宝中证银行ETF (512800.SH) [成交:19.44亿, 涨:0.90%]</span></td></tr>
-<tr><td><span>2</span></td><td><span>元件</span></td><td><span class='text-up'>32.00</span></td><td><span class='text-down'>-8.76%</span></td><td><span>贤丰控股</span></td><td><span class='badge'>东山精密(+31.90亿, 涨-10.0%)</span> <span class='badge'>生益科技(+11.66亿, 涨-10.0%)</span> <span class='badge'>景旺电子(+11.56亿, 涨1.3%)</span></td><td><span class='badge'>华泰柏瑞中证韩交所中韩半导体ETF(QDII) (513310.SH) [成交:152.68亿, 涨:-10.00%]</span></td></tr>
-<tr><td><span>3</span></td><td><span>电力</span></td><td><span class='text-up'>24.00</span></td><td><span class='text-up'>1.25%</span></td><td><span>珈伟新能</span></td><td><span class='badge'>长江电力(+11.23亿, 涨2.0%)</span> <span class='badge'>大唐发电(+5.96亿, 涨1.9%)</span> <span class='badge'>华能国际(+3.70亿, 涨2.5%)</span></td><td><span class='badge'>广发中证全指电力公用事业ETF (159611.SZ) [成交:10.61亿, 涨:2.18%]</span></td></tr>
-<tr><td><span>4</span></td><td><span>石油加工贸易</span></td><td><span class='text-up'>5.00</span></td><td><span class='text-down'>-1.98%</span></td><td><span>中国石油</span></td><td><span>—</span></td><td><span class='badge'>富国标普石油天然气勘探及生产精选行业ETF(QDII) (513350.SH) [成交:28.06亿, 涨:2.21%]</span></td></tr>
-<tr><td><span>5</span></td><td><span>其他电源设备</span></td><td><span class='text-up'>4.00</span></td><td><span class='text-down'>-6.01%</span></td><td><span>高特电子</span></td><td><span>—</span></td><td><span>暂无对应ETF</span></td></tr></tbody></table></div></section><section class='table-section'><h2>主力资金净流出排行 (Top 5)</h2><div class='table-wrapper'><table><thead><tr><th>排名</th><th>行业板块</th><th>主力资金流出</th><th>今日涨跌幅</th><th>主力领涨股</th><th>真实代表场内 ETF</th></tr></thead><tbody><tr><td><span>1</span></td><td><span>半导体</span></td><td><span class='text-up'>94.00</span></td><td><span class='text-down'>-9.83%</span></td><td><span>有研硅</span></td><td><span class='badge'>华泰柏瑞中证韩交所中韩半导体ETF(QDII) (513310.SH) [成交:152.68亿, 涨:-10.00%]</span></td></tr>
-<tr><td><span>2</span></td><td><span>化学制药</span></td><td><span class='text-up'>61.00</span></td><td><span class='text-down'>-7.15%</span></td><td><span>哈药股份</span></td><td><span>暂无对应ETF</span></td></tr>
-<tr><td><span>3</span></td><td><span>工业金属</span></td><td><span class='text-up'>38.00</span></td><td><span class='text-down'>-4.32%</span></td><td><span>新威凌</span></td><td><span class='badge'>鹏华道琼斯工业平均ETF(QDII) (513400.SH) [成交:3.21亿, 涨:-1.67%]</span></td></tr>
-<tr><td><span>4</span></td><td><span>IT服务</span></td><td><span class='text-up'>37.00</span></td><td><span class='text-down'>-4.74%</span></td><td><span>云创退</span></td><td><span>暂无对应ETF</span></td></tr>
-<tr><td><span>5</span></td><td><span>消费电子</span></td><td><span class='text-up'>32.00</span></td><td><span class='text-down'>-7.34%</span></td><td><span>格林精密</span></td><td><span class='badge'>华泰柏瑞中证韩交所中韩半导体ETF(QDII) (513310.SH) [成交:152.68亿, 涨:-10.00%]</span></td></tr></tbody></table></div></section><section class='table-section'><h2>主力潜伏板块 (资金悄悄建仓)</h2><div class='table-wrapper'><table><thead><tr><th>排名</th><th>行业板块</th><th>主力资金买入</th><th>今日涨跌幅</th><th>主力领涨股</th><th>主力大额买入股 (前三)</th><th>真实代表场内 ETF</th></tr></thead><tbody><tr><td><span>1</span></td><td><span>银行</span></td><td><span class='text-up'>43.00</span></td><td><span class='text-up'>0.40%</span></td><td><span>建设银行</span></td><td><span class='badge'>招商银行(+11.75亿, 涨0.9%)</span> <span class='badge'>农业银行(+10.47亿, 涨1.4%)</span> <span class='badge'>工商银行(+9.47亿, 涨2.4%)</span></td><td><span class='badge'>华宝中证银行ETF (512800.SH) [成交:19.44亿, 涨:0.90%]</span></td></tr>
-<tr><td><span>2</span></td><td><span>电力</span></td><td><span class='text-up'>24.00</span></td><td><span class='text-up'>1.25%</span></td><td><span>珈伟新能</span></td><td><span class='badge'>长江电力(+11.23亿, 涨2.0%)</span> <span class='badge'>大唐发电(+5.96亿, 涨1.9%)</span> <span class='badge'>华能国际(+3.70亿, 涨2.5%)</span></td><td><span class='badge'>广发中证全指电力公用事业ETF (159611.SZ) [成交:10.61亿, 涨:2.18%]</span></td></tr></tbody></table></div></section><section class='table-section'><h2>indices</h2><div class='table-wrapper'><table><thead><tr><th>代码</th><th>trade_date</th><th>收盘价</th><th>开盘价</th><th>最高价</th><th>最低价</th><th>昨收价</th><th>涨跌额</th><th>涨跌幅</th><th>成交量</th><th>成交额</th></tr></thead><tbody><tr><td><span>000001.SH</span></td><td><span>20260717</span></td><td><span>3764.1547</span></td><td><span>3865.3165</span></td><td><span>3869.2148</span></td><td><span>3745.1744</span></td><td><span>3882.4126</span></td><td><span>-118.2579</span></td><td><span class='text-down'>-3.046</span></td><td><span>650450984.0</span></td><td><span>1246445452.8363</span></td></tr>
+    <section class='table-section'><h2>主力资金净流入排行 (Top 5)</h2><div class='table-wrapper'><table><thead><tr><th>排名</th><th>行业板块</th><th>主力资金流入</th><th>今日涨跌幅</th><th>主力领涨股</th><th>主力大额买入股 (前三)</th><th>真实代表场内 ETF</th></tr></thead><tbody><tr><td><span>1</span></td><td><span>银行</span></td><td>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span class="text-up" style="min-width: 65px; font-variant-numeric: tabular-nums;">43.00</span>
+                  <div style="flex-grow: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; max-width: 100px;">
+                    <div style="width: 100.0%; height: 100%; background: linear-gradient(90deg, rgba(255,74,107,0.2) 0%, rgba(255,74,107,0.8) 100%); border-radius: 3px;"></div>
+                  </div>
+                </div>
+                </td><td><span class='text-up'>0.40%</span></td><td><span>建设银行</span></td><td><span class='badge'>招商银行(+11.75亿, 涨0.9%)</span> <span class='badge'>农业银行(+10.47亿, 涨1.4%)</span> <span class='badge'>工商银行(+9.47亿, 涨2.4%)</span></td><td><span class='badge'>⚡️ 华宝中证银行ETF (512800.SH) [成交:19.44亿, 涨:0.90%]</span></td></tr>
+<tr><td><span>2</span></td><td><span>元件</span></td><td>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span class="text-up" style="min-width: 65px; font-variant-numeric: tabular-nums;">32.00</span>
+                  <div style="flex-grow: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; max-width: 100px;">
+                    <div style="width: 74.4%; height: 100%; background: linear-gradient(90deg, rgba(255,74,107,0.2) 0%, rgba(255,74,107,0.8) 100%); border-radius: 3px;"></div>
+                  </div>
+                </div>
+                </td><td><span class='text-down'>-8.76%</span></td><td><span>贤丰控股</span></td><td><span class='badge'>东山精密(+31.90亿, 涨-10.0%)</span> <span class='badge'>生益科技(+11.66亿, 涨-10.0%)</span> <span class='badge'>景旺电子(+11.56亿, 涨1.3%)</span></td><td><span class='badge'>⚡️ 华泰柏瑞中证韩交所中韩半导体ETF(QDII) (513310.SH) [成交:152.68亿, 涨:-10.00%]</span></td></tr>
+<tr><td><span>3</span></td><td><span>电力</span></td><td>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span class="text-up" style="min-width: 65px; font-variant-numeric: tabular-nums;">24.00</span>
+                  <div style="flex-grow: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; max-width: 100px;">
+                    <div style="width: 55.8%; height: 100%; background: linear-gradient(90deg, rgba(255,74,107,0.2) 0%, rgba(255,74,107,0.8) 100%); border-radius: 3px;"></div>
+                  </div>
+                </div>
+                </td><td><span class='text-up'>1.25%</span></td><td><span>珈伟新能</span></td><td><span class='badge'>长江电力(+11.23亿, 涨2.0%)</span> <span class='badge'>大唐发电(+5.96亿, 涨1.9%)</span> <span class='badge'>华能国际(+3.70亿, 涨2.5%)</span></td><td><span class='badge'>⚡️ 广发中证全指电力公用事业ETF (159611.SZ) [成交:10.61亿, 涨:2.18%]</span></td></tr>
+<tr><td><span>4</span></td><td><span>石油加工贸易</span></td><td>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span class="text-up" style="min-width: 65px; font-variant-numeric: tabular-nums;">5.00</span>
+                  <div style="flex-grow: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; max-width: 100px;">
+                    <div style="width: 11.6%; height: 100%; background: linear-gradient(90deg, rgba(255,74,107,0.2) 0%, rgba(255,74,107,0.8) 100%); border-radius: 3px;"></div>
+                  </div>
+                </div>
+                </td><td><span class='text-down'>-1.98%</span></td><td><span>中国石油</span></td><td><span>—</span></td><td><span class='badge'>⚡️ 富国标普石油天然气勘探及生产精选行业ETF(QDII) (513350.SH) [成交:28.06亿, 涨:2.21%]</span></td></tr>
+<tr><td><span>5</span></td><td><span>其他电源设备</span></td><td>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span class="text-up" style="min-width: 65px; font-variant-numeric: tabular-nums;">4.00</span>
+                  <div style="flex-grow: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; max-width: 100px;">
+                    <div style="width: 9.3%; height: 100%; background: linear-gradient(90deg, rgba(255,74,107,0.2) 0%, rgba(255,74,107,0.8) 100%); border-radius: 3px;"></div>
+                  </div>
+                </div>
+                </td><td><span class='text-down'>-6.01%</span></td><td><span>高特电子</span></td><td><span>—</span></td><td><span>暂无对应ETF</span></td></tr></tbody></table></div></section><section class='table-section'><h2>主力资金净流出排行 (Top 5)</h2><div class='table-wrapper'><table><thead><tr><th>排名</th><th>行业板块</th><th>主力资金流出</th><th>今日涨跌幅</th><th>主力领涨股</th><th>真实代表场内 ETF</th></tr></thead><tbody><tr><td><span>1</span></td><td><span>半导体</span></td><td>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span class="text-up" style="min-width: 65px; font-variant-numeric: tabular-nums;">94.00</span>
+                  <div style="flex-grow: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; max-width: 100px;">
+                    <div style="width: 100.0%; height: 100%; background: linear-gradient(90deg, rgba(255,74,107,0.2) 0%, rgba(255,74,107,0.8) 100%); border-radius: 3px;"></div>
+                  </div>
+                </div>
+                </td><td><span class='text-down'>-9.83%</span></td><td><span>有研硅</span></td><td><span class='badge'>⚡️ 华泰柏瑞中证韩交所中韩半导体ETF(QDII) (513310.SH) [成交:152.68亿, 涨:-10.00%]</span></td></tr>
+<tr><td><span>2</span></td><td><span>化学制药</span></td><td>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span class="text-up" style="min-width: 65px; font-variant-numeric: tabular-nums;">61.00</span>
+                  <div style="flex-grow: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; max-width: 100px;">
+                    <div style="width: 64.9%; height: 100%; background: linear-gradient(90deg, rgba(255,74,107,0.2) 0%, rgba(255,74,107,0.8) 100%); border-radius: 3px;"></div>
+                  </div>
+                </div>
+                </td><td><span class='text-down'>-7.15%</span></td><td><span>哈药股份</span></td><td><span>暂无对应ETF</span></td></tr>
+<tr><td><span>3</span></td><td><span>工业金属</span></td><td>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span class="text-up" style="min-width: 65px; font-variant-numeric: tabular-nums;">38.00</span>
+                  <div style="flex-grow: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; max-width: 100px;">
+                    <div style="width: 40.4%; height: 100%; background: linear-gradient(90deg, rgba(255,74,107,0.2) 0%, rgba(255,74,107,0.8) 100%); border-radius: 3px;"></div>
+                  </div>
+                </div>
+                </td><td><span class='text-down'>-4.32%</span></td><td><span>新威凌</span></td><td><span class='badge'>⚡️ 鹏华道琼斯工业平均ETF(QDII) (513400.SH) [成交:3.21亿, 涨:-1.67%]</span></td></tr>
+<tr><td><span>4</span></td><td><span>IT服务</span></td><td>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span class="text-up" style="min-width: 65px; font-variant-numeric: tabular-nums;">37.00</span>
+                  <div style="flex-grow: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; max-width: 100px;">
+                    <div style="width: 39.4%; height: 100%; background: linear-gradient(90deg, rgba(255,74,107,0.2) 0%, rgba(255,74,107,0.8) 100%); border-radius: 3px;"></div>
+                  </div>
+                </div>
+                </td><td><span class='text-down'>-4.74%</span></td><td><span>云创退</span></td><td><span>暂无对应ETF</span></td></tr>
+<tr><td><span>5</span></td><td><span>消费电子</span></td><td>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span class="text-up" style="min-width: 65px; font-variant-numeric: tabular-nums;">32.00</span>
+                  <div style="flex-grow: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; max-width: 100px;">
+                    <div style="width: 34.0%; height: 100%; background: linear-gradient(90deg, rgba(255,74,107,0.2) 0%, rgba(255,74,107,0.8) 100%); border-radius: 3px;"></div>
+                  </div>
+                </div>
+                </td><td><span class='text-down'>-7.34%</span></td><td><span>格林精密</span></td><td><span class='badge'>⚡️ 华泰柏瑞中证韩交所中韩半导体ETF(QDII) (513310.SH) [成交:152.68亿, 涨:-10.00%]</span></td></tr></tbody></table></div></section><section class='table-section'><h2>主力潜伏板块 (资金悄悄建仓)</h2><div class='table-wrapper'><table><thead><tr><th>排名</th><th>行业板块</th><th>主力资金买入</th><th>今日涨跌幅</th><th>主力领涨股</th><th>主力大额买入股 (前三)</th><th>真实代表场内 ETF</th></tr></thead><tbody><tr><td><span>1</span></td><td><span>银行</span></td><td>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span class="text-up" style="min-width: 65px; font-variant-numeric: tabular-nums;">43.00</span>
+                  <div style="flex-grow: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; max-width: 100px;">
+                    <div style="width: 100.0%; height: 100%; background: linear-gradient(90deg, rgba(255,74,107,0.2) 0%, rgba(255,74,107,0.8) 100%); border-radius: 3px;"></div>
+                  </div>
+                </div>
+                </td><td><span class='text-up'>0.40%</span></td><td><span>建设银行</span></td><td><span class='badge'>招商银行(+11.75亿, 涨0.9%)</span> <span class='badge'>农业银行(+10.47亿, 涨1.4%)</span> <span class='badge'>工商银行(+9.47亿, 涨2.4%)</span></td><td><span class='badge'>⚡️ 华宝中证银行ETF (512800.SH) [成交:19.44亿, 涨:0.90%]</span></td></tr>
+<tr><td><span>2</span></td><td><span>电力</span></td><td>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span class="text-up" style="min-width: 65px; font-variant-numeric: tabular-nums;">24.00</span>
+                  <div style="flex-grow: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; max-width: 100px;">
+                    <div style="width: 55.8%; height: 100%; background: linear-gradient(90deg, rgba(255,74,107,0.2) 0%, rgba(255,74,107,0.8) 100%); border-radius: 3px;"></div>
+                  </div>
+                </div>
+                </td><td><span class='text-up'>1.25%</span></td><td><span>珈伟新能</span></td><td><span class='badge'>长江电力(+11.23亿, 涨2.0%)</span> <span class='badge'>大唐发电(+5.96亿, 涨1.9%)</span> <span class='badge'>华能国际(+3.70亿, 涨2.5%)</span></td><td><span class='badge'>⚡️ 广发中证全指电力公用事业ETF (159611.SZ) [成交:10.61亿, 涨:2.18%]</span></td></tr></tbody></table></div></section><section class='table-section'><h2>indices</h2><div class='table-wrapper'><table><thead><tr><th>代码</th><th>trade_date</th><th>收盘价</th><th>开盘价</th><th>最高价</th><th>最低价</th><th>昨收价</th><th>涨跌额</th><th>涨跌幅</th><th>成交量</th><th>成交额</th></tr></thead><tbody><tr><td><span>000001.SH</span></td><td><span>20260717</span></td><td><span>3764.1547</span></td><td><span>3865.3165</span></td><td><span>3869.2148</span></td><td><span>3745.1744</span></td><td><span>3882.4126</span></td><td><span>-118.2579</span></td><td><span class='text-down'>-3.046</span></td><td><span>650450984.0</span></td><td><span>1246445452.8363</span></td></tr>
 <tr><td><span>000016.SH</span></td><td><span>20260717</span></td><td><span>2827.6713</span></td><td><span>2887.0926</span></td><td><span>2890.0992</span></td><td><span>2814.3559</span></td><td><span>2904.1185</span></td><td><span>-76.4472</span></td><td><span class='text-down'>-2.6324</span></td><td><span>71440659.0</span></td><td><span>257315956.782</span></td></tr>
 <tr><td><span>399001.SZ</span></td><td><span>20260717</span></td><td><span>13706.8841</span></td><td><span>14348.2151</span></td><td><span>14350.4678</span></td><td><span>13586.4888</span></td><td><span>14488.6541</span></td><td><span>-781.77</span></td><td><span class='text-down'>-5.3957</span></td><td><span>296374862.41</span></td><td><span>874338468.4</span></td></tr>
 <tr><td><span>000300.SH</span></td><td><span>20260717</span></td><td><span>4529.0953</span></td><td><span>4661.6218</span></td><td><span>4663.5311</span></td><td><span>4492.085</span></td><td><span>4698.4344</span></td><td><span>-169.3391</span></td><td><span class='text-down'>-3.6042</span></td><td><span>302629886.0</span></td><td><span>920822412.822</span></td></tr>
@@ -377,6 +492,26 @@
 <tr><td><span>601288.SH</span></td><td><span>20260717</span></td><td><span>1837874</span></td><td><span>117084.15</span></td><td><span>1638815</span></td><td><span>104380.4</span></td><td><span>1898722</span></td><td><span>120930.12</span></td><td><span>1764194</span></td><td><span>112377.96</span></td><td><span>1099213</span></td><td><span>70002.22</span></td><td><span>1226800</span></td><td><span>78112.92</span></td><td><span>542254</span></td><td><span>34532.13</span></td><td><span>748253</span></td><td><span>47677.33</span></td><td><span>1637719</span></td><td><span>104669.8</span></td></tr>
 <tr><td><span>600673.SH</span></td><td><span>20260717</span></td><td><span>196594</span></td><td><span>66547.04</span></td><td><span>185432</span></td><td><span>62778.36</span></td><td><span>166249</span></td><td><span>56317.59</span></td><td><span>177138</span></td><td><span>59982.06</span></td><td><span>120611</span></td><td><span>40805.15</span></td><td><span>124883</span></td><td><span>42262.03</span></td><td><span>56502</span></td><td><span>19069.14</span></td><td><span>52504</span></td><td><span>17716.47</span></td><td><span>-68199</span></td><td><span>-22846.84</span></td></tr>
 <tr><td><span>600522.SH</span></td><td><span>20260717</span></td><td><span>1098350</span></td><td><span>383130.18</span></td><td><span>1011667</span></td><td><span>353099.86</span></td><td><span>801381</span></td><td><span>279872.0</span></td><td><span>772242</span></td><td><span>269830.98</span></td><td><span>464468</span></td><td><span>162760.12</span></td><td><span>494503</span></td><td><span>172875.33</span></td><td><span>259886</span></td><td><span>90659.36</span></td><td><span>345674</span></td><td><span>120615.49</span></td><td><span>-308</span></td><td><span>-411.07</span></td></tr></tbody></table></div></section>
+<section class='table-section'><h2>members_881270.TI</h2><div class='table-wrapper'><table><thead><tr><th>代码</th><th>con_code</th><th>con_name</th></tr></thead><tbody><tr><td><span>881270.TI</span></td><td><span>000636.SZ</span></td><td><span>风华高科</span></td></tr>
+<tr><td><span>881270.TI</span></td><td><span>000823.SZ</span></td><td><span>超声电子</span></td></tr>
+<tr><td><span>881270.TI</span></td><td><span>001389.SZ</span></td><td><span>广合科技</span></td></tr>
+<tr><td><span>881270.TI</span></td><td><span>002134.SZ</span></td><td><span>天津普林</span></td></tr>
+<tr><td><span>881270.TI</span></td><td><span>002138.SZ</span></td><td><span>顺络电子</span></td></tr>
+<tr><td><span>881270.TI</span></td><td><span>002141.SZ</span></td><td><span>贤丰控股</span></td></tr>
+<tr><td><span>881270.TI</span></td><td><span>002199.SZ</span></td><td><span>*ST东晶</span></td></tr>
+<tr><td><span>881270.TI</span></td><td><span>002384.SZ</span></td><td><span>东山精密</span></td></tr>
+<tr><td><span>881270.TI</span></td><td><span>002436.SZ</span></td><td><span>兴森科技</span></td></tr>
+<tr><td><span>881270.TI</span></td><td><span>002463.SZ</span></td><td><span>沪电股份</span></td></tr>
+<tr><td><span>881270.TI</span></td><td><span>002484.SZ</span></td><td><span>江海股份</span></td></tr>
+<tr><td><span>881270.TI</span></td><td><span>002552.SZ</span></td><td><span>宝鼎科技</span></td></tr>
+<tr><td><span>881270.TI</span></td><td><span>002579.SZ</span></td><td><span>中京电子</span></td></tr>
+<tr><td><span>881270.TI</span></td><td><span>002636.SZ</span></td><td><span>金安国纪</span></td></tr>
+<tr><td><span>881270.TI</span></td><td><span>002815.SZ</span></td><td><span>崇达技术</span></td></tr>
+<tr><td><span>881270.TI</span></td><td><span>002913.SZ</span></td><td><span>奥士康</span></td></tr>
+<tr><td><span>881270.TI</span></td><td><span>002916.SZ</span></td><td><span>深南电路</span></td></tr>
+<tr><td><span>881270.TI</span></td><td><span>002938.SZ</span></td><td><span>鹏鼎控股</span></td></tr>
+<tr><td><span>881270.TI</span></td><td><span>300319.SZ</span></td><td><span>麦捷科技</span></td></tr>
+<tr><td><span>881270.TI</span></td><td><span>300408.SZ</span></td><td><span>三环集团</span></td></tr></tbody></table></div></section>
 <section class='table-section'><h2>members_881145.TI</h2><div class='table-wrapper'><table><thead><tr><th>代码</th><th>con_code</th><th>con_name</th></tr></thead><tbody><tr><td><span>881145.TI</span></td><td><span>000027.SZ</span></td><td><span>深圳能源</span></td></tr>
 <tr><td><span>881145.TI</span></td><td><span>000037.SZ</span></td><td><span>深南电A</span></td></tr>
 <tr><td><span>881145.TI</span></td><td><span>000155.SZ</span></td><td><span>川能动力</span></td></tr>
@@ -417,28 +552,8 @@
 <tr><td><span>881155.TI</span></td><td><span>601009.SH</span></td><td><span>南京银行</span></td></tr>
 <tr><td><span>881155.TI</span></td><td><span>601077.SH</span></td><td><span>渝农商行</span></td></tr>
 <tr><td><span>881155.TI</span></td><td><span>601128.SH</span></td><td><span>常熟银行</span></td></tr></tbody></table></div></section>
-<section class='table-section'><h2>members_881270.TI</h2><div class='table-wrapper'><table><thead><tr><th>代码</th><th>con_code</th><th>con_name</th></tr></thead><tbody><tr><td><span>881270.TI</span></td><td><span>000636.SZ</span></td><td><span>风华高科</span></td></tr>
-<tr><td><span>881270.TI</span></td><td><span>000823.SZ</span></td><td><span>超声电子</span></td></tr>
-<tr><td><span>881270.TI</span></td><td><span>001389.SZ</span></td><td><span>广合科技</span></td></tr>
-<tr><td><span>881270.TI</span></td><td><span>002134.SZ</span></td><td><span>天津普林</span></td></tr>
-<tr><td><span>881270.TI</span></td><td><span>002138.SZ</span></td><td><span>顺络电子</span></td></tr>
-<tr><td><span>881270.TI</span></td><td><span>002141.SZ</span></td><td><span>贤丰控股</span></td></tr>
-<tr><td><span>881270.TI</span></td><td><span>002199.SZ</span></td><td><span>*ST东晶</span></td></tr>
-<tr><td><span>881270.TI</span></td><td><span>002384.SZ</span></td><td><span>东山精密</span></td></tr>
-<tr><td><span>881270.TI</span></td><td><span>002436.SZ</span></td><td><span>兴森科技</span></td></tr>
-<tr><td><span>881270.TI</span></td><td><span>002463.SZ</span></td><td><span>沪电股份</span></td></tr>
-<tr><td><span>881270.TI</span></td><td><span>002484.SZ</span></td><td><span>江海股份</span></td></tr>
-<tr><td><span>881270.TI</span></td><td><span>002552.SZ</span></td><td><span>宝鼎科技</span></td></tr>
-<tr><td><span>881270.TI</span></td><td><span>002579.SZ</span></td><td><span>中京电子</span></td></tr>
-<tr><td><span>881270.TI</span></td><td><span>002636.SZ</span></td><td><span>金安国纪</span></td></tr>
-<tr><td><span>881270.TI</span></td><td><span>002815.SZ</span></td><td><span>崇达技术</span></td></tr>
-<tr><td><span>881270.TI</span></td><td><span>002913.SZ</span></td><td><span>奥士康</span></td></tr>
-<tr><td><span>881270.TI</span></td><td><span>002916.SZ</span></td><td><span>深南电路</span></td></tr>
-<tr><td><span>881270.TI</span></td><td><span>002938.SZ</span></td><td><span>鹏鼎控股</span></td></tr>
-<tr><td><span>881270.TI</span></td><td><span>300319.SZ</span></td><td><span>麦捷科技</span></td></tr>
-<tr><td><span>881270.TI</span></td><td><span>300408.SZ</span></td><td><span>三环集团</span></td></tr></tbody></table></div></section>
     <div style="text-align: center; margin-top: 40px; font-size: 12px; color: var(--text-muted);">
-      数据源：主要指数: 8 条，来源 tushare，原始返回 8000 条；板块资金流: 90 条，来源 tushare；A股日行情: 5522 条，来源 tushare；fund_basics: 2869 条，来源 tushare；fund_dailies: 2069 条，来源 tushare；individual_moneyflow: 5195 条，来源 tushare；members_881145.TI: 110 条，来源 unknown；members_881155.TI: 42 条，来源 unknown；members_881270.TI: 62 条，来源 unknown
+      数据源：主要指数: 8 条，来源 tushare，原始返回 8000 条；板块资金流: 90 条，来源 tushare；A股日行情: 5522 条，来源 tushare；fund_basics: 2869 条，来源 tushare；fund_dailies: 2069 条，来源 tushare；individual_moneyflow: 5195 条，来源 tushare；members_881270.TI: 62 条，来源 unknown；members_881145.TI: 110 条，来源 unknown；members_881155.TI: 42 条，来源 unknown
     </div>
   </div>
 </body>
