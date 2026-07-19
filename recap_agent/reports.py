@@ -692,14 +692,23 @@ def write_report_files(
     card_path = directory / f"{task}-feishu-card.json"
     snapshot_path = directory / f"{task}-snapshot.json"
     html_path.write_text(report.html, encoding="utf-8")
+    
+    if task == "daily":
+        index_path = directory / "index.html"
+        index_path.write_text(report.html, encoding="utf-8")
+        
     card_path.write_text(
         json.dumps(report.card, ensure_ascii=False, indent=2), encoding="utf-8"
     )
     snapshot_path.write_text(
         json.dumps(report.snapshot, ensure_ascii=False, indent=2), encoding="utf-8"
     )
-    return {
+    
+    results = {
         "html": str(html_path),
         "card": str(card_path),
         "snapshot": str(snapshot_path),
     }
+    if task == "daily":
+        results["index"] = str(directory / "index.html")
+    return results
