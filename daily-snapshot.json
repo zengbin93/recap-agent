@@ -1,7 +1,7 @@
 {
   "task": "daily",
   "title": "全球市场日报",
-  "generated_at": "2026-07-19T00:39:26+00:00",
+  "generated_at": "2026-07-19T04:40:38+00:00",
   "period": {
     "task": "daily",
     "start_date": "20260717",
@@ -14,7 +14,7 @@
     "flat_rows": 39,
     "stock_count": 5522,
     "breadth_basis": "a_share_daily",
-    "total_rows": 5620
+    "total_rows": 15967
   },
   "top_gainers": [
     {
@@ -91,6 +91,48 @@
       "source": "tushare",
       "warning": null,
       "raw_rows": 5522
+    },
+    "fund_basics": {
+      "rows": 2869,
+      "label": "fund_basics",
+      "source": "tushare",
+      "warning": null,
+      "raw_rows": 2869
+    },
+    "fund_dailies": {
+      "rows": 2069,
+      "label": "fund_dailies",
+      "source": "tushare",
+      "warning": null,
+      "raw_rows": 2069
+    },
+    "individual_moneyflow": {
+      "rows": 5195,
+      "label": "individual_moneyflow",
+      "source": "tushare",
+      "warning": null,
+      "raw_rows": 5195
+    },
+    "members_881155.TI": {
+      "rows": 42,
+      "label": "members_881155.TI",
+      "source": null,
+      "warning": null,
+      "raw_rows": 42
+    },
+    "members_881145.TI": {
+      "rows": 110,
+      "label": "members_881145.TI",
+      "source": null,
+      "warning": null,
+      "raw_rows": 110
+    },
+    "members_881270.TI": {
+      "rows": 62,
+      "label": "members_881270.TI",
+      "source": null,
+      "warning": null,
+      "raw_rows": 62
     }
   }
 }
