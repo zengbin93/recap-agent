@@ -79,3 +79,11 @@ jobs:
             artifacts/reports/hk-weekly-recap/**
             artifacts/cache/hk-weekly-recap/**
           if-no-files-found: warn
+
+      - name: Deploy to GitHub Pages
+        if: always() && env.RECAP_DRY_RUN != 'true'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./artifacts/reports
+          keep_files: true
