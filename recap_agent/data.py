@@ -207,20 +207,51 @@ def resolve_latest_trade_date(
 ) -> str:
     """Resolve the latest open SSE date at or before the requested date."""
 
-    target = _parse_date(requested_date) if requested_date else date.today()
+    if requested_date:
+        target = _parse_date(requested_date)
+        target_text = _format_date(target)
+        result = collector.fetch_table(
+            "trade_cal",
+            {"exchange": "SSE", "end_date": target_text, "is_open": "1"},
+            ttl_seconds=60 * 60 * 24,
+        )
+        open_dates = [
+            str(row.get("cal_date"))
+            for row in result.rows
+            if str(row.get("is_open")) == "1"
+            and row.get("cal_date")
+            and str(row["cal_date"]) <= target_text
+        ]
+        if not open_dates:
+            raise RuntimeError(f"no open trading date at or before {target_text}")
+        return max(open_dates)
+
+    target = date.today()
+    target_text = _format_date(target)
     result = collector.fetch_table(
         "trade_cal",
-        {"exchange": "SSE", "end_date": _format_date(target), "is_open": "1"},
+        {"exchange": "SSE", "end_date": target_text, "is_open": "1"},
         ttl_seconds=60 * 60 * 24,
     )
-    target_text = _format_date(target)
-    open_dates = [
-        str(row.get("cal_date"))
-        for row in result.rows
-        if str(row.get("is_open")) == "1"
-        and row.get("cal_date")
-        and str(row["cal_date"]) <= target_text
-    ]
+    open_dates = sorted(
+        [
+            str(row.get("cal_date"))
+            for row in result.rows
+            if str(row.get("is_open")) == "1"
+            and row.get("cal_date")
+            and str(row["cal_date"]) <= target_text
+        ],
+        reverse=True,
+    )
     if not open_dates:
-        raise RuntimeError(f"no open trading date at or before {_format_date(target)}")
-    return max(open_dates)
+        raise RuntimeError(f"no open trading date at or before {target_text}")
+
+    for candidate in open_dates:
+        try:
+            daily_check = collector.fetch_table("daily", {"trade_date": candidate}, ttl_seconds=60 * 60)
+            if daily_check.rows:
+                return candidate
+        except Exception:
+            pass
+
+    return open_dates[0]

@@ -244,7 +244,7 @@ def is_bj(ts_code: str) -> bool:
 
 
 def resolve_trade_date(client: TushareClient, trade_date: str | None) -> str:
-    """Return the requested trade date, or the latest open SSE date up to today."""
+    """Return the requested trade date, or the latest open SSE date up to today with settled data."""
     if trade_date:
         return trade_date
     today = datetime.now().date()
@@ -255,10 +255,17 @@ def resolve_trade_date(client: TushareClient, trade_date: str | None) -> str:
         fields=["cal_date", "is_open"],
         cache_key=f"SSE_{start}_{yyyymmdd(today)}_open",
     )
-    dates = sorted(row["cal_date"] for row in rows if str(row.get("is_open")) == "1")
+    dates = sorted([row["cal_date"] for row in rows if str(row.get("is_open")) == "1"], reverse=True)
     if not dates:
         raise RuntimeError("No open SSE trading date found in the last 15 days")
-    return dates[-1]
+    for d in dates:
+        try:
+            daily_rows = client.query("daily", params={"trade_date": d}, fields=["ts_code"], cache_key=f"check_{d}")
+            if daily_rows:
+                return d
+        except Exception:
+            pass
+    return dates[0]
 
 
 def recent_open_dates(client: TushareClient, trade_date: str, days: int) -> list[str]:
