@@ -7,6 +7,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Mapping
 
+from recap_agent.tracker import calculate_strategy_performance, evaluate_sector_risk
+
 
 @dataclass(frozen=True)
 class ReportResult:
@@ -549,6 +551,28 @@ def render_recap_report(
       color: var(--down-color) !important;
       font-weight: 700;
     }}
+    .tag-warning {{
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-weight: bold;
+      border-radius: 4px;
+      background-color: rgba(255, 74, 107, 0.15);
+      color: #ff4a6b;
+      border: 1px solid rgba(255, 74, 107, 0.3);
+      margin-left: 6px;
+    }}
+    .tag-safe {{
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-weight: bold;
+      border-radius: 4px;
+      background-color: rgba(0, 230, 118, 0.15);
+      color: #00e676;
+      border: 1px solid rgba(0, 230, 118, 0.3);
+      margin-left: 6px;
+    }}
     
     .movers {{
       background: var(--card-bg);
@@ -907,7 +931,13 @@ def _render_table(name: str, rows: list[Mapping[str, Any]]) -> str:
             val = str(row.get(col, ''))
             color_class = _get_color_class(col, val)
             
-            if col in ("核心买入个股", "真实代表ETF") and val not in ("", "—", "暂无对应ETF"):
+            if col == "板块名称":
+                raw = row.get("raw_row") if isinstance(row.get("raw_row"), dict) else row
+                sig = evaluate_sector_risk(raw)
+                risk_tag = f" <span class='{sig.tag_class}' title='{html.escape(sig.reason)}'>{html.escape(sig.tag_label)}</span>" if sig.risk_level != "normal" else ""
+                td_elements.append(f"<td><strong style='color:#ffffff; font-size:15px;'>{html.escape(val)}</strong>{risk_tag}</td>")
+                
+            elif col in ("核心买入个股", "真实代表ETF") and val not in ("", "—", "暂无对应ETF"):
                 parts = val.split("、") if "、" in val else [val]
                 badges = []
                 for p in parts:
@@ -999,6 +1029,7 @@ def _source_text(snapshot: Mapping[str, Any]) -> str:
 
 def _render_snapshot_summary(snapshot: Mapping[str, Any]) -> str:
     summary = snapshot["summary"]
+    perf = calculate_strategy_performance()
     
     gainers = (
         "".join(
@@ -1030,7 +1061,26 @@ def _render_snapshot_summary(snapshot: Mapping[str, Any]) -> str:
     flat_pct = (flat / total) * 100.0
     
     return f"""
-  <section class="summary">
+  <section class="summary" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+    <div class="summary-card" style="grid-column: 1 / -1; background: linear-gradient(135deg, rgba(30,41,59,0.8) 0%, rgba(15,23,42,0.9) 100%); border: 1px solid rgba(56, 189, 248, 0.2); padding: 20px 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div>
+          <span style="color: #94a3b8; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px;">
+            <span>🎯</span> 量化策略历史实证绩效 (近 30 个交易日回测)
+          </span>
+          <div style="display: flex; gap: 28px; margin-top: 10px; align-items: center; flex-wrap: wrap;">
+            <div><span style="font-size: 12px; color: #94a3b8;">T+1 胜率:</span> <strong style="font-size: 22px; color: #ff4a6b; margin-left: 6px;">{perf.t1_win_rate}%</strong></div>
+            <div><span style="font-size: 12px; color: #94a3b8;">T+3 胜率:</span> <strong style="font-size: 22px; color: #ff4a6b; margin-left: 6px;">{perf.t3_win_rate}%</strong></div>
+            <div><span style="font-size: 12px; color: #94a3b8;">T+1 期望收益:</span> <strong style="font-size: 18px; color: #38bdf8; margin-left: 6px;">+{perf.t1_avg_return}%</strong></div>
+            <div><span style="font-size: 12px; color: #94a3b8;">T+3 期望收益:</span> <strong style="font-size: 18px; color: #38bdf8; margin-left: 6px;">+{perf.t3_avg_return}%</strong></div>
+          </div>
+        </div>
+        <div style="font-size: 12px; color: #64748b; background: rgba(255,255,255,0.03); padding: 8px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+          {html.escape(perf.benchmark_note)}
+        </div>
+      </div>
+    </div>
+    
     <div class="summary-card">
       <span>盘面研判信号</span>
       <strong class="{trend_class}" style="display: flex; align-items: center; gap: 8px;">
@@ -1168,16 +1218,19 @@ def _render_active_sectors_table(active_data: dict[str, Any]) -> str:
         recent_pct = float(s.get("recent_pct") or 0.0)
         amp = float(s.get("amplitude") or 0.0)
         
+        sig = evaluate_sector_risk(s)
+        risk_tag = f"<span class='{sig.tag_class}' title='{html.escape(sig.reason)}'>{html.escape(sig.tag_label)}</span>" if sig.risk_level != "normal" else ""
+
         flow_tag = ""
         if s.get("quote_available"):
             if today_pct > 0:
-                flow_tag = "<span class='tag-up'>主力流入</span>"
+                flow_tag = f"<span class='tag-up'>主力流入</span>{risk_tag}"
             elif today_pct < 0:
-                flow_tag = "<span class='tag-down'>主力流出</span>"
+                flow_tag = f"<span class='tag-down'>主力流出</span>{risk_tag}"
             else:
-                flow_tag = "<span class='tag-flat'>多空平衡</span>"
+                flow_tag = f"<span class='tag-flat'>多空平衡</span>{risk_tag}"
         else:
-            flow_tag = "<span class='tag-flat'>方向未知</span>"
+            flow_tag = f"<span class='tag-flat'>方向未知</span>{risk_tag}"
             
         today_class = "text-up" if today_pct > 0 else "text-down" if today_pct < 0 else ""
         recent_class = "text-up" if recent_pct > 0 else "text-down" if recent_pct < 0 else ""

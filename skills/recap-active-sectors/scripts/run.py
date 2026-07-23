@@ -32,6 +32,8 @@ from typing import Any, Callable
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
+from recap_agent.tracker import evaluate_sector_risk
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_CACHE_DIR = PROJECT_ROOT / "artifacts" / "cache" / "tushare"
@@ -806,14 +808,18 @@ def write_csv_report(report: ActiveSectorsReport, path: Path) -> None:
 def render_html(report: ActiveSectorsReport) -> str:
     rows = []
     for s in report.sectors:
+        sector_dict = asdict(s)
+        sig = evaluate_sector_risk(sector_dict)
+        risk_tag_html = f"<span class='{sig.tag_class}' title='{escape(sig.reason)}'>{escape(sig.tag_label)}</span>" if sig.risk_level != "normal" else ""
+
         if not s.quote_available:
-            flow_tag_html = "<span class='tag-flat'>方向未知</span>"
+            flow_tag_html = f"<span class='tag-flat'>方向未知</span>{risk_tag_html}"
         elif s.today_pct > 0:
-            flow_tag_html = "<span class='tag-up'>主力流入</span>"
+            flow_tag_html = f"<span class='tag-up'>主力流入</span>{risk_tag_html}"
         elif s.today_pct < 0:
-            flow_tag_html = "<span class='tag-down'>主力流出</span>"
+            flow_tag_html = f"<span class='tag-down'>主力流出</span>{risk_tag_html}"
         else:
-            flow_tag_html = "<span class='tag-flat'>多空平衡</span>"
+            flow_tag_html = f"<span class='tag-flat'>多空平衡</span>{risk_tag_html}"
 
         reps_items = []
         for r in s.representatives:
@@ -1071,6 +1077,28 @@ def render_html(report: ActiveSectorsReport) -> str:
       border-radius: 4px;
       background-color: var(--flat-bg);
       color: var(--flat-color);
+      margin-left: 8px;
+    }}
+    .tag-warning {{
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-weight: bold;
+      border-radius: 4px;
+      background-color: rgba(255, 74, 107, 0.15);
+      color: #ff4a6b;
+      border: 1px solid rgba(255, 74, 107, 0.3);
+      margin-left: 8px;
+    }}
+    .tag-safe {{
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-weight: bold;
+      border-radius: 4px;
+      background-color: rgba(0, 230, 118, 0.15);
+      color: #00e676;
+      border: 1px solid rgba(0, 230, 118, 0.3);
       margin-left: 8px;
     }}
     
