@@ -8,7 +8,7 @@
       "template": "blue",
       "title": {
         "tag": "plain_text",
-        "content": "📊 成交活跃板块复盘 · 20260723"
+        "content": "📊 成交活跃板块复盘 · 20260724"
       }
     },
     "elements": [
@@ -19,7 +19,7 @@
             "is_short": true,
             "text": {
               "tag": "lark_md",
-              "content": "📅 **交易日**\n20260723"
+              "content": "📅 **交易日**\n20260724"
             }
           },
           {
@@ -40,14 +40,14 @@
             "is_short": true,
             "text": {
               "tag": "lark_md",
-              "content": "🧩 **候选板块**\n153 个"
+              "content": "🧩 **候选板块**\n147 个"
             }
           },
           {
             "is_short": true,
             "text": {
               "tag": "lark_md",
-              "content": "🔥 **去重主题**\n100 个（展示前 10）"
+              "content": "🔥 **去重主题**\n97 个（展示前 10）"
             }
           }
         ]
@@ -69,7 +69,7 @@
                 "tag": "div",
                 "text": {
                   "tag": "lark_md",
-                  "content": "**1. 共封装光学(CPO)** <font color='green'>【主力流出】</font>　<font color='grey'>概念 · 命中 33/203 · 覆盖 16.3%</font>\n<font color='grey'>榜内成交</font> 3133.72 亿（42.0%） · 较前4日均值 +0.8\n<font color='grey'>代表</font> 中际旭创 · 东山精密 · 紫光股份\n<font color='grey'>已合并</font> 计算机通信和其他电子设备制造业指数 · 芯片概念"
+                  "content": "**1. 半导体** <font color='green'>【主力流出】</font>　<font color='grey'>行业 · 命中 31/181 · 覆盖 17.1%</font>\n<font color='grey'>榜内成交</font> 2417.85 亿（38.1%） · 较前4日均值 +0.8\n<font color='grey'>代表</font> 兆易创新 · 通富微电 · 长电科技\n<font color='grey'>已合并</font> 存储芯片 · 半导体产品与设备Ⅱ(A股)"
                 }
               }
             ]
@@ -84,7 +84,7 @@
                 "tag": "div",
                 "text": {
                   "tag": "lark_md",
-                  "content": "今日 <font color='green'>▼ 0.49%</font>\n5日 <font color='green'>▼ 10.56%</font>"
+                  "content": "今日 <font color='green'>▼ 0.10%</font>\n5日 <font color='green'>▼ 1.51%</font>"
                 }
               }
             ]
@@ -105,7 +105,7 @@
                 "tag": "div",
                 "text": {
                   "tag": "lark_md",
-                  "content": "**2. 半导体** <font color='green'>【主力流出】</font>　<font color='grey'>行业 · 命中 30/181 · 覆盖 16.6%</font>\n<font color='grey'>榜内成交</font> 2460.99 亿（33.0%） · 较前4日均值 -0.2\n<font color='grey'>代表</font> 兆易创新 · 通富微电 · 长电科技\n<font color='grey'>已合并</font> 存储芯片 · 半导体产品与设备Ⅱ(A股)"
+                  "content": "**2. 共封装光学(CPO)** <font color='green'>【主力流出】</font>　<font color='grey'>概念 · 命中 32/203 · 覆盖 15.8%</font>\n<font color='grey'>榜内成交</font> 2486.45 亿（39.2%） · 较前4日均值 -0.8\n<font color='grey'>代表</font> 中际旭创 · 通富微电 · 新易盛\n<font color='grey'>已合并</font> 5G"
                 }
               }
             ]
@@ -120,7 +120,7 @@
                 "tag": "div",
                 "text": {
                   "tag": "lark_md",
-                  "content": "今日 <font color='green'>▼ 3.24%</font>\n5日 <font color='green'>▼ 11.11%</font>"
+                  "content": "今日 <font color='green'>▼ 2.35%</font>\n5日 <font color='green'>▼ 3.83%</font>"
                 }
               }
             ]
@@ -142,7 +142,7 @@
                 "tag": "div",
                 "text": {
                   "tag": "lark_md",
-                  "content": "**3. 数字芯片设计** <font color='green'>【主力流出】</font>　<font color='grey'>行业 · 命中 14/53 · 覆盖 26.4%</font>\n<font color='grey'>榜内成交</font> 1176.86 亿（15.8%） · 较前4日均值 +0.2\n<font color='grey'>代表</font> 兆易创新 · 寒武纪 · 德明利"
+                  "content": "**3. 芯片概念** <font color='green'>【主力流出】</font>　<font color='grey'>概念 · 命中 66/908 · 覆盖 7.3%</font>\n<font color='grey'>榜内成交</font> 4707.24 亿（74.2%） · 较前4日均值 +1.0\n<font color='grey'>代表</font> 中际旭创 · 兆易创新 · 通富微电\n<font color='grey'>已合并</font> 计算机通信和其他电子设备制造业指数 · 计算机、通信和其他电子设备制造业指数"
                 }
               }
             ]
@@ -157,7 +157,7 @@
                 "tag": "div",
                 "text": {
                   "tag": "lark_md",
-                  "content": "今日 <font color='green'>▼ 3.03%</font>\n5日 <font color='green'>▼ 9.81%</font>"
+                  "content": "今日 <font color='green'>▼ 1.89%</font>\n5日 <font color='green'>▼ 3.08%</font>"
                 }
               }
             ]
@@ -178,7 +178,7 @@
                 "tag": "div",
                 "text": {
                   "tag": "lark_md",
-                  "content": "**4. 先进封装** <font color='green'>【主力流出】</font>　<font color='grey'>概念 · 命中 24/200 · 覆盖 12.0%</font>\n<font color='grey'>榜内成交</font> 1709.35 亿（22.9%） · 较前4日均值 -0.2\n<font color='grey'>代表</font> 通富微电 · 长电科技 · 寒武纪"
+                  "content": "**4. 数字芯片设计** <font color='green'>【主力流出】</font>　<font color='grey'>行业 · 命中 15/53 · 覆盖 28.3%</font>\n<font color='grey'>榜内成交</font> 1124.59 亿（17.7%） · 较前4日均值 +1.0\n<font color='grey'>代表</font> 兆易创新 · 澜起科技 · 寒武纪"
                 }
               }
             ]
@@ -193,7 +193,7 @@
                 "tag": "div",
                 "text": {
                   "tag": "lark_md",
-                  "content": "今日 <font color='green'>▼ 1.15%</font>\n5日 <font color='green'>▼ 10.36%</font>"
+                  "content": "今日 <font color='green'>▼ 1.06%</font>\n5日 <font color='red'>▲ 0.15%</font>"
                 }
               }
             ]
@@ -215,7 +215,7 @@
                 "tag": "div",
                 "text": {
                   "tag": "lark_md",
-                  "content": "**5. 中芯国际概念** <font color='green'>【主力流出】</font>　<font color='grey'>概念 · 命中 14/89 · 覆盖 15.7%</font>\n<font color='grey'>榜内成交</font> 1005.51 亿（13.5%） · 较前4日均值 +0.2\n<font color='grey'>代表</font> 长电科技 · 德明利 · 中芯国际"
+                  "content": "**5. 先进封装** <font color='green'>【主力流出】</font>　<font color='grey'>概念 · 命中 26/200 · 覆盖 13.0%</font>\n<font color='grey'>榜内成交</font> 1827.82 亿（28.8%） · 较前4日均值 +1.8\n<font color='grey'>代表</font> 通富微电 · 长电科技 · 北方华创"
                 }
               }
             ]
@@ -230,7 +230,7 @@
                 "tag": "div",
                 "text": {
                   "tag": "lark_md",
-                  "content": "今日 <font color='green'>▼ 1.54%</font>\n5日 <font color='green'>▼ 9.66%</font>"
+                  "content": "今日 <font color='green'>▼ 0.80%</font>\n5日 <font color='green'>▼ 3.26%</font>"
                 }
               }
             ]
@@ -251,7 +251,7 @@
                 "tag": "div",
                 "text": {
                   "tag": "lark_md",
-                  "content": "**6. 光纤概念** <font color='red'>【主力流入】</font>　<font color='grey'>概念 · 命中 15/111 · 覆盖 13.5%</font>\n<font color='grey'>榜内成交</font> 1191.36 亿（16.0%） · 较前4日均值 -1.2\n<font color='grey'>代表</font> 东山精密 · 亨通光电 · 中兴通讯"
+                  "content": "**6. 中芯国际概念** <font color='red'>【主力流入】</font>　<font color='grey'>概念 · 命中 14/89 · 覆盖 15.7%</font>\n<font color='grey'>榜内成交</font> 1087.08 亿（17.1%） · 较前4日均值 +0.2\n<font color='grey'>代表</font> 长电科技 · 澜起科技 · 北方华创"
                 }
               }
             ]
@@ -266,7 +266,7 @@
                 "tag": "div",
                 "text": {
                   "tag": "lark_md",
-                  "content": "今日 <font color='red'>▲ 1.36%</font>\n5日 <font color='green'>▼ 8.91%</font>"
+                  "content": "今日 <font color='red'>▲ 0.30%</font>\n5日 <font color='green'>▼ 2.19%</font>"
                 }
               }
             ]
@@ -288,7 +288,7 @@
                 "tag": "div",
                 "text": {
                   "tag": "lark_md",
-                  "content": "**7. 通信设备** <font color='red'>【主力流入】</font>　<font color='grey'>行业 · 命中 13/91 · 覆盖 14.3%</font>\n<font color='grey'>榜内成交</font> 1217.02 亿（16.3%） · 较前4日均值 +1.8\n<font color='grey'>代表</font> 中际旭创 · 新易盛 · 亨通光电\n<font color='grey'>已合并</font> 通信设备Ⅲ(A股) · 通信设备Ⅳ(A股)"
+                  "content": "**7. 光纤概念** <font color='green'>【主力流出】</font>　<font color='grey'>概念 · 命中 16/111 · 覆盖 14.4%</font>\n<font color='grey'>榜内成交</font> 968.63 亿（15.3%） · 较前4日均值 -0.5\n<font color='grey'>代表</font> 东山精密 · 京东方A · 亨通光电"
                 }
               }
             ]
@@ -303,7 +303,7 @@
                 "tag": "div",
                 "text": {
                   "tag": "lark_md",
-                  "content": "今日 <font color='red'>▲ 0.78%</font>\n5日 <font color='green'>▼ 6.99%</font>"
+                  "content": "今日 <font color='green'>▼ 2.55%</font>\n5日 <font color='green'>▼ 3.49%</font>"
                 }
               }
             ]
@@ -324,7 +324,7 @@
                 "tag": "div",
                 "text": {
                   "tag": "lark_md",
-                  "content": "**8. 汽车电子** <font color='red'>【主力流入】</font>　<font color='grey'>概念 · 命中 25/389 · 覆盖 6.4%</font>\n<font color='grey'>榜内成交</font> 2155.24 亿（28.9%） · 较前4日均值 -1.0\n<font color='grey'>代表</font> 中际旭创 · 兆易创新 · 通富微电"
+                  "content": "**8. 汽车电子** <font color='green'>【主力流出】</font>　<font color='grey'>概念 · 命中 27/389 · 覆盖 6.9%</font>\n<font color='grey'>榜内成交</font> 2011.94 亿（31.7%） · 较前4日均值 +1.2\n<font color='grey'>代表</font> 中际旭创 · 兆易创新 · 通富微电"
                 }
               }
             ]
@@ -339,7 +339,7 @@
                 "tag": "div",
                 "text": {
                   "tag": "lark_md",
-                  "content": "今日 <font color='red'>▲ 0.62%</font>\n5日 <font color='green'>▼ 8.38%</font>"
+                  "content": "今日 <font color='green'>▼ 1.79%</font>\n5日 <font color='green'>▼ 3.14%</font>"
                 }
               }
             ]
@@ -361,7 +361,7 @@
                 "tag": "div",
                 "text": {
                   "tag": "lark_md",
-                  "content": "**9. F5G概念** <font color='red'>【主力流入】</font>　<font color='grey'>概念 · 命中 7/36 · 覆盖 19.4%</font>\n<font color='grey'>榜内成交</font> 669.18 亿（9.0%） · 较前4日均值 +1.0\n<font color='grey'>代表</font> 中际旭创 · 亨通光电 · 光迅科技"
+                  "content": "**9. 半导体设备** <font color='red'>【主力流入】</font>　<font color='grey'>行业 · 命中 6/25 · 覆盖 24.0%</font>\n<font color='grey'>榜内成交</font> 467.33 亿（7.4%） · 较前4日均值 +0.0\n<font color='grey'>代表</font> 北方华创 · 中微公司 · 长川科技\n<font color='grey'>已合并</font> 半导体材料与设备(A股) · 专用设备制造业指数"
                 }
               }
             ]
@@ -376,7 +376,7 @@
                 "tag": "div",
                 "text": {
                   "tag": "lark_md",
-                  "content": "今日 <font color='red'>▲ 0.24%</font>\n5日 <font color='green'>▼ 7.00%</font>"
+                  "content": "今日 <font color='red'>▲ 3.40%</font>\n5日 <font color='red'>▲ 2.55%</font>"
                 }
               }
             ]
@@ -397,7 +397,7 @@
                 "tag": "div",
                 "text": {
                   "tag": "lark_md",
-                  "content": "**10. 东数西算(算力)** <font color='red'>【主力流入】</font>　<font color='grey'>概念 · 命中 24/411 · 覆盖 5.8%</font>\n<font color='grey'>榜内成交</font> 1807.11 亿（24.2%） · 较前4日均值 +4.2\n<font color='grey'>代表</font> 紫光股份 · 浪潮信息 · 寒武纪\n<font color='grey'>已合并</font> 腾讯概念 · 百度概念"
+                  "content": "**10. 通信网络设备及器件** <font color='green'>【主力流出】</font>　<font color='grey'>行业 · 命中 7/40 · 覆盖 17.5%</font>\n<font color='grey'>榜内成交</font> 652.96 亿（10.3%） · 较前4日均值 +0.0\n<font color='grey'>代表</font> 中际旭创 · 新易盛 · 中兴通讯\n<font color='grey'>已合并</font> 通信设备 · 通信设备Ⅲ(A股)"
                 }
               }
             ]
@@ -412,7 +412,7 @@
                 "tag": "div",
                 "text": {
                   "tag": "lark_md",
-                  "content": "今日 <font color='red'>▲ 1.22%</font>\n5日 <font color='green'>▼ 4.45%</font>"
+                  "content": "今日 <font color='green'>▼ 2.22%</font>\n5日 <font color='green'>▼ 1.27%</font>"
                 }
               }
             ]
