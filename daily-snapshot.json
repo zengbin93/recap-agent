@@ -1,73 +1,73 @@
 {
   "task": "daily",
   "title": "全球市场日报",
-  "generated_at": "2026-08-19T11:46:37+00:00",
+  "generated_at": "2026-08-20T11:56:13+00:00",
   "period": {
     "task": "daily",
-    "start_date": "20260819",
-    "end_date": "20260819"
+    "start_date": "20260820",
+    "end_date": "20260820"
   },
   "summary": {
-    "trend": "偏弱",
-    "positive_rows": 449,
-    "negative_rows": 5069,
-    "flat_rows": 23,
+    "trend": "偏强",
+    "positive_rows": 4096,
+    "negative_rows": 1347,
+    "flat_rows": 98,
     "stock_count": 5541,
     "breadth_basis": "a_share_daily",
-    "total_rows": 16275
+    "total_rows": 16379
   },
   "top_gainers": [
     {
       "dataset": "a_share_daily",
-      "label": "688836.SH",
-      "pct_change": 460.34
+      "label": "301655.SZ",
+      "pct_change": 282.24
     },
     {
       "dataset": "a_share_daily",
-      "label": "920059.BJ",
-      "pct_change": 122.37
+      "label": "920344.BJ",
+      "pct_change": 29.97
     },
     {
       "dataset": "a_share_daily",
-      "label": "301106.SZ",
-      "pct_change": 20.02
-    },
-    {
-      "dataset": "a_share_daily",
-      "label": "300069.SZ",
+      "label": "300710.SZ",
       "pct_change": 20.01
     },
     {
       "dataset": "a_share_daily",
-      "label": "301130.SZ",
-      "pct_change": 19.99
+      "label": "301166.SZ",
+      "pct_change": 20.01
+    },
+    {
+      "dataset": "a_share_daily",
+      "label": "688276.SH",
+      "pct_change": 20.01
     }
   ],
   "top_losers": [
     {
       "dataset": "a_share_daily",
-      "label": "688585.SH",
-      "pct_change": -19.3
+      "label": "920059.BJ",
+      "pct_change": -29.98
     },
     {
       "dataset": "a_share_daily",
-      "label": "301717.SZ",
-      "pct_change": -19.03
+      "label": "688836.SH",
+      "pct_change": -18.7
     },
     {
       "dataset": "a_share_daily",
-      "label": "688826.SH",
-      "pct_change": -18.23
+      "label": "300246.SZ",
+      "pct_change": -15.45
     },
     {
       "dataset": "a_share_daily",
-      "label": "688828.SH",
-      "pct_change": -18.21
+      "label": "300591.SZ",
+      "pct_change": -14.83
     },
     {
       "dataset": "a_share_daily",
-      "label": "920510.BJ",
-      "pct_change": -18.2
+      "label": "301005.SZ",
+      "pct_change": -14.23
     }
   ],
   "datasets": {
@@ -76,7 +76,7 @@
       "label": "主要指数",
       "source": "tushare",
       "warning": null,
-      "raw_rows": 8000
+      "raw_rows": 3968
     },
     "hot_sectors": {
       "rows": 90,
@@ -93,18 +93,18 @@
       "raw_rows": 5541
     },
     "fund_basics": {
-      "rows": 2899,
+      "rows": 2902,
       "label": "fund_basics",
       "source": "tushare",
       "warning": null,
-      "raw_rows": 2899
+      "raw_rows": 2902
     },
     "fund_dailies": {
-      "rows": 2104,
+      "rows": 2094,
       "label": "fund_dailies",
       "source": "tushare",
       "warning": null,
-      "raw_rows": 2104
+      "raw_rows": 2094
     },
     "individual_moneyflow": {
       "rows": 5541,
@@ -113,12 +113,12 @@
       "warning": null,
       "raw_rows": 5541
     },
-    "members_881169.TI": {
-      "rows": 14,
-      "label": "members_881169.TI",
+    "members_881141.TI": {
+      "rows": 68,
+      "label": "members_881141.TI",
       "source": null,
       "warning": null,
-      "raw_rows": 14
+      "raw_rows": 68
     },
     "members_881155.TI": {
       "rows": 42,
@@ -127,12 +127,26 @@
       "warning": null,
       "raw_rows": 42
     },
-    "members_881148.TI": {
-      "rows": 36,
-      "label": "members_881148.TI",
+    "members_881175.TI": {
+      "rows": 56,
+      "label": "members_881175.TI",
       "source": null,
       "warning": null,
-      "raw_rows": 36
+      "raw_rows": 56
+    },
+    "members_881125.TI": {
+      "rows": 23,
+      "label": "members_881125.TI",
+      "source": null,
+      "warning": null,
+      "raw_rows": 23
+    },
+    "members_881169.TI": {
+      "rows": 14,
+      "label": "members_881169.TI",
+      "source": null,
+      "warning": null,
+      "raw_rows": 14
     }
   }
 }
