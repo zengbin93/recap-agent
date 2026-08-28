@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-26T11:54:27",
-  "trade_date": "20260826",
+  "generated_at": "2026-08-28T21:41:26",
+  "trade_date": "20260828",
   "top_n": 100,
   "min_count": 5,
   "recent_days": 5,
@@ -9,8 +9,8 @@
     "I"
   ],
   "top_stock_count": 100,
-  "active_sector_count": 148,
-  "theme_cluster_count": 94,
+  "active_sector_count": 143,
+  "theme_cluster_count": 96,
   "displayed_sector_count": 40,
   "sectors": [
     {
@@ -19,264 +19,156 @@
       "name": "共封装光学(CPO)",
       "sector_type": "N",
       "type_label": "概念",
-      "hit_count": 31,
+      "hit_count": 37,
       "hit_stocks": [
         "中际旭创",
         "亨通光电",
         "新易盛",
-        "东山精密",
-        "天孚通信",
-        "立讯精密",
         "生益科技",
-        "长飞光纤",
         "胜宏科技",
-        "中天科技",
-        "永鼎股份",
-        "剑桥科技",
-        "长电科技",
-        "国瓷材料",
-        "罗博特科",
-        "京东方A",
+        "东山精密",
         "工业富联",
-        "源杰科技",
+        "中天科技",
+        "长飞光纤",
+        "天孚通信",
+        "风华高科",
+        "德明利",
+        "三环集团",
+        "国瓷材料",
+        "长电科技",
+        "立讯精密",
+        "京东方A",
+        "紫光股份",
         "通富微电",
+        "源杰科技",
+        "生益电子",
+        "永鼎股份",
+        "赛微电子",
+        "兴森科技",
+        "光库科技",
+        "华工科技",
+        "协创数据",
+        "剑桥科技",
         "烽火通信",
         "光迅科技",
+        "麦捷科技",
+        "星网锐捷",
+        "德科立",
+        "德福科技",
         "太辰光",
-        "德明利",
-        "风华高科",
-        "紫光股份",
-        "华工科技",
-        "三环集团",
-        "景旺电子",
-        "联特科技",
-        "长盈通",
-        "杰普特"
+        "腾景科技",
+        "炬光科技"
       ],
       "sector_size": 205,
-      "coverage_pct": 15.12,
-      "turnover_yi": 1825.16,
-      "turnover_share_pct": 36.65,
-      "baseline_hit_count": 33.0,
-      "hit_change": -2.0,
-      "today_pct": -0.28,
-      "recent_pct": 1.36,
-      "amplitude": 7.26,
+      "coverage_pct": 18.05,
+      "turnover_yi": 2852.53,
+      "turnover_share_pct": 45.43,
+      "baseline_hit_count": 32.75,
+      "hit_change": 4.25,
+      "today_pct": -1.14,
+      "recent_pct": 1.24,
+      "amplitude": 10.86,
       "quote_available": true,
       "related_sectors": [
-        "5G"
+        "计算机通信和其他电子设备制造业指数",
+        "芯片概念",
+        "计算机、通信和其他电子设备制造业指数",
+        "5G",
+        "数据中心(AIDC)",
+        "信息技术(A股)",
+        "半导体产品与设备Ⅱ(A股)",
+        "半导体",
+        "技术硬件与设备(A股)",
+        "半导体产品与设备Ⅲ(A股)",
+        "制造业指数",
+        "制造业指数",
+        "半导体产品(A股)",
+        "电子设备、仪器和元件(A股)",
+        "电子元件(A股)"
       ],
       "representatives": [
         {
           "ts_code": "300308.SZ",
           "name": "中际旭创",
           "in_top": true,
-          "pct_chg": 0.58,
-          "recent_pct": -4.99,
-          "amount_yi": 186.04
+          "pct_chg": -0.9,
+          "recent_pct": -8.98,
+          "amount_yi": 280.49
         },
         {
           "ts_code": "600487.SH",
           "name": "亨通光电",
           "in_top": true,
-          "pct_chg": 0.36,
-          "recent_pct": 10.05,
-          "amount_yi": 136.78
+          "pct_chg": -3.65,
+          "recent_pct": 10.49,
+          "amount_yi": 183.23
         },
         {
           "ts_code": "300502.SZ",
           "name": "新易盛",
           "in_top": true,
-          "pct_chg": -0.52,
-          "recent_pct": -3.09,
-          "amount_yi": 136.4
+          "pct_chg": -2.47,
+          "recent_pct": -9.73,
+          "amount_yi": 175.48
         },
         {
-          "ts_code": "002384.SZ",
-          "name": "东山精密",
+          "ts_code": "600183.SH",
+          "name": "生益科技",
           "in_top": true,
-          "pct_chg": 1.84,
-          "recent_pct": -1.39,
-          "amount_yi": 123.7
+          "pct_chg": 3.32,
+          "recent_pct": 9.68,
+          "amount_yi": 144.75
         },
         {
-          "ts_code": "300394.SZ",
-          "name": "天孚通信",
+          "ts_code": "300476.SZ",
+          "name": "胜宏科技",
           "in_top": true,
-          "pct_chg": -1.37,
-          "recent_pct": -8.59,
-          "amount_yi": 92.93
+          "pct_chg": -8.15,
+          "recent_pct": -4.78,
+          "amount_yi": 143.12
         }
       ]
     },
     {
       "rank": 2,
-      "index_code": "885756.TI",
-      "name": "芯片概念",
-      "sector_type": "N",
-      "type_label": "概念",
-      "hit_count": 58,
-      "hit_stocks": [
-        "中际旭创",
-        "亨通光电",
-        "新易盛",
-        "东山精密",
-        "长鑫科技",
-        "兆易创新",
-        "寒武纪",
-        "立讯精密",
-        "生益科技",
-        "长飞光纤",
-        "沪电股份",
-        "北方华创",
-        "胜宏科技",
-        "中微公司",
-        "澜起科技",
-        "中天科技",
-        "华虹宏力",
-        "永鼎股份",
-        "长电科技",
-        "中芯国际",
-        "士兰微",
-        "国瓷材料",
-        "远东股份",
-        "罗博特科",
-        "京东方A",
-        "海光信息",
-        "芯原股份",
-        "长川科技",
-        "工业富联",
-        "华正新材",
-        "普冉股份",
-        "源杰科技",
-        "通富微电",
-        "云南锗业",
-        "中科飞测",
-        "烽火通信",
-        "有研新材",
-        "光迅科技",
-        "太辰光",
-        "晓程科技",
-        "天通股份",
-        "德明利",
-        "紫光股份",
-        "华工科技",
-        "佰维存储",
-        "金螳螂",
-        "联瑞新材",
-        "利通电子",
-        "拓荆科技",
-        "歌尔股份",
-        "联特科技",
-        "飞龙股份",
-        "太极实业",
-        "江丰电子",
-        "长盈通",
-        "江波龙",
-        "多氟多",
-        "杰普特"
-      ],
-      "sector_size": 918,
-      "coverage_pct": 6.32,
-      "turnover_yi": 3095.77,
-      "turnover_share_pct": 62.17,
-      "baseline_hit_count": 61.25,
-      "hit_change": -3.25,
-      "today_pct": 0.01,
-      "recent_pct": 0.43,
-      "amplitude": 5.18,
-      "quote_available": true,
-      "related_sectors": [
-        "计算机通信和其他电子设备制造业指数",
-        "计算机、通信和其他电子设备制造业指数",
-        "信息技术(A股)",
-        "数据中心(AIDC)",
-        "技术硬件与设备(A股)",
-        "制造业指数",
-        "制造业指数",
-        "电子设备、仪器和元件(A股)"
-      ],
-      "representatives": [
-        {
-          "ts_code": "300308.SZ",
-          "name": "中际旭创",
-          "in_top": true,
-          "pct_chg": 0.58,
-          "recent_pct": -4.99,
-          "amount_yi": 186.04
-        },
-        {
-          "ts_code": "600487.SH",
-          "name": "亨通光电",
-          "in_top": true,
-          "pct_chg": 0.36,
-          "recent_pct": 10.05,
-          "amount_yi": 136.78
-        },
-        {
-          "ts_code": "300502.SZ",
-          "name": "新易盛",
-          "in_top": true,
-          "pct_chg": -0.52,
-          "recent_pct": -3.09,
-          "amount_yi": 136.4
-        },
-        {
-          "ts_code": "002384.SZ",
-          "name": "东山精密",
-          "in_top": true,
-          "pct_chg": 1.84,
-          "recent_pct": -1.39,
-          "amount_yi": 123.7
-        },
-        {
-          "ts_code": "688825.SH",
-          "name": "长鑫科技",
-          "in_top": true,
-          "pct_chg": -0.71,
-          "recent_pct": -2.52,
-          "amount_yi": 113.35
-        }
-      ]
-    },
-    {
-      "rank": 3,
       "index_code": "886084.TI",
       "name": "光纤概念",
       "sector_type": "N",
       "type_label": "概念",
-      "hit_count": 20,
+      "hit_count": 22,
       "hit_stocks": [
         "亨通光电",
         "东山精密",
-        "天孚通信",
-        "长飞光纤",
-        "通鼎互联",
         "中天科技",
-        "永鼎股份",
-        "蓝思科技",
-        "远东股份",
-        "罗博特科",
+        "长飞光纤",
+        "天孚通信",
+        "云南锗业",
+        "三环集团",
+        "杭电股份",
         "京东方A",
         "源杰科技",
-        "云南锗业",
-        "烽火通信",
+        "通鼎互联",
         "有研新材",
+        "永鼎股份",
+        "远东股份",
+        "光库科技",
+        "蓝思科技",
+        "烽火通信",
         "光迅科技",
+        "德科立",
         "太辰光",
-        "三环集团",
-        "长盈通",
-        "杰普特"
+        "腾景科技",
+        "炬光科技"
       ],
       "sector_size": 112,
-      "coverage_pct": 17.86,
-      "turnover_yi": 1102.08,
-      "turnover_share_pct": 22.13,
-      "baseline_hit_count": 21.0,
-      "hit_change": -1.0,
-      "today_pct": 0.01,
-      "recent_pct": 2.5,
-      "amplitude": 5.85,
+      "coverage_pct": 19.64,
+      "turnover_yi": 1447.68,
+      "turnover_share_pct": 23.06,
+      "baseline_hit_count": 20.25,
+      "hit_change": 1.75,
+      "today_pct": -1.06,
+      "recent_pct": 2.19,
+      "amplitude": 9.7,
       "quote_available": true,
       "related_sectors": [],
       "representatives": [
@@ -284,247 +176,175 @@
           "ts_code": "600487.SH",
           "name": "亨通光电",
           "in_top": true,
-          "pct_chg": 0.36,
-          "recent_pct": 10.05,
-          "amount_yi": 136.78
+          "pct_chg": -3.65,
+          "recent_pct": 10.49,
+          "amount_yi": 183.23
         },
         {
           "ts_code": "002384.SZ",
           "name": "东山精密",
           "in_top": true,
-          "pct_chg": 1.84,
-          "recent_pct": -1.39,
-          "amount_yi": 123.7
-        },
-        {
-          "ts_code": "300394.SZ",
-          "name": "天孚通信",
-          "in_top": true,
-          "pct_chg": -1.37,
-          "recent_pct": -8.59,
-          "amount_yi": 92.93
-        },
-        {
-          "ts_code": "601869.SH",
-          "name": "长飞光纤",
-          "in_top": true,
-          "pct_chg": -1.64,
-          "recent_pct": 12.39,
-          "amount_yi": 75.05
-        },
-        {
-          "ts_code": "002491.SZ",
-          "name": "通鼎互联",
-          "in_top": true,
-          "pct_chg": 5.05,
-          "recent_pct": 28.31,
-          "amount_yi": 73.32
-        }
-      ]
-    },
-    {
-      "rank": 4,
-      "index_code": "884263.TI",
-      "name": "通信线缆及配套",
-      "sector_type": "I",
-      "type_label": "行业",
-      "hit_count": 6,
-      "hit_stocks": [
-        "亨通光电",
-        "长飞光纤",
-        "通鼎互联",
-        "中天科技",
-        "永鼎股份",
-        "长盈通"
-      ],
-      "sector_size": 12,
-      "coverage_pct": 50.0,
-      "turnover_yi": 421.82,
-      "turnover_share_pct": 8.47,
-      "baseline_hit_count": 5.75,
-      "hit_change": 0.25,
-      "today_pct": -0.36,
-      "recent_pct": 10.24,
-      "amplitude": 12.95,
-      "quote_available": true,
-      "related_sectors": [
-        "特高压",
-        "海工装备",
-        "风电"
-      ],
-      "representatives": [
-        {
-          "ts_code": "600487.SH",
-          "name": "亨通光电",
-          "in_top": true,
-          "pct_chg": 0.36,
-          "recent_pct": 10.05,
-          "amount_yi": 136.78
-        },
-        {
-          "ts_code": "601869.SH",
-          "name": "长飞光纤",
-          "in_top": true,
-          "pct_chg": -1.64,
-          "recent_pct": 12.39,
-          "amount_yi": 75.05
-        },
-        {
-          "ts_code": "002491.SZ",
-          "name": "通鼎互联",
-          "in_top": true,
-          "pct_chg": 5.05,
-          "recent_pct": 28.31,
-          "amount_yi": 73.32
+          "pct_chg": -2.48,
+          "recent_pct": -2.72,
+          "amount_yi": 111.42
         },
         {
           "ts_code": "600522.SH",
           "name": "中天科技",
           "in_top": true,
-          "pct_chg": -1.42,
-          "recent_pct": 4.34,
-          "amount_yi": 58.71
+          "pct_chg": -2.88,
+          "recent_pct": 4.82,
+          "amount_yi": 95.1
         },
         {
-          "ts_code": "600105.SH",
-          "name": "永鼎股份",
+          "ts_code": "601869.SH",
+          "name": "长飞光纤",
           "in_top": true,
-          "pct_chg": 1.72,
-          "recent_pct": 3.16,
-          "amount_yi": 51.07
+          "pct_chg": -1.04,
+          "recent_pct": 16.16,
+          "amount_yi": 91.89
+        },
+        {
+          "ts_code": "300394.SZ",
+          "name": "天孚通信",
+          "in_top": true,
+          "pct_chg": -1.34,
+          "recent_pct": -3.48,
+          "amount_yi": 91.04
         }
       ]
     },
     {
-      "rank": 5,
-      "index_code": "881121.TI",
-      "name": "半导体",
-      "sector_type": "I",
-      "type_label": "行业",
-      "hit_count": 23,
+      "rank": 3,
+      "index_code": "886042.TI",
+      "name": "存储芯片",
+      "sector_type": "N",
+      "type_label": "概念",
+      "hit_count": 28,
       "hit_stocks": [
-        "长鑫科技",
+        "生益科技",
         "兆易创新",
-        "寒武纪",
-        "北方华创",
-        "中微公司",
+        "长鑫科技",
         "澜起科技",
-        "华虹宏力",
-        "长电科技",
-        "中芯国际",
-        "士兰微",
-        "海光信息",
-        "芯原股份",
-        "长川科技",
-        "普冉股份",
-        "源杰科技",
-        "通富微电",
-        "中科飞测",
-        "有研新材",
         "德明利",
+        "香农芯创",
+        "多氟多",
+        "长电科技",
+        "通富微电",
+        "有研新材",
+        "联瑞新材",
+        "兴森科技",
+        "普冉股份",
+        "华工科技",
+        "协创数据",
+        "中微公司",
         "佰维存储",
-        "拓荆科技",
-        "江丰电子",
-        "江波龙"
+        "麦捷科技",
+        "江波龙",
+        "长川科技",
+        "大普微",
+        "先导基电",
+        "北方华创",
+        "德福科技",
+        "中芯国际",
+        "太极实业",
+        "炬光科技",
+        "华虹宏力"
       ],
-      "sector_size": 185,
-      "coverage_pct": 12.43,
-      "turnover_yi": 1196.08,
-      "turnover_share_pct": 24.02,
-      "baseline_hit_count": 24.75,
-      "hit_change": -1.75,
-      "today_pct": -0.12,
-      "recent_pct": -1.78,
-      "amplitude": 8.38,
+      "sector_size": 203,
+      "coverage_pct": 13.79,
+      "turnover_yi": 1681.91,
+      "turnover_share_pct": 26.79,
+      "baseline_hit_count": 26.75,
+      "hit_change": 1.25,
+      "today_pct": -1.44,
+      "recent_pct": 0.92,
+      "amplitude": 10.48,
       "quote_available": true,
-      "related_sectors": [
-        "半导体产品与设备Ⅱ(A股)",
-        "存储芯片",
-        "半导体产品与设备Ⅲ(A股)",
-        "半导体产品(A股)",
-        "汽车芯片"
-      ],
+      "related_sectors": [],
       "representatives": [
         {
-          "ts_code": "688825.SH",
-          "name": "长鑫科技",
+          "ts_code": "600183.SH",
+          "name": "生益科技",
           "in_top": true,
-          "pct_chg": -0.71,
-          "recent_pct": -2.52,
-          "amount_yi": 113.35
+          "pct_chg": 3.32,
+          "recent_pct": 9.68,
+          "amount_yi": 144.75
         },
         {
           "ts_code": "603986.SH",
           "name": "兆易创新",
           "in_top": true,
-          "pct_chg": -0.76,
-          "recent_pct": -2.78,
-          "amount_yi": 111.59
+          "pct_chg": -3.5,
+          "recent_pct": -2.99,
+          "amount_yi": 142.09
         },
         {
-          "ts_code": "688256.SH",
-          "name": "寒武纪",
+          "ts_code": "688825.SH",
+          "name": "长鑫科技",
           "in_top": true,
-          "pct_chg": 0.94,
-          "recent_pct": -2.9,
-          "amount_yi": 99.53
+          "pct_chg": -0.88,
+          "recent_pct": 1.03,
+          "amount_yi": 132.91
         },
         {
-          "ts_code": "002371.SZ",
-          "name": "北方华创",
+          "ts_code": "688008.SH",
+          "name": "澜起科技",
           "in_top": true,
-          "pct_chg": 0.04,
-          "recent_pct": -1.72,
-          "amount_yi": 68.24
+          "pct_chg": -3.72,
+          "recent_pct": 6.21,
+          "amount_yi": 84.57
         },
         {
-          "ts_code": "688012.SH",
-          "name": "中微公司",
+          "ts_code": "001309.SZ",
+          "name": "德明利",
           "in_top": true,
-          "pct_chg": 3.97,
-          "recent_pct": -1.06,
-          "amount_yi": 60.22
+          "pct_chg": -0.17,
+          "recent_pct": 3.35,
+          "amount_yi": 83.89
         }
       ]
     },
     {
-      "rank": 6,
+      "rank": 4,
       "index_code": "881129.TI",
       "name": "通信设备",
       "sector_type": "I",
       "type_label": "行业",
-      "hit_count": 14,
+      "hit_count": 15,
       "hit_stocks": [
         "中际旭创",
         "亨通光电",
         "新易盛",
-        "天孚通信",
-        "长飞光纤",
-        "通鼎互联",
         "中天科技",
+        "长飞光纤",
+        "天孚通信",
+        "通鼎互联",
         "永鼎股份",
+        "光库科技",
         "剑桥科技",
         "烽火通信",
         "光迅科技",
-        "太辰光",
-        "联特科技",
-        "长盈通"
+        "星网锐捷",
+        "德科立",
+        "太辰光"
       ],
       "sector_size": 91,
-      "coverage_pct": 15.38,
-      "turnover_yi": 1021.13,
-      "turnover_share_pct": 20.51,
-      "baseline_hit_count": 15.0,
-      "hit_change": -1.0,
-      "today_pct": -0.16,
-      "recent_pct": 4.67,
-      "amplitude": 5.76,
+      "coverage_pct": 16.48,
+      "turnover_yi": 1323.7,
+      "turnover_share_pct": 21.08,
+      "baseline_hit_count": 14.75,
+      "hit_change": 0.25,
+      "today_pct": -0.95,
+      "recent_pct": 2.47,
+      "amplitude": 8.61,
       "quote_available": true,
       "related_sectors": [
+        "F5G概念",
         "电信业务(A股)",
+        "通信网络设备及器件",
         "通信设备Ⅲ(A股)",
         "通信设备Ⅳ(A股)",
-        "通信网络设备及器件",
         "通讯业务(A股)"
       ],
       "representatives": [
@@ -532,1028 +352,651 @@
           "ts_code": "300308.SZ",
           "name": "中际旭创",
           "in_top": true,
-          "pct_chg": 0.58,
-          "recent_pct": -4.99,
-          "amount_yi": 186.04
+          "pct_chg": -0.9,
+          "recent_pct": -8.98,
+          "amount_yi": 280.49
         },
         {
           "ts_code": "600487.SH",
           "name": "亨通光电",
           "in_top": true,
-          "pct_chg": 0.36,
-          "recent_pct": 10.05,
-          "amount_yi": 136.78
+          "pct_chg": -3.65,
+          "recent_pct": 10.49,
+          "amount_yi": 183.23
         },
         {
           "ts_code": "300502.SZ",
           "name": "新易盛",
           "in_top": true,
-          "pct_chg": -0.52,
-          "recent_pct": -3.09,
-          "amount_yi": 136.4
+          "pct_chg": -2.47,
+          "recent_pct": -9.73,
+          "amount_yi": 175.48
         },
         {
-          "ts_code": "300394.SZ",
-          "name": "天孚通信",
+          "ts_code": "600522.SH",
+          "name": "中天科技",
           "in_top": true,
-          "pct_chg": -1.37,
-          "recent_pct": -8.59,
-          "amount_yi": 92.93
+          "pct_chg": -2.88,
+          "recent_pct": 4.82,
+          "amount_yi": 95.1
         },
         {
           "ts_code": "601869.SH",
           "name": "长飞光纤",
           "in_top": true,
-          "pct_chg": -1.64,
-          "recent_pct": 12.39,
-          "amount_yi": 75.05
+          "pct_chg": -1.04,
+          "recent_pct": 16.16,
+          "amount_yi": 91.89
         }
       ]
     },
     {
-      "rank": 7,
-      "index_code": "881169.TI",
-      "name": "贵金属",
+      "rank": 5,
+      "index_code": "884263.TI",
+      "name": "通信线缆及配套",
       "sector_type": "I",
       "type_label": "行业",
-      "hit_count": 6,
+      "hit_count": 5,
       "hit_stocks": [
-        "紫金矿业",
-        "湖南白银",
-        "兴业银锡",
-        "晓程科技",
-        "山东黄金",
-        "赤峰黄金"
+        "亨通光电",
+        "中天科技",
+        "长飞光纤",
+        "通鼎互联",
+        "永鼎股份"
       ],
-      "sector_size": 14,
-      "coverage_pct": 42.86,
-      "turnover_yi": 295.64,
-      "turnover_share_pct": 5.94,
-      "baseline_hit_count": 6.5,
-      "hit_change": -0.5,
-      "today_pct": -0.25,
-      "recent_pct": 8.25,
-      "amplitude": 12.24,
+      "sector_size": 12,
+      "coverage_pct": 41.67,
+      "turnover_yi": 477.33,
+      "turnover_share_pct": 7.6,
+      "baseline_hit_count": 5.75,
+      "hit_change": -0.75,
+      "today_pct": -3.58,
+      "recent_pct": 4.49,
+      "amplitude": 15.43,
       "quote_available": true,
       "related_sectors": [
-        "贵金属Ⅲ",
-        "有色金属矿采选业指数",
-        "有色金属矿采选业指数",
-        "黄金概念",
-        "金属铜",
-        "金属铅",
-        "小金属概念",
-        "金属锌",
-        "金属与采矿(A股)",
-        "采矿业指数",
-        "采矿业指数",
-        "多种金属与采矿(A股)",
-        "原材料Ⅱ(A股)",
-        "原材料(A股)"
+        "海工装备"
       ],
       "representatives": [
         {
-          "ts_code": "601899.SH",
-          "name": "紫金矿业",
+          "ts_code": "600487.SH",
+          "name": "亨通光电",
           "in_top": true,
-          "pct_chg": 2.35,
-          "recent_pct": 5.22,
-          "amount_yi": 109.24
+          "pct_chg": -3.65,
+          "recent_pct": 10.49,
+          "amount_yi": 183.23
         },
         {
-          "ts_code": "002716.SZ",
-          "name": "湖南白银",
+          "ts_code": "600522.SH",
+          "name": "中天科技",
           "in_top": true,
-          "pct_chg": 5.11,
-          "recent_pct": 24.4,
-          "amount_yi": 53.36
+          "pct_chg": -2.88,
+          "recent_pct": 4.82,
+          "amount_yi": 95.1
         },
         {
-          "ts_code": "000426.SZ",
-          "name": "兴业银锡",
+          "ts_code": "601869.SH",
+          "name": "长飞光纤",
           "in_top": true,
-          "pct_chg": 1.87,
-          "recent_pct": 11.9,
-          "amount_yi": 35.46
+          "pct_chg": -1.04,
+          "recent_pct": 16.16,
+          "amount_yi": 91.89
         },
         {
-          "ts_code": "300139.SZ",
-          "name": "晓程科技",
+          "ts_code": "002491.SZ",
+          "name": "通鼎互联",
           "in_top": true,
-          "pct_chg": -1.42,
-          "recent_pct": 16.2,
-          "amount_yi": 34.72
+          "pct_chg": -5.96,
+          "recent_pct": 4.86,
+          "amount_yi": 56.47
         },
         {
-          "ts_code": "600547.SH",
-          "name": "山东黄金",
+          "ts_code": "600105.SH",
+          "name": "永鼎股份",
           "in_top": true,
-          "pct_chg": -1.37,
-          "recent_pct": 5.8,
-          "amount_yi": 33.68
+          "pct_chg": -2.93,
+          "recent_pct": 0.2,
+          "amount_yi": 50.64
         }
       ]
     },
     {
-      "rank": 8,
+      "rank": 6,
       "index_code": "886009.TI",
       "name": "先进封装",
       "sector_type": "N",
       "type_label": "概念",
       "hit_count": 23,
       "hit_stocks": [
+        "生益科技",
         "寒武纪",
         "天孚通信",
-        "生益科技",
-        "北方华创",
-        "中微公司",
         "长电科技",
-        "蓝思科技",
-        "士兰微",
         "京东方A",
-        "芯原股份",
-        "华正新材",
         "通富微电",
-        "中科飞测",
         "有研新材",
-        "光迅科技",
-        "天通股份",
-        "光智科技",
-        "华工科技",
-        "佰维存储",
+        "赛微电子",
         "联瑞新材",
-        "拓荆科技",
+        "华正新材",
+        "兴森科技",
+        "华工科技",
+        "蓝思科技",
+        "天通股份",
+        "中微公司",
+        "佰维存储",
+        "士兰微",
+        "光迅科技",
+        "江波龙",
+        "北方华创",
         "太极实业",
-        "江波龙"
+        "芯原股份",
+        "炬光科技"
       ],
       "sector_size": 204,
       "coverage_pct": 11.27,
-      "turnover_yi": 1071.99,
-      "turnover_share_pct": 21.53,
-      "baseline_hit_count": 24.0,
-      "hit_change": -1.0,
-      "today_pct": -0.25,
-      "recent_pct": -1.23,
-      "amplitude": 7.48,
+      "turnover_yi": 1302.91,
+      "turnover_share_pct": 20.75,
+      "baseline_hit_count": 24.25,
+      "hit_change": -1.25,
+      "today_pct": -1.24,
+      "recent_pct": 0.59,
+      "amplitude": 10.22,
       "quote_available": true,
       "related_sectors": [],
       "representatives": [
         {
+          "ts_code": "600183.SH",
+          "name": "生益科技",
+          "in_top": true,
+          "pct_chg": 3.32,
+          "recent_pct": 9.68,
+          "amount_yi": 144.75
+        },
+        {
           "ts_code": "688256.SH",
           "name": "寒武纪",
           "in_top": true,
-          "pct_chg": 0.94,
-          "recent_pct": -2.9,
-          "amount_yi": 99.53
+          "pct_chg": -0.13,
+          "recent_pct": 1.12,
+          "amount_yi": 116.37
         },
         {
           "ts_code": "300394.SZ",
           "name": "天孚通信",
           "in_top": true,
-          "pct_chg": -1.37,
-          "recent_pct": -8.59,
-          "amount_yi": 92.93
-        },
-        {
-          "ts_code": "600183.SH",
-          "name": "生益科技",
-          "in_top": true,
-          "pct_chg": 0.78,
-          "recent_pct": 3.62,
-          "amount_yi": 75.32
-        },
-        {
-          "ts_code": "002371.SZ",
-          "name": "北方华创",
-          "in_top": true,
-          "pct_chg": 0.04,
-          "recent_pct": -1.72,
-          "amount_yi": 68.24
-        },
-        {
-          "ts_code": "688012.SH",
-          "name": "中微公司",
-          "in_top": true,
-          "pct_chg": 3.97,
-          "recent_pct": -1.06,
-          "amount_yi": 60.22
-        }
-      ]
-    },
-    {
-      "rank": 9,
-      "index_code": "884287.TI",
-      "name": "数字芯片设计",
-      "sector_type": "I",
-      "type_label": "行业",
-      "hit_count": 10,
-      "hit_stocks": [
-        "长鑫科技",
-        "兆易创新",
-        "寒武纪",
-        "澜起科技",
-        "海光信息",
-        "芯原股份",
-        "普冉股份",
-        "德明利",
-        "佰维存储",
-        "江波龙"
-      ],
-      "sector_size": 55,
-      "coverage_pct": 18.18,
-      "turnover_yi": 610.01,
-      "turnover_share_pct": 12.25,
-      "baseline_hit_count": 10.5,
-      "hit_change": -0.5,
-      "today_pct": -0.51,
-      "recent_pct": -1.58,
-      "amplitude": 7.29,
-      "quote_available": true,
-      "related_sectors": [],
-      "representatives": [
-        {
-          "ts_code": "688825.SH",
-          "name": "长鑫科技",
-          "in_top": true,
-          "pct_chg": -0.71,
-          "recent_pct": -2.52,
-          "amount_yi": 113.35
-        },
-        {
-          "ts_code": "603986.SH",
-          "name": "兆易创新",
-          "in_top": true,
-          "pct_chg": -0.76,
-          "recent_pct": -2.78,
-          "amount_yi": 111.59
-        },
-        {
-          "ts_code": "688256.SH",
-          "name": "寒武纪",
-          "in_top": true,
-          "pct_chg": 0.94,
-          "recent_pct": -2.9,
-          "amount_yi": 99.53
-        },
-        {
-          "ts_code": "688008.SH",
-          "name": "澜起科技",
-          "in_top": true,
-          "pct_chg": 3.38,
-          "recent_pct": 0.5,
-          "amount_yi": 59.73
-        },
-        {
-          "ts_code": "688041.SH",
-          "name": "海光信息",
-          "in_top": true,
-          "pct_chg": -0.47,
-          "recent_pct": -11.08,
-          "amount_yi": 45.82
-        }
-      ]
-    },
-    {
-      "rank": 10,
-      "index_code": "885998.TI",
-      "name": "F5G概念",
-      "sector_type": "N",
-      "type_label": "概念",
-      "hit_count": 7,
-      "hit_stocks": [
-        "中际旭创",
-        "亨通光电",
-        "剑桥科技",
-        "烽火通信",
-        "光迅科技",
-        "太辰光",
-        "华工科技"
-      ],
-      "sector_size": 36,
-      "coverage_pct": 19.44,
-      "turnover_yi": 510.38,
-      "turnover_share_pct": 10.25,
-      "baseline_hit_count": 8.5,
-      "hit_change": -1.5,
-      "today_pct": 0.19,
-      "recent_pct": 3.27,
-      "amplitude": 6.79,
-      "quote_available": true,
-      "related_sectors": [],
-      "representatives": [
-        {
-          "ts_code": "300308.SZ",
-          "name": "中际旭创",
-          "in_top": true,
-          "pct_chg": 0.58,
-          "recent_pct": -4.99,
-          "amount_yi": 186.04
-        },
-        {
-          "ts_code": "600487.SH",
-          "name": "亨通光电",
-          "in_top": true,
-          "pct_chg": 0.36,
-          "recent_pct": 10.05,
-          "amount_yi": 136.78
-        },
-        {
-          "ts_code": "603083.SH",
-          "name": "剑桥科技",
-          "in_top": true,
-          "pct_chg": 10.0,
-          "recent_pct": 13.97,
-          "amount_yi": 49.96
-        },
-        {
-          "ts_code": "600498.SH",
-          "name": "烽火通信",
-          "in_top": true,
-          "pct_chg": -2.68,
-          "recent_pct": 5.94,
-          "amount_yi": 35.28
-        },
-        {
-          "ts_code": "002281.SZ",
-          "name": "光迅科技",
-          "in_top": true,
-          "pct_chg": 0.33,
-          "recent_pct": -5.62,
-          "amount_yi": 35.07
-        }
-      ]
-    },
-    {
-      "rank": 11,
-      "index_code": "884054.TI",
-      "name": "铜",
-      "sector_type": "I",
-      "type_label": "行业",
-      "hit_count": 5,
-      "hit_stocks": [
-        "洛阳钼业",
-        "江西铜业",
-        "白银有色",
-        "西部矿业",
-        "铜陵有色"
-      ],
-      "sector_size": 16,
-      "coverage_pct": 31.25,
-      "turnover_yi": 242.03,
-      "turnover_share_pct": 4.86,
-      "baseline_hit_count": 1.25,
-      "hit_change": 3.75,
-      "today_pct": 5.34,
-      "recent_pct": 9.54,
-      "amplitude": 9.83,
-      "quote_available": true,
-      "related_sectors": [
-        "铜(A股)",
-        "金属镍",
-        "工业金属"
-      ],
-      "representatives": [
-        {
-          "ts_code": "603993.SH",
-          "name": "洛阳钼业",
-          "in_top": true,
-          "pct_chg": 6.35,
-          "recent_pct": 8.83,
-          "amount_yi": 90.83
-        },
-        {
-          "ts_code": "600362.SH",
-          "name": "江西铜业",
-          "in_top": true,
-          "pct_chg": 10.01,
-          "recent_pct": 10.34,
-          "amount_yi": 41.5
-        },
-        {
-          "ts_code": "601212.SH",
-          "name": "白银有色",
-          "in_top": true,
-          "pct_chg": 10.03,
-          "recent_pct": 34.07,
-          "amount_yi": 40.32
-        },
-        {
-          "ts_code": "601168.SH",
-          "name": "西部矿业",
-          "in_top": true,
-          "pct_chg": 7.62,
-          "recent_pct": 6.6,
-          "amount_yi": 36.86
-        },
-        {
-          "ts_code": "000630.SZ",
-          "name": "铜陵有色",
-          "in_top": true,
-          "pct_chg": 4.98,
-          "recent_pct": 5.97,
-          "amount_yi": 32.52
-        }
-      ]
-    },
-    {
-      "rank": 12,
-      "index_code": "881270.TI",
-      "name": "元件",
-      "sector_type": "I",
-      "type_label": "行业",
-      "hit_count": 9,
-      "hit_stocks": [
-        "东山精密",
-        "生益科技",
-        "沪电股份",
-        "胜宏科技",
-        "华正新材",
-        "风华高科",
-        "三环集团",
-        "景旺电子",
-        "金安国纪"
-      ],
-      "sector_size": 63,
-      "coverage_pct": 14.29,
-      "turnover_yi": 495.39,
-      "turnover_share_pct": 9.95,
-      "baseline_hit_count": 8.5,
-      "hit_change": 0.5,
-      "today_pct": -0.23,
-      "recent_pct": -0.04,
-      "amplitude": 7.54,
-      "quote_available": true,
-      "related_sectors": [
-        "印制电路板",
-        "电子元件(A股)"
-      ],
-      "representatives": [
-        {
-          "ts_code": "002384.SZ",
-          "name": "东山精密",
-          "in_top": true,
-          "pct_chg": 1.84,
-          "recent_pct": -1.39,
-          "amount_yi": 123.7
-        },
-        {
-          "ts_code": "600183.SH",
-          "name": "生益科技",
-          "in_top": true,
-          "pct_chg": 0.78,
-          "recent_pct": 3.62,
-          "amount_yi": 75.32
-        },
-        {
-          "ts_code": "002463.SZ",
-          "name": "沪电股份",
-          "in_top": true,
-          "pct_chg": 4.31,
-          "recent_pct": 5.12,
-          "amount_yi": 70.9
-        },
-        {
-          "ts_code": "300476.SZ",
-          "name": "胜宏科技",
-          "in_top": true,
-          "pct_chg": 1.82,
-          "recent_pct": 1.65,
-          "amount_yi": 61.63
-        },
-        {
-          "ts_code": "603186.SH",
-          "name": "华正新材",
-          "in_top": true,
-          "pct_chg": 0.4,
-          "recent_pct": 0.2,
-          "amount_yi": 43.18
-        }
-      ]
-    },
-    {
-      "rank": 13,
-      "index_code": "885840.TI",
-      "name": "人民币贬值受益",
-      "sector_type": "N",
-      "type_label": "概念",
-      "hit_count": 26,
-      "hit_stocks": [
-        "中际旭创",
-        "新易盛",
-        "东山精密",
-        "长鑫科技",
-        "兆易创新",
-        "天孚通信",
-        "洛阳钼业",
-        "立讯精密",
-        "沪电股份",
-        "胜宏科技",
-        "澜起科技",
-        "药明康德",
-        "剑桥科技",
-        "长电科技",
-        "蓝思科技",
-        "通富微电",
-        "太辰光",
-        "晓程科技",
-        "德明利",
-        "宇树科技",
-        "赤峰黄金",
-        "歌尔股份",
-        "联特科技",
-        "飞龙股份",
-        "江波龙",
-        "凯莱英"
-      ],
-      "sector_size": 608,
-      "coverage_pct": 4.28,
-      "turnover_yi": 1681.78,
-      "turnover_share_pct": 33.78,
-      "baseline_hit_count": 28.0,
-      "hit_change": -2.0,
-      "today_pct": 0.05,
-      "recent_pct": 1.9,
-      "amplitude": 2.97,
-      "quote_available": true,
-      "related_sectors": [],
-      "representatives": [
-        {
-          "ts_code": "300308.SZ",
-          "name": "中际旭创",
-          "in_top": true,
-          "pct_chg": 0.58,
-          "recent_pct": -4.99,
-          "amount_yi": 186.04
-        },
-        {
-          "ts_code": "300502.SZ",
-          "name": "新易盛",
-          "in_top": true,
-          "pct_chg": -0.52,
-          "recent_pct": -3.09,
-          "amount_yi": 136.4
-        },
-        {
-          "ts_code": "002384.SZ",
-          "name": "东山精密",
-          "in_top": true,
-          "pct_chg": 1.84,
-          "recent_pct": -1.39,
-          "amount_yi": 123.7
-        },
-        {
-          "ts_code": "688825.SH",
-          "name": "长鑫科技",
-          "in_top": true,
-          "pct_chg": -0.71,
-          "recent_pct": -2.52,
-          "amount_yi": 113.35
-        },
-        {
-          "ts_code": "603986.SH",
-          "name": "兆易创新",
-          "in_top": true,
-          "pct_chg": -0.76,
-          "recent_pct": -2.78,
-          "amount_yi": 111.59
-        }
-      ]
-    },
-    {
-      "rank": 14,
-      "index_code": "886044.TI",
-      "name": "液冷服务器",
-      "sector_type": "N",
-      "type_label": "概念",
-      "hit_count": 15,
-      "hit_stocks": [
-        "中际旭创",
-        "亨通光电",
-        "立讯精密",
-        "英维克",
-        "中天科技",
-        "剑桥科技",
-        "蓝思科技",
-        "远东股份",
-        "工业富联",
-        "烽火通信",
-        "光迅科技",
-        "风华高科",
-        "紫光股份",
-        "利通电子",
-        "飞龙股份"
-      ],
-      "sector_size": 229,
-      "coverage_pct": 6.55,
-      "turnover_yi": 925.43,
-      "turnover_share_pct": 18.59,
-      "baseline_hit_count": 15.75,
-      "hit_change": -0.75,
-      "today_pct": -0.29,
-      "recent_pct": 2.43,
-      "amplitude": 4.54,
-      "quote_available": true,
-      "related_sectors": [],
-      "representatives": [
-        {
-          "ts_code": "300308.SZ",
-          "name": "中际旭创",
-          "in_top": true,
-          "pct_chg": 0.58,
-          "recent_pct": -4.99,
-          "amount_yi": 186.04
-        },
-        {
-          "ts_code": "600487.SH",
-          "name": "亨通光电",
-          "in_top": true,
-          "pct_chg": 0.36,
-          "recent_pct": 10.05,
-          "amount_yi": 136.78
-        },
-        {
-          "ts_code": "002475.SZ",
-          "name": "立讯精密",
-          "in_top": true,
-          "pct_chg": 4.1,
-          "recent_pct": 6.75,
-          "amount_yi": 86.49
-        },
-        {
-          "ts_code": "002837.SZ",
-          "name": "英维克",
-          "in_top": true,
-          "pct_chg": 3.06,
-          "recent_pct": 18.03,
-          "amount_yi": 71.43
-        },
-        {
-          "ts_code": "600522.SH",
-          "name": "中天科技",
-          "in_top": true,
-          "pct_chg": -1.42,
-          "recent_pct": 4.34,
-          "amount_yi": 58.71
-        }
-      ]
-    },
-    {
-      "rank": 15,
-      "index_code": "885545.TI",
-      "name": "汽车电子",
-      "sector_type": "N",
-      "type_label": "概念",
-      "hit_count": 20,
-      "hit_stocks": [
-        "中际旭创",
-        "兆易创新",
-        "立讯精密",
-        "生益科技",
-        "沪电股份",
-        "胜宏科技",
-        "中天科技",
-        "长电科技",
-        "蓝思科技",
-        "中芯国际",
-        "士兰微",
-        "普冉股份",
-        "通富微电",
-        "天通股份",
-        "德明利",
-        "风华高科",
-        "华工科技",
-        "歌尔股份",
-        "景旺电子",
-        "飞龙股份"
-      ],
-      "sector_size": 393,
-      "coverage_pct": 5.09,
-      "turnover_yi": 1147.63,
-      "turnover_share_pct": 23.05,
-      "baseline_hit_count": 22.0,
-      "hit_change": -2.0,
-      "today_pct": -0.07,
-      "recent_pct": 1.63,
-      "amplitude": 4.59,
-      "quote_available": true,
-      "related_sectors": [],
-      "representatives": [
-        {
-          "ts_code": "300308.SZ",
-          "name": "中际旭创",
-          "in_top": true,
-          "pct_chg": 0.58,
-          "recent_pct": -4.99,
-          "amount_yi": 186.04
-        },
-        {
-          "ts_code": "603986.SH",
-          "name": "兆易创新",
-          "in_top": true,
-          "pct_chg": -0.76,
-          "recent_pct": -2.78,
-          "amount_yi": 111.59
-        },
-        {
-          "ts_code": "002475.SZ",
-          "name": "立讯精密",
-          "in_top": true,
-          "pct_chg": 4.1,
-          "recent_pct": 6.75,
-          "amount_yi": 86.49
-        },
-        {
-          "ts_code": "600183.SH",
-          "name": "生益科技",
-          "in_top": true,
-          "pct_chg": 0.78,
-          "recent_pct": 3.62,
-          "amount_yi": 75.32
-        },
-        {
-          "ts_code": "002463.SZ",
-          "name": "沪电股份",
-          "in_top": true,
-          "pct_chg": 4.31,
-          "recent_pct": 5.12,
-          "amount_yi": 70.9
-        }
-      ]
-    },
-    {
-      "rank": 16,
-      "index_code": "885959.TI",
-      "name": "PCB概念",
-      "sector_type": "N",
-      "type_label": "概念",
-      "hit_count": 16,
-      "hit_stocks": [
-        "东山精密",
-        "生益科技",
-        "沪电股份",
-        "胜宏科技",
-        "中天科技",
-        "中国巨石",
-        "华正新材",
-        "江西铜业",
-        "中钨高新",
-        "天通股份",
-        "铜陵有色",
-        "华工科技",
-        "诺德股份",
-        "景旺电子",
-        "金安国纪",
-        "杰普特"
-      ],
-      "sector_size": 236,
-      "coverage_pct": 6.78,
-      "turnover_yi": 776.61,
-      "turnover_share_pct": 15.6,
-      "baseline_hit_count": 14.5,
-      "hit_change": 1.5,
-      "today_pct": -0.16,
-      "recent_pct": 0.06,
-      "amplitude": 6.32,
-      "quote_available": true,
-      "related_sectors": [],
-      "representatives": [
-        {
-          "ts_code": "002384.SZ",
-          "name": "东山精密",
-          "in_top": true,
-          "pct_chg": 1.84,
-          "recent_pct": -1.39,
-          "amount_yi": 123.7
-        },
-        {
-          "ts_code": "600183.SH",
-          "name": "生益科技",
-          "in_top": true,
-          "pct_chg": 0.78,
-          "recent_pct": 3.62,
-          "amount_yi": 75.32
-        },
-        {
-          "ts_code": "002463.SZ",
-          "name": "沪电股份",
-          "in_top": true,
-          "pct_chg": 4.31,
-          "recent_pct": 5.12,
-          "amount_yi": 70.9
-        },
-        {
-          "ts_code": "300476.SZ",
-          "name": "胜宏科技",
-          "in_top": true,
-          "pct_chg": 1.82,
-          "recent_pct": 1.65,
-          "amount_yi": 61.63
-        },
-        {
-          "ts_code": "600522.SH",
-          "name": "中天科技",
-          "in_top": true,
-          "pct_chg": -1.42,
-          "recent_pct": 4.34,
-          "amount_yi": 58.71
-        }
-      ]
-    },
-    {
-      "rank": 17,
-      "index_code": "885897.TI",
-      "name": "中芯国际概念",
-      "sector_type": "N",
-      "type_label": "概念",
-      "hit_count": 10,
-      "hit_stocks": [
-        "北方华创",
-        "中微公司",
-        "澜起科技",
-        "长电科技",
-        "中芯国际",
-        "中科飞测",
-        "有研新材",
-        "德明利",
-        "江丰电子",
-        "多氟多"
-      ],
-      "sector_size": 90,
-      "coverage_pct": 11.11,
-      "turnover_yi": 448.93,
-      "turnover_share_pct": 9.02,
-      "baseline_hit_count": 12.0,
-      "hit_change": -2.0,
-      "today_pct": 0.42,
-      "recent_pct": -1.89,
-      "amplitude": 7.77,
-      "quote_available": true,
-      "related_sectors": [],
-      "representatives": [
-        {
-          "ts_code": "002371.SZ",
-          "name": "北方华创",
-          "in_top": true,
-          "pct_chg": 0.04,
-          "recent_pct": -1.72,
-          "amount_yi": 68.24
-        },
-        {
-          "ts_code": "688012.SH",
-          "name": "中微公司",
-          "in_top": true,
-          "pct_chg": 3.97,
-          "recent_pct": -1.06,
-          "amount_yi": 60.22
-        },
-        {
-          "ts_code": "688008.SH",
-          "name": "澜起科技",
-          "in_top": true,
-          "pct_chg": 3.38,
-          "recent_pct": 0.5,
-          "amount_yi": 59.73
+          "pct_chg": -1.34,
+          "recent_pct": -3.48,
+          "amount_yi": 91.04
         },
         {
           "ts_code": "600584.SH",
           "name": "长电科技",
           "in_top": true,
-          "pct_chg": -0.58,
-          "recent_pct": -5.3,
-          "amount_yi": 49.57
+          "pct_chg": -2.1,
+          "recent_pct": -4.63,
+          "amount_yi": 68.09
         },
         {
-          "ts_code": "688981.SH",
-          "name": "中芯国际",
+          "ts_code": "000725.SZ",
+          "name": "京东方A",
           "in_top": true,
-          "pct_chg": 3.46,
-          "recent_pct": -3.02,
-          "amount_yi": 49.32
+          "pct_chg": -0.34,
+          "recent_pct": -1.33,
+          "amount_yi": 61.23
         }
       ]
     },
     {
-      "rank": 18,
-      "index_code": "886048.TI",
-      "name": "英伟达概念",
-      "sector_type": "N",
-      "type_label": "概念",
-      "hit_count": 9,
+      "rank": 7,
+      "index_code": "884287.TI",
+      "name": "数字芯片设计",
+      "sector_type": "I",
+      "type_label": "行业",
+      "hit_count": 11,
       "hit_stocks": [
-        "天孚通信",
-        "英维克",
-        "胜宏科技",
-        "罗博特科",
-        "工业富联",
-        "协鑫能科",
-        "紫光股份",
-        "利通电子",
-        "景旺电子"
+        "兆易创新",
+        "长鑫科技",
+        "寒武纪",
+        "澜起科技",
+        "德明利",
+        "海光信息",
+        "普冉股份",
+        "佰维存储",
+        "江波龙",
+        "大普微",
+        "芯原股份"
       ],
-      "sector_size": 78,
-      "coverage_pct": 11.54,
-      "turnover_yi": 443.98,
-      "turnover_share_pct": 8.92,
-      "baseline_hit_count": 8.75,
-      "hit_change": 0.25,
-      "today_pct": -0.68,
-      "recent_pct": 0.25,
-      "amplitude": 4.73,
+      "sector_size": 55,
+      "coverage_pct": 20.0,
+      "turnover_yi": 828.3,
+      "turnover_share_pct": 13.19,
+      "baseline_hit_count": 10.5,
+      "hit_change": 0.5,
+      "today_pct": -1.91,
+      "recent_pct": -0.03,
+      "amplitude": 9.4,
       "quote_available": true,
       "related_sectors": [],
       "representatives": [
         {
-          "ts_code": "300394.SZ",
-          "name": "天孚通信",
+          "ts_code": "603986.SH",
+          "name": "兆易创新",
           "in_top": true,
-          "pct_chg": -1.37,
-          "recent_pct": -8.59,
-          "amount_yi": 92.93
+          "pct_chg": -3.5,
+          "recent_pct": -2.99,
+          "amount_yi": 142.09
         },
         {
-          "ts_code": "002837.SZ",
-          "name": "英维克",
+          "ts_code": "688825.SH",
+          "name": "长鑫科技",
           "in_top": true,
-          "pct_chg": 3.06,
-          "recent_pct": 18.03,
-          "amount_yi": 71.43
+          "pct_chg": -0.88,
+          "recent_pct": 1.03,
+          "amount_yi": 132.91
+        },
+        {
+          "ts_code": "688256.SH",
+          "name": "寒武纪",
+          "in_top": true,
+          "pct_chg": -0.13,
+          "recent_pct": 1.12,
+          "amount_yi": 116.37
+        },
+        {
+          "ts_code": "688008.SH",
+          "name": "澜起科技",
+          "in_top": true,
+          "pct_chg": -3.72,
+          "recent_pct": 6.21,
+          "amount_yi": 84.57
+        },
+        {
+          "ts_code": "001309.SZ",
+          "name": "德明利",
+          "in_top": true,
+          "pct_chg": -0.17,
+          "recent_pct": 3.35,
+          "amount_yi": 83.89
+        }
+      ]
+    },
+    {
+      "rank": 8,
+      "index_code": "881270.TI",
+      "name": "元件",
+      "sector_type": "I",
+      "type_label": "行业",
+      "hit_count": 11,
+      "hit_stocks": [
+        "生益科技",
+        "胜宏科技",
+        "东山精密",
+        "风华高科",
+        "沪电股份",
+        "三环集团",
+        "金安国纪",
+        "生益电子",
+        "华正新材",
+        "兴森科技",
+        "麦捷科技"
+      ],
+      "sector_size": 63,
+      "coverage_pct": 17.46,
+      "turnover_yi": 900.1,
+      "turnover_share_pct": 14.34,
+      "baseline_hit_count": 9.25,
+      "hit_change": 1.75,
+      "today_pct": -0.56,
+      "recent_pct": 1.85,
+      "amplitude": 12.54,
+      "quote_available": true,
+      "related_sectors": [
+        "印制电路板"
+      ],
+      "representatives": [
+        {
+          "ts_code": "600183.SH",
+          "name": "生益科技",
+          "in_top": true,
+          "pct_chg": 3.32,
+          "recent_pct": 9.68,
+          "amount_yi": 144.75
         },
         {
           "ts_code": "300476.SZ",
           "name": "胜宏科技",
           "in_top": true,
-          "pct_chg": 1.82,
-          "recent_pct": 1.65,
-          "amount_yi": 61.63
+          "pct_chg": -8.15,
+          "recent_pct": -4.78,
+          "amount_yi": 143.12
         },
         {
-          "ts_code": "300757.SZ",
-          "name": "罗博特科",
+          "ts_code": "002384.SZ",
+          "name": "东山精密",
           "in_top": true,
-          "pct_chg": 7.47,
-          "recent_pct": 9.5,
-          "amount_yi": 46.21
+          "pct_chg": -2.48,
+          "recent_pct": -2.72,
+          "amount_yi": 111.42
+        },
+        {
+          "ts_code": "000636.SZ",
+          "name": "风华高科",
+          "in_top": true,
+          "pct_chg": 2.48,
+          "recent_pct": 1.43,
+          "amount_yi": 90.87
+        },
+        {
+          "ts_code": "002463.SZ",
+          "name": "沪电股份",
+          "in_top": true,
+          "pct_chg": -0.26,
+          "recent_pct": 0.4,
+          "amount_yi": 73.37
+        }
+      ]
+    },
+    {
+      "rank": 9,
+      "index_code": "886048.TI",
+      "name": "英伟达概念",
+      "sector_type": "N",
+      "type_label": "概念",
+      "hit_count": 12,
+      "hit_stocks": [
+        "胜宏科技",
+        "工业富联",
+        "天孚通信",
+        "紫光股份",
+        "英维克",
+        "协创数据",
+        "麦格米特",
+        "麦捷科技",
+        "利通电子",
+        "深信服",
+        "大普微",
+        "浪潮信息"
+      ],
+      "sector_size": 78,
+      "coverage_pct": 15.38,
+      "turnover_yi": 750.58,
+      "turnover_share_pct": 11.95,
+      "baseline_hit_count": 9.5,
+      "hit_change": 2.5,
+      "today_pct": -0.5,
+      "recent_pct": 1.75,
+      "amplitude": 8.61,
+      "quote_available": true,
+      "related_sectors": [],
+      "representatives": [
+        {
+          "ts_code": "300476.SZ",
+          "name": "胜宏科技",
+          "in_top": true,
+          "pct_chg": -8.15,
+          "recent_pct": -4.78,
+          "amount_yi": 143.12
         },
         {
           "ts_code": "601138.SH",
           "name": "工业富联",
           "in_top": true,
-          "pct_chg": 0.7,
-          "recent_pct": -2.04,
-          "amount_yi": 44.13
+          "pct_chg": 0.28,
+          "recent_pct": 1.91,
+          "amount_yi": 103.15
+        },
+        {
+          "ts_code": "300394.SZ",
+          "name": "天孚通信",
+          "in_top": true,
+          "pct_chg": -1.34,
+          "recent_pct": -3.48,
+          "amount_yi": 91.04
+        },
+        {
+          "ts_code": "000938.SZ",
+          "name": "紫光股份",
+          "in_top": true,
+          "pct_chg": -1.48,
+          "recent_pct": -1.51,
+          "amount_yi": 60.15
+        },
+        {
+          "ts_code": "002837.SZ",
+          "name": "英维克",
+          "in_top": true,
+          "pct_chg": -2.26,
+          "recent_pct": 19.14,
+          "amount_yi": 54.17
         }
       ]
     },
     {
-      "rank": 19,
+      "rank": 10,
+      "index_code": "885545.TI",
+      "name": "汽车电子",
+      "sector_type": "N",
+      "type_label": "概念",
+      "hit_count": 25,
+      "hit_stocks": [
+        "中际旭创",
+        "生益科技",
+        "胜宏科技",
+        "兆易创新",
+        "中天科技",
+        "风华高科",
+        "德明利",
+        "沪电股份",
+        "长电科技",
+        "立讯精密",
+        "通富微电",
+        "潍柴动力",
+        "生益电子",
+        "赛微电子",
+        "国际复材",
+        "普冉股份",
+        "华工科技",
+        "蓝思科技",
+        "协创数据",
+        "天通股份",
+        "士兰微",
+        "麦捷科技",
+        "中芯国际",
+        "信维通信",
+        "飞龙股份"
+      ],
+      "sector_size": 393,
+      "coverage_pct": 6.36,
+      "turnover_yi": 1886.48,
+      "turnover_share_pct": 30.05,
+      "baseline_hit_count": 22.5,
+      "hit_change": 2.5,
+      "today_pct": -0.59,
+      "recent_pct": 1.5,
+      "amplitude": 7.8,
+      "quote_available": true,
+      "related_sectors": [],
+      "representatives": [
+        {
+          "ts_code": "300308.SZ",
+          "name": "中际旭创",
+          "in_top": true,
+          "pct_chg": -0.9,
+          "recent_pct": -8.98,
+          "amount_yi": 280.49
+        },
+        {
+          "ts_code": "600183.SH",
+          "name": "生益科技",
+          "in_top": true,
+          "pct_chg": 3.32,
+          "recent_pct": 9.68,
+          "amount_yi": 144.75
+        },
+        {
+          "ts_code": "300476.SZ",
+          "name": "胜宏科技",
+          "in_top": true,
+          "pct_chg": -8.15,
+          "recent_pct": -4.78,
+          "amount_yi": 143.12
+        },
+        {
+          "ts_code": "603986.SH",
+          "name": "兆易创新",
+          "in_top": true,
+          "pct_chg": -3.5,
+          "recent_pct": -2.99,
+          "amount_yi": 142.09
+        },
+        {
+          "ts_code": "600522.SH",
+          "name": "中天科技",
+          "in_top": true,
+          "pct_chg": -2.88,
+          "recent_pct": 4.82,
+          "amount_yi": 95.1
+        }
+      ]
+    },
+    {
+      "rank": 11,
+      "index_code": "885959.TI",
+      "name": "PCB概念",
+      "sector_type": "N",
+      "type_label": "概念",
+      "hit_count": 19,
+      "hit_stocks": [
+        "生益科技",
+        "胜宏科技",
+        "东山精密",
+        "中国巨石",
+        "中天科技",
+        "沪电股份",
+        "杭电股份",
+        "金安国纪",
+        "中钨高新",
+        "生益电子",
+        "华正新材",
+        "国际复材",
+        "兴森科技",
+        "华工科技",
+        "东材科技",
+        "天通股份",
+        "铜冠铜箔",
+        "德福科技",
+        "江西铜业"
+      ],
+      "sector_size": 236,
+      "coverage_pct": 8.05,
+      "turnover_yi": 1325.92,
+      "turnover_share_pct": 21.12,
+      "baseline_hit_count": 16.5,
+      "hit_change": 2.5,
+      "today_pct": -0.61,
+      "recent_pct": 1.58,
+      "amplitude": 10.22,
+      "quote_available": true,
+      "related_sectors": [],
+      "representatives": [
+        {
+          "ts_code": "600183.SH",
+          "name": "生益科技",
+          "in_top": true,
+          "pct_chg": 3.32,
+          "recent_pct": 9.68,
+          "amount_yi": 144.75
+        },
+        {
+          "ts_code": "300476.SZ",
+          "name": "胜宏科技",
+          "in_top": true,
+          "pct_chg": -8.15,
+          "recent_pct": -4.78,
+          "amount_yi": 143.12
+        },
+        {
+          "ts_code": "002384.SZ",
+          "name": "东山精密",
+          "in_top": true,
+          "pct_chg": -2.48,
+          "recent_pct": -2.72,
+          "amount_yi": 111.42
+        },
+        {
+          "ts_code": "600176.SH",
+          "name": "中国巨石",
+          "in_top": true,
+          "pct_chg": 1.31,
+          "recent_pct": 2.76,
+          "amount_yi": 99.51
+        },
+        {
+          "ts_code": "600522.SH",
+          "name": "中天科技",
+          "in_top": true,
+          "pct_chg": -2.88,
+          "recent_pct": 4.82,
+          "amount_yi": 95.1
+        }
+      ]
+    },
+    {
+      "rank": 12,
       "index_code": "885806.TI",
       "name": "华为概念",
       "sector_type": "N",
       "type_label": "概念",
-      "hit_count": 32,
+      "hit_count": 38,
       "hit_stocks": [
         "亨通光电",
-        "东山精密",
-        "天孚通信",
-        "立讯精密",
         "生益科技",
-        "英维克",
-        "沪电股份",
+        "东山精密",
         "中天科技",
-        "永鼎股份",
-        "剑桥科技",
-        "蓝思科技",
-        "士兰微",
-        "远东股份",
-        "罗博特科",
-        "京东方A",
-        "华正新材",
-        "普冉股份",
-        "云南锗业",
-        "协鑫能科",
-        "烽火通信",
-        "有研新材",
-        "光迅科技",
+        "天孚通信",
         "风华高科",
-        "华工科技",
-        "佰维存储",
+        "云南锗业",
+        "沪电股份",
         "三环集团",
+        "立讯精密",
+        "京东方A",
+        "英维克",
+        "蓝色光标",
+        "生益电子",
+        "有研新材",
+        "永鼎股份",
+        "赛微电子",
+        "华正新材",
+        "远东股份",
+        "国际复材",
+        "兴森科技",
+        "普冉股份",
+        "华工科技",
+        "蓝思科技",
+        "剑桥科技",
+        "佰维存储",
+        "士兰微",
+        "烽火通信",
+        "光迅科技",
+        "麦捷科技",
         "利通电子",
-        "歌尔股份",
-        "景旺电子",
-        "飞龙股份",
         "江波龙",
-        "杰普特"
+        "星网锐捷",
+        "德福科技",
+        "易点天下",
+        "信维通信",
+        "飞龙股份",
+        "腾景科技"
       ],
       "sector_size": 1006,
-      "coverage_pct": 3.18,
-      "turnover_yi": 1614.09,
-      "turnover_share_pct": 32.42,
-      "baseline_hit_count": 33.25,
-      "hit_change": -1.25,
-      "today_pct": -0.06,
-      "recent_pct": 1.79,
-      "amplitude": 3.63,
+      "coverage_pct": 3.78,
+      "turnover_yi": 2294.35,
+      "turnover_share_pct": 36.54,
+      "baseline_hit_count": 34.0,
+      "hit_change": 4.0,
+      "today_pct": -0.2,
+      "recent_pct": 1.54,
+      "amplitude": 6.15,
       "quote_available": true,
       "related_sectors": [],
       "representatives": [
@@ -1561,300 +1004,740 @@
           "ts_code": "600487.SH",
           "name": "亨通光电",
           "in_top": true,
-          "pct_chg": 0.36,
-          "recent_pct": 10.05,
-          "amount_yi": 136.78
-        },
-        {
-          "ts_code": "002384.SZ",
-          "name": "东山精密",
-          "in_top": true,
-          "pct_chg": 1.84,
-          "recent_pct": -1.39,
-          "amount_yi": 123.7
-        },
-        {
-          "ts_code": "300394.SZ",
-          "name": "天孚通信",
-          "in_top": true,
-          "pct_chg": -1.37,
-          "recent_pct": -8.59,
-          "amount_yi": 92.93
-        },
-        {
-          "ts_code": "002475.SZ",
-          "name": "立讯精密",
-          "in_top": true,
-          "pct_chg": 4.1,
-          "recent_pct": 6.75,
-          "amount_yi": 86.49
+          "pct_chg": -3.65,
+          "recent_pct": 10.49,
+          "amount_yi": 183.23
         },
         {
           "ts_code": "600183.SH",
           "name": "生益科技",
           "in_top": true,
-          "pct_chg": 0.78,
-          "recent_pct": 3.62,
-          "amount_yi": 75.32
+          "pct_chg": 3.32,
+          "recent_pct": 9.68,
+          "amount_yi": 144.75
+        },
+        {
+          "ts_code": "002384.SZ",
+          "name": "东山精密",
+          "in_top": true,
+          "pct_chg": -2.48,
+          "recent_pct": -2.72,
+          "amount_yi": 111.42
+        },
+        {
+          "ts_code": "600522.SH",
+          "name": "中天科技",
+          "in_top": true,
+          "pct_chg": -2.88,
+          "recent_pct": 4.82,
+          "amount_yi": 95.1
+        },
+        {
+          "ts_code": "300394.SZ",
+          "name": "天孚通信",
+          "in_top": true,
+          "pct_chg": -1.34,
+          "recent_pct": -3.48,
+          "amount_yi": 91.04
         }
       ]
     },
     {
-      "rank": 20,
+      "rank": 13,
+      "index_code": "886044.TI",
+      "name": "液冷服务器",
+      "sector_type": "N",
+      "type_label": "概念",
+      "hit_count": 17,
+      "hit_stocks": [
+        "中际旭创",
+        "亨通光电",
+        "工业富联",
+        "中天科技",
+        "风华高科",
+        "立讯精密",
+        "紫光股份",
+        "英维克",
+        "远东股份",
+        "蓝思科技",
+        "剑桥科技",
+        "烽火通信",
+        "光迅科技",
+        "利通电子",
+        "浪潮信息",
+        "网宿科技",
+        "飞龙股份"
+      ],
+      "sector_size": 229,
+      "coverage_pct": 7.42,
+      "turnover_yi": 1317.02,
+      "turnover_share_pct": 20.98,
+      "baseline_hit_count": 16.5,
+      "hit_change": 0.5,
+      "today_pct": -0.97,
+      "recent_pct": 2.42,
+      "amplitude": 8.12,
+      "quote_available": true,
+      "related_sectors": [],
+      "representatives": [
+        {
+          "ts_code": "300308.SZ",
+          "name": "中际旭创",
+          "in_top": true,
+          "pct_chg": -0.9,
+          "recent_pct": -8.98,
+          "amount_yi": 280.49
+        },
+        {
+          "ts_code": "600487.SH",
+          "name": "亨通光电",
+          "in_top": true,
+          "pct_chg": -3.65,
+          "recent_pct": 10.49,
+          "amount_yi": 183.23
+        },
+        {
+          "ts_code": "601138.SH",
+          "name": "工业富联",
+          "in_top": true,
+          "pct_chg": 0.28,
+          "recent_pct": 1.91,
+          "amount_yi": 103.15
+        },
+        {
+          "ts_code": "600522.SH",
+          "name": "中天科技",
+          "in_top": true,
+          "pct_chg": -2.88,
+          "recent_pct": 4.82,
+          "amount_yi": 95.1
+        },
+        {
+          "ts_code": "000636.SZ",
+          "name": "风华高科",
+          "in_top": true,
+          "pct_chg": 2.48,
+          "recent_pct": 1.43,
+          "amount_yi": 90.87
+        }
+      ]
+    },
+    {
+      "rank": 14,
+      "index_code": "885957.TI",
+      "name": "东数西算(算力)",
+      "sector_type": "N",
+      "type_label": "概念",
+      "hit_count": 24,
+      "hit_stocks": [
+        "胜宏科技",
+        "寒武纪",
+        "工业富联",
+        "中天科技",
+        "长飞光纤",
+        "风华高科",
+        "香农芯创",
+        "紫光股份",
+        "海光信息",
+        "英维克",
+        "永鼎股份",
+        "赛微电子",
+        "远东股份",
+        "华工科技",
+        "协创数据",
+        "烽火通信",
+        "光迅科技",
+        "麦捷科技",
+        "利通电子",
+        "深信服",
+        "德科立",
+        "浪潮信息",
+        "网宿科技",
+        "芯原股份"
+      ],
+      "sector_size": 415,
+      "coverage_pct": 5.78,
+      "turnover_yi": 1499.98,
+      "turnover_share_pct": 23.89,
+      "baseline_hit_count": 18.25,
+      "hit_change": 5.75,
+      "today_pct": -0.19,
+      "recent_pct": 1.35,
+      "amplitude": 6.63,
+      "quote_available": true,
+      "related_sectors": [],
+      "representatives": [
+        {
+          "ts_code": "300476.SZ",
+          "name": "胜宏科技",
+          "in_top": true,
+          "pct_chg": -8.15,
+          "recent_pct": -4.78,
+          "amount_yi": 143.12
+        },
+        {
+          "ts_code": "688256.SH",
+          "name": "寒武纪",
+          "in_top": true,
+          "pct_chg": -0.13,
+          "recent_pct": 1.12,
+          "amount_yi": 116.37
+        },
+        {
+          "ts_code": "601138.SH",
+          "name": "工业富联",
+          "in_top": true,
+          "pct_chg": 0.28,
+          "recent_pct": 1.91,
+          "amount_yi": 103.15
+        },
+        {
+          "ts_code": "600522.SH",
+          "name": "中天科技",
+          "in_top": true,
+          "pct_chg": -2.88,
+          "recent_pct": 4.82,
+          "amount_yi": 95.1
+        },
+        {
+          "ts_code": "601869.SH",
+          "name": "长飞光纤",
+          "in_top": true,
+          "pct_chg": -1.04,
+          "recent_pct": 16.16,
+          "amount_yi": 91.89
+        }
+      ]
+    },
+    {
+      "rank": 15,
+      "index_code": "885840.TI",
+      "name": "人民币贬值受益",
+      "sector_type": "N",
+      "type_label": "概念",
+      "hit_count": 27,
+      "hit_stocks": [
+        "中际旭创",
+        "新易盛",
+        "胜宏科技",
+        "兆易创新",
+        "长鑫科技",
+        "东山精密",
+        "天孚通信",
+        "澜起科技",
+        "德明利",
+        "香农芯创",
+        "沪电股份",
+        "长电科技",
+        "立讯精密",
+        "通富微电",
+        "潍柴动力",
+        "赛微电子",
+        "蓝思科技",
+        "协创数据",
+        "药明康德",
+        "剑桥科技",
+        "江波龙",
+        "网宿科技",
+        "易点天下",
+        "信维通信",
+        "洛阳钼业",
+        "太辰光",
+        "飞龙股份"
+      ],
+      "sector_size": 608,
+      "coverage_pct": 4.44,
+      "turnover_yi": 2139.13,
+      "turnover_share_pct": 34.07,
+      "baseline_hit_count": 26.5,
+      "hit_change": 0.5,
+      "today_pct": 0.17,
+      "recent_pct": 1.54,
+      "amplitude": 4.44,
+      "quote_available": true,
+      "related_sectors": [],
+      "representatives": [
+        {
+          "ts_code": "300308.SZ",
+          "name": "中际旭创",
+          "in_top": true,
+          "pct_chg": -0.9,
+          "recent_pct": -8.98,
+          "amount_yi": 280.49
+        },
+        {
+          "ts_code": "300502.SZ",
+          "name": "新易盛",
+          "in_top": true,
+          "pct_chg": -2.47,
+          "recent_pct": -9.73,
+          "amount_yi": 175.48
+        },
+        {
+          "ts_code": "300476.SZ",
+          "name": "胜宏科技",
+          "in_top": true,
+          "pct_chg": -8.15,
+          "recent_pct": -4.78,
+          "amount_yi": 143.12
+        },
+        {
+          "ts_code": "603986.SH",
+          "name": "兆易创新",
+          "in_top": true,
+          "pct_chg": -3.5,
+          "recent_pct": -2.99,
+          "amount_yi": 142.09
+        },
+        {
+          "ts_code": "688825.SH",
+          "name": "长鑫科技",
+          "in_top": true,
+          "pct_chg": -0.88,
+          "recent_pct": 1.03,
+          "amount_yi": 132.91
+        }
+      ]
+    },
+    {
+      "rank": 16,
+      "index_code": "886037.TI",
+      "name": "6G概念",
+      "sector_type": "N",
+      "type_label": "概念",
+      "hit_count": 10,
+      "hit_stocks": [
+        "亨通光电",
+        "中天科技",
+        "紫光股份",
+        "赛微电子",
+        "华正新材",
+        "兴森科技",
+        "华工科技",
+        "烽火通信",
+        "光迅科技",
+        "信维通信"
+      ],
+      "sector_size": 98,
+      "coverage_pct": 10.2,
+      "turnover_yi": 659.94,
+      "turnover_share_pct": 10.51,
+      "baseline_hit_count": 8.5,
+      "hit_change": 1.5,
+      "today_pct": -0.98,
+      "recent_pct": 1.17,
+      "amplitude": 9.35,
+      "quote_available": true,
+      "related_sectors": [],
+      "representatives": [
+        {
+          "ts_code": "600487.SH",
+          "name": "亨通光电",
+          "in_top": true,
+          "pct_chg": -3.65,
+          "recent_pct": 10.49,
+          "amount_yi": 183.23
+        },
+        {
+          "ts_code": "600522.SH",
+          "name": "中天科技",
+          "in_top": true,
+          "pct_chg": -2.88,
+          "recent_pct": 4.82,
+          "amount_yi": 95.1
+        },
+        {
+          "ts_code": "000938.SZ",
+          "name": "紫光股份",
+          "in_top": true,
+          "pct_chg": -1.48,
+          "recent_pct": -1.51,
+          "amount_yi": 60.15
+        },
+        {
+          "ts_code": "300456.SZ",
+          "name": "赛微电子",
+          "in_top": true,
+          "pct_chg": 9.01,
+          "recent_pct": 28.7,
+          "amount_yi": 50.62
+        },
+        {
+          "ts_code": "603186.SH",
+          "name": "华正新材",
+          "in_top": true,
+          "pct_chg": 0.11,
+          "recent_pct": 6.52,
+          "amount_yi": 49.48
+        }
+      ]
+    },
+    {
+      "rank": 17,
+      "index_code": "885800.TI",
+      "name": "消费电子概念",
+      "sector_type": "N",
+      "type_label": "概念",
+      "hit_count": 23,
+      "hit_stocks": [
+        "长鑫科技",
+        "东山精密",
+        "澜起科技",
+        "三环集团",
+        "国瓷材料",
+        "立讯精密",
+        "通富微电",
+        "赛微电子",
+        "华正新材",
+        "国际复材",
+        "蓝思科技",
+        "东材科技",
+        "协创数据",
+        "佰维存储",
+        "士兰微",
+        "麦捷科技",
+        "利通电子",
+        "江波龙",
+        "德福科技",
+        "中芯国际",
+        "信维通信",
+        "炬光科技",
+        "华虹宏力"
+      ],
+      "sector_size": 506,
+      "coverage_pct": 4.55,
+      "turnover_yi": 1282.48,
+      "turnover_share_pct": 20.43,
+      "baseline_hit_count": 19.5,
+      "hit_change": 3.5,
+      "today_pct": -0.52,
+      "recent_pct": 1.54,
+      "amplitude": 8.21,
+      "quote_available": true,
+      "related_sectors": [],
+      "representatives": [
+        {
+          "ts_code": "688825.SH",
+          "name": "长鑫科技",
+          "in_top": true,
+          "pct_chg": -0.88,
+          "recent_pct": 1.03,
+          "amount_yi": 132.91
+        },
+        {
+          "ts_code": "002384.SZ",
+          "name": "东山精密",
+          "in_top": true,
+          "pct_chg": -2.48,
+          "recent_pct": -2.72,
+          "amount_yi": 111.42
+        },
+        {
+          "ts_code": "688008.SH",
+          "name": "澜起科技",
+          "in_top": true,
+          "pct_chg": -3.72,
+          "recent_pct": 6.21,
+          "amount_yi": 84.57
+        },
+        {
+          "ts_code": "300408.SZ",
+          "name": "三环集团",
+          "in_top": true,
+          "pct_chg": -0.21,
+          "recent_pct": -1.46,
+          "amount_yi": 70.96
+        },
+        {
+          "ts_code": "300285.SZ",
+          "name": "国瓷材料",
+          "in_top": true,
+          "pct_chg": -1.59,
+          "recent_pct": 1.53,
+          "amount_yi": 68.7
+        }
+      ]
+    },
+    {
+      "rank": 18,
       "index_code": "886070.TI",
       "name": "AI手机",
       "sector_type": "N",
       "type_label": "概念",
       "hit_count": 6,
       "hit_stocks": [
-        "东山精密",
         "胜宏科技",
+        "东山精密",
         "蓝思科技",
-        "芯原股份",
         "佰维存储",
-        "江波龙"
+        "江波龙",
+        "芯原股份"
       ],
       "sector_size": 40,
       "coverage_pct": 15.0,
-      "turnover_yi": 338.93,
-      "turnover_share_pct": 6.81,
-      "baseline_hit_count": 5.25,
-      "hit_change": 0.75,
-      "today_pct": -0.19,
-      "recent_pct": 1.55,
-      "amplitude": 4.89,
+      "turnover_yi": 425.16,
+      "turnover_share_pct": 6.77,
+      "baseline_hit_count": 5.5,
+      "hit_change": 0.5,
+      "today_pct": -0.67,
+      "recent_pct": 2.14,
+      "amplitude": 8.62,
       "quote_available": true,
       "related_sectors": [],
       "representatives": [
         {
-          "ts_code": "002384.SZ",
-          "name": "东山精密",
-          "in_top": true,
-          "pct_chg": 1.84,
-          "recent_pct": -1.39,
-          "amount_yi": 123.7
-        },
-        {
           "ts_code": "300476.SZ",
           "name": "胜宏科技",
           "in_top": true,
-          "pct_chg": 1.82,
-          "recent_pct": 1.65,
-          "amount_yi": 61.63
+          "pct_chg": -8.15,
+          "recent_pct": -4.78,
+          "amount_yi": 143.12
+        },
+        {
+          "ts_code": "002384.SZ",
+          "name": "东山精密",
+          "in_top": true,
+          "pct_chg": -2.48,
+          "recent_pct": -2.72,
+          "amount_yi": 111.42
         },
         {
           "ts_code": "300433.SZ",
           "name": "蓝思科技",
           "in_top": true,
-          "pct_chg": 2.96,
-          "recent_pct": 7.94,
-          "amount_yi": 49.56
-        },
-        {
-          "ts_code": "688521.SH",
-          "name": "芯原股份",
-          "in_top": true,
-          "pct_chg": 9.73,
-          "recent_pct": -2.59,
-          "amount_yi": 45.34
+          "pct_chg": -2.1,
+          "recent_pct": 2.8,
+          "amount_yi": 47.89
         },
         {
           "ts_code": "688525.SH",
           "name": "佰维存储",
           "in_top": true,
-          "pct_chg": -1.96,
-          "recent_pct": -3.6,
-          "amount_yi": 31.97
+          "pct_chg": -3.15,
+          "recent_pct": -3.36,
+          "amount_yi": 44.75
+        },
+        {
+          "ts_code": "301308.SZ",
+          "name": "江波龙",
+          "in_top": true,
+          "pct_chg": -2.43,
+          "recent_pct": -0.99,
+          "amount_yi": 43.1
         }
       ]
     },
     {
-      "rank": 21,
-      "index_code": "884229.TI",
-      "name": "半导体设备",
-      "sector_type": "I",
-      "type_label": "行业",
-      "hit_count": 5,
-      "hit_stocks": [
-        "北方华创",
-        "中微公司",
-        "长川科技",
-        "中科飞测",
-        "拓荆科技"
-      ],
-      "sector_size": 26,
-      "coverage_pct": 19.23,
-      "turnover_yi": 240.82,
-      "turnover_share_pct": 4.84,
-      "baseline_hit_count": 4.75,
-      "hit_change": 0.25,
-      "today_pct": 1.93,
-      "recent_pct": -0.42,
-      "amplitude": 8.9,
-      "quote_available": true,
-      "related_sectors": [
-        "半导体材料与设备(A股)",
-        "专用设备制造业指数",
-        "专业设备制造业指数"
-      ],
-      "representatives": [
-        {
-          "ts_code": "002371.SZ",
-          "name": "北方华创",
-          "in_top": true,
-          "pct_chg": 0.04,
-          "recent_pct": -1.72,
-          "amount_yi": 68.24
-        },
-        {
-          "ts_code": "688012.SH",
-          "name": "中微公司",
-          "in_top": true,
-          "pct_chg": 3.97,
-          "recent_pct": -1.06,
-          "amount_yi": 60.22
-        },
-        {
-          "ts_code": "300604.SZ",
-          "name": "长川科技",
-          "in_top": true,
-          "pct_chg": 4.77,
-          "recent_pct": 1.17,
-          "amount_yi": 44.84
-        },
-        {
-          "ts_code": "688361.SH",
-          "name": "中科飞测",
-          "in_top": true,
-          "pct_chg": 6.79,
-          "recent_pct": 5.85,
-          "amount_yi": 37.99
-        },
-        {
-          "ts_code": "688072.SH",
-          "name": "拓荆科技",
-          "in_top": true,
-          "pct_chg": 3.06,
-          "recent_pct": -2.17,
-          "amount_yi": 29.53
-        }
-      ]
-    },
-    {
-      "rank": 22,
-      "index_code": "886073.TI",
-      "name": "铜缆高速连接",
+      "rank": 19,
+      "index_code": "885611.TI",
+      "name": "阿里巴巴概念",
       "sector_type": "N",
       "type_label": "概念",
-      "hit_count": 6,
+      "hit_count": 18,
       "hit_stocks": [
-        "立讯精密",
-        "长飞光纤",
+        "长鑫科技",
+        "寒武纪",
+        "工业富联",
         "中天科技",
+        "香农芯创",
+        "紫光股份",
+        "海光信息",
+        "英维克",
+        "蓝色光标",
         "远东股份",
-        "太辰光",
-        "华工科技"
+        "华工科技",
+        "佰维存储",
+        "光迅科技",
+        "麦捷科技",
+        "星网锐捷",
+        "大普微",
+        "易点天下",
+        "芯原股份"
       ],
-      "sector_size": 47,
-      "coverage_pct": 12.77,
-      "turnover_yi": 333.88,
-      "turnover_share_pct": 6.71,
-      "baseline_hit_count": 6.75,
-      "hit_change": -0.75,
-      "today_pct": -0.52,
-      "recent_pct": 3.58,
-      "amplitude": 5.58,
+      "sector_size": 347,
+      "coverage_pct": 5.19,
+      "turnover_yi": 1129.83,
+      "turnover_share_pct": 18.0,
+      "baseline_hit_count": 12.0,
+      "hit_change": 6.0,
+      "today_pct": 0.2,
+      "recent_pct": 1.63,
+      "amplitude": 6.16,
       "quote_available": true,
-      "related_sectors": [],
+      "related_sectors": [
+        "抖音概念(字节概念)",
+        "腾讯概念"
+      ],
       "representatives": [
         {
-          "ts_code": "002475.SZ",
-          "name": "立讯精密",
+          "ts_code": "688825.SH",
+          "name": "长鑫科技",
           "in_top": true,
-          "pct_chg": 4.1,
-          "recent_pct": 6.75,
-          "amount_yi": 86.49
+          "pct_chg": -0.88,
+          "recent_pct": 1.03,
+          "amount_yi": 132.91
         },
         {
-          "ts_code": "601869.SH",
-          "name": "长飞光纤",
+          "ts_code": "688256.SH",
+          "name": "寒武纪",
           "in_top": true,
-          "pct_chg": -1.64,
-          "recent_pct": 12.39,
-          "amount_yi": 75.05
+          "pct_chg": -0.13,
+          "recent_pct": 1.12,
+          "amount_yi": 116.37
+        },
+        {
+          "ts_code": "601138.SH",
+          "name": "工业富联",
+          "in_top": true,
+          "pct_chg": 0.28,
+          "recent_pct": 1.91,
+          "amount_yi": 103.15
         },
         {
           "ts_code": "600522.SH",
           "name": "中天科技",
           "in_top": true,
-          "pct_chg": -1.42,
-          "recent_pct": 4.34,
-          "amount_yi": 58.71
+          "pct_chg": -2.88,
+          "recent_pct": 4.82,
+          "amount_yi": 95.1
         },
         {
-          "ts_code": "600869.SH",
-          "name": "远东股份",
+          "ts_code": "300475.SZ",
+          "name": "香农芯创",
           "in_top": true,
-          "pct_chg": 6.91,
-          "recent_pct": 12.47,
-          "amount_yi": 46.38
-        },
-        {
-          "ts_code": "300570.SZ",
-          "name": "太辰光",
-          "in_top": true,
-          "pct_chg": -2.65,
-          "recent_pct": 9.46,
-          "amount_yi": 34.93
+          "pct_chg": 4.09,
+          "recent_pct": 8.86,
+          "amount_yi": 74.39
         }
       ]
     },
     {
-      "rank": 23,
+      "rank": 20,
+      "index_code": "885454.TI",
+      "name": "智能穿戴",
+      "sector_type": "N",
+      "type_label": "概念",
+      "hit_count": 15,
+      "hit_stocks": [
+        "东山精密",
+        "风华高科",
+        "德明利",
+        "长电科技",
+        "立讯精密",
+        "京东方A",
+        "通富微电",
+        "蓝思科技",
+        "协创数据",
+        "天通股份",
+        "佰维存储",
+        "士兰微",
+        "麦捷科技",
+        "江波龙",
+        "信维通信"
+      ],
+      "sector_size": 240,
+      "coverage_pct": 6.25,
+      "turnover_yi": 890.29,
+      "turnover_share_pct": 14.18,
+      "baseline_hit_count": 13.0,
+      "hit_change": 2.0,
+      "today_pct": -0.64,
+      "recent_pct": 1.35,
+      "amplitude": 7.93,
+      "quote_available": true,
+      "related_sectors": [
+        "AI眼镜"
+      ],
+      "representatives": [
+        {
+          "ts_code": "002384.SZ",
+          "name": "东山精密",
+          "in_top": true,
+          "pct_chg": -2.48,
+          "recent_pct": -2.72,
+          "amount_yi": 111.42
+        },
+        {
+          "ts_code": "000636.SZ",
+          "name": "风华高科",
+          "in_top": true,
+          "pct_chg": 2.48,
+          "recent_pct": 1.43,
+          "amount_yi": 90.87
+        },
+        {
+          "ts_code": "001309.SZ",
+          "name": "德明利",
+          "in_top": true,
+          "pct_chg": -0.17,
+          "recent_pct": 3.35,
+          "amount_yi": 83.89
+        },
+        {
+          "ts_code": "600584.SH",
+          "name": "长电科技",
+          "in_top": true,
+          "pct_chg": -2.1,
+          "recent_pct": -4.63,
+          "amount_yi": 68.09
+        },
+        {
+          "ts_code": "002475.SZ",
+          "name": "立讯精密",
+          "in_top": true,
+          "pct_chg": -1.01,
+          "recent_pct": 3.57,
+          "amount_yi": 62.43
+        }
+      ]
+    },
+    {
+      "rank": 21,
       "index_code": "885431.TI",
       "name": "新能源汽车",
       "sector_type": "N",
       "type_label": "概念",
-      "hit_count": 28,
+      "hit_count": 29,
       "hit_stocks": [
         "亨通光电",
-        "东山精密",
-        "立讯精密",
-        "宁德时代",
         "生益科技",
-        "长飞光纤",
-        "英维克",
         "胜宏科技",
-        "中天科技",
-        "永鼎股份",
-        "蓝思科技",
-        "士兰微",
-        "国瓷材料",
-        "远东股份",
-        "罗博特科",
-        "京东方A",
+        "东山精密",
         "工业富联",
-        "协鑫能科",
-        "天通股份",
-        "光智科技",
+        "宁德时代",
+        "中天科技",
+        "长飞光纤",
+        "多氟多",
+        "杭电股份",
+        "国瓷材料",
+        "立讯精密",
+        "京东方A",
         "阳光电源",
-        "铜陵有色",
-        "华工科技",
+        "潍柴动力",
+        "英维克",
+        "永鼎股份",
         "联瑞新材",
-        "诺德股份",
-        "景旺电子",
-        "飞龙股份",
-        "多氟多"
+        "远东股份",
+        "华工科技",
+        "蓝思科技",
+        "东材科技",
+        "天通股份",
+        "天齐锂业",
+        "麦格米特",
+        "士兰微",
+        "麦捷科技",
+        "德福科技",
+        "飞龙股份"
       ],
       "sector_size": 1062,
-      "coverage_pct": 2.64,
-      "turnover_yi": 1492.51,
-      "turnover_share_pct": 29.97,
-      "baseline_hit_count": 25.25,
-      "hit_change": 2.75,
-      "today_pct": -0.0,
-      "recent_pct": 2.08,
-      "amplitude": 3.72,
+      "coverage_pct": 2.73,
+      "turnover_yi": 2067.33,
+      "turnover_share_pct": 32.93,
+      "baseline_hit_count": 27.75,
+      "hit_change": 1.25,
+      "today_pct": -0.2,
+      "recent_pct": 1.69,
+      "amplitude": 5.7,
       "quote_available": true,
       "related_sectors": [],
       "representatives": [
@@ -1862,190 +1745,328 @@
           "ts_code": "600487.SH",
           "name": "亨通光电",
           "in_top": true,
-          "pct_chg": 0.36,
-          "recent_pct": 10.05,
-          "amount_yi": 136.78
-        },
-        {
-          "ts_code": "002384.SZ",
-          "name": "东山精密",
-          "in_top": true,
-          "pct_chg": 1.84,
-          "recent_pct": -1.39,
-          "amount_yi": 123.7
-        },
-        {
-          "ts_code": "002475.SZ",
-          "name": "立讯精密",
-          "in_top": true,
-          "pct_chg": 4.1,
-          "recent_pct": 6.75,
-          "amount_yi": 86.49
-        },
-        {
-          "ts_code": "300750.SZ",
-          "name": "宁德时代",
-          "in_top": true,
-          "pct_chg": 0.6,
-          "recent_pct": -2.57,
-          "amount_yi": 79.09
+          "pct_chg": -3.65,
+          "recent_pct": 10.49,
+          "amount_yi": 183.23
         },
         {
           "ts_code": "600183.SH",
           "name": "生益科技",
           "in_top": true,
-          "pct_chg": 0.78,
-          "recent_pct": 3.62,
-          "amount_yi": 75.32
-        }
-      ]
-    },
-    {
-      "rank": 24,
-      "index_code": "885376.TI",
-      "name": "苹果概念",
-      "sector_type": "N",
-      "type_label": "概念",
-      "hit_count": 10,
-      "hit_stocks": [
-        "东山精密",
-        "立讯精密",
-        "长电科技",
-        "蓝思科技",
-        "罗博特科",
-        "京东方A",
-        "工业富联",
-        "华工科技",
-        "歌尔股份",
-        "杰普特"
-      ],
-      "sector_size": 140,
-      "coverage_pct": 7.14,
-      "turnover_yi": 533.39,
-      "turnover_share_pct": 10.71,
-      "baseline_hit_count": 8.75,
-      "hit_change": 1.25,
-      "today_pct": -0.47,
-      "recent_pct": 2.95,
-      "amplitude": 4.82,
-      "quote_available": true,
-      "related_sectors": [
-        "虚拟现实"
-      ],
-      "representatives": [
+          "pct_chg": 3.32,
+          "recent_pct": 9.68,
+          "amount_yi": 144.75
+        },
+        {
+          "ts_code": "300476.SZ",
+          "name": "胜宏科技",
+          "in_top": true,
+          "pct_chg": -8.15,
+          "recent_pct": -4.78,
+          "amount_yi": 143.12
+        },
         {
           "ts_code": "002384.SZ",
           "name": "东山精密",
           "in_top": true,
-          "pct_chg": 1.84,
-          "recent_pct": -1.39,
-          "amount_yi": 123.7
+          "pct_chg": -2.48,
+          "recent_pct": -2.72,
+          "amount_yi": 111.42
         },
         {
-          "ts_code": "002475.SZ",
-          "name": "立讯精密",
+          "ts_code": "601138.SH",
+          "name": "工业富联",
           "in_top": true,
-          "pct_chg": 4.1,
-          "recent_pct": 6.75,
-          "amount_yi": 86.49
+          "pct_chg": 0.28,
+          "recent_pct": 1.91,
+          "amount_yi": 103.15
+        }
+      ]
+    },
+    {
+      "rank": 22,
+      "index_code": "886111.TI",
+      "name": "玻璃基板",
+      "sector_type": "N",
+      "type_label": "概念",
+      "hit_count": 7,
+      "hit_stocks": [
+        "长电科技",
+        "京东方A",
+        "通富微电",
+        "赛微电子",
+        "兴森科技",
+        "华工科技",
+        "蓝思科技"
+      ],
+      "sector_size": 57,
+      "coverage_pct": 12.28,
+      "turnover_yi": 384.02,
+      "turnover_share_pct": 6.12,
+      "baseline_hit_count": 6.5,
+      "hit_change": 0.5,
+      "today_pct": -0.64,
+      "recent_pct": 0.6,
+      "amplitude": 10.15,
+      "quote_available": true,
+      "related_sectors": [],
+      "representatives": [
+        {
+          "ts_code": "600584.SH",
+          "name": "长电科技",
+          "in_top": true,
+          "pct_chg": -2.1,
+          "recent_pct": -4.63,
+          "amount_yi": 68.09
+        },
+        {
+          "ts_code": "000725.SZ",
+          "name": "京东方A",
+          "in_top": true,
+          "pct_chg": -0.34,
+          "recent_pct": -1.33,
+          "amount_yi": 61.23
+        },
+        {
+          "ts_code": "002156.SZ",
+          "name": "通富微电",
+          "in_top": true,
+          "pct_chg": 0.03,
+          "recent_pct": -0.2,
+          "amount_yi": 59.06
+        },
+        {
+          "ts_code": "300456.SZ",
+          "name": "赛微电子",
+          "in_top": true,
+          "pct_chg": 9.01,
+          "recent_pct": 28.7,
+          "amount_yi": 50.62
+        },
+        {
+          "ts_code": "002436.SZ",
+          "name": "兴森科技",
+          "in_top": true,
+          "pct_chg": 0.22,
+          "recent_pct": 1.22,
+          "amount_yi": 49.04
+        }
+      ]
+    },
+    {
+      "rank": 23,
+      "index_code": "886035.TI",
+      "name": "毫米波雷达",
+      "sector_type": "N",
+      "type_label": "概念",
+      "hit_count": 10,
+      "hit_stocks": [
+        "生益科技",
+        "沪电股份",
+        "长电科技",
+        "立讯精密",
+        "通富微电",
+        "生益电子",
+        "华正新材",
+        "兴森科技",
+        "天通股份",
+        "信维通信"
+      ],
+      "sector_size": 127,
+      "coverage_pct": 7.87,
+      "turnover_yi": 642.94,
+      "turnover_share_pct": 10.24,
+      "baseline_hit_count": 9.75,
+      "hit_change": 0.25,
+      "today_pct": -0.37,
+      "recent_pct": 1.66,
+      "amplitude": 7.62,
+      "quote_available": true,
+      "related_sectors": [],
+      "representatives": [
+        {
+          "ts_code": "600183.SH",
+          "name": "生益科技",
+          "in_top": true,
+          "pct_chg": 3.32,
+          "recent_pct": 9.68,
+          "amount_yi": 144.75
+        },
+        {
+          "ts_code": "002463.SZ",
+          "name": "沪电股份",
+          "in_top": true,
+          "pct_chg": -0.26,
+          "recent_pct": 0.4,
+          "amount_yi": 73.37
         },
         {
           "ts_code": "600584.SH",
           "name": "长电科技",
           "in_top": true,
-          "pct_chg": -0.58,
-          "recent_pct": -5.3,
-          "amount_yi": 49.57
+          "pct_chg": -2.1,
+          "recent_pct": -4.63,
+          "amount_yi": 68.09
+        },
+        {
+          "ts_code": "002475.SZ",
+          "name": "立讯精密",
+          "in_top": true,
+          "pct_chg": -1.01,
+          "recent_pct": 3.57,
+          "amount_yi": 62.43
+        },
+        {
+          "ts_code": "002156.SZ",
+          "name": "通富微电",
+          "in_top": true,
+          "pct_chg": 0.03,
+          "recent_pct": -0.2,
+          "amount_yi": 59.06
+        }
+      ]
+    },
+    {
+      "rank": 24,
+      "index_code": "885738.TI",
+      "name": "OLED",
+      "sector_type": "N",
+      "type_label": "概念",
+      "hit_count": 12,
+      "hit_stocks": [
+        "京东方A",
+        "有研新材",
+        "蓝思科技",
+        "东材科技",
+        "天通股份",
+        "士兰微",
+        "利通电子",
+        "先导基电",
+        "北方华创",
+        "中芯国际",
+        "太极实业",
+        "炬光科技"
+      ],
+      "sector_size": 156,
+      "coverage_pct": 7.69,
+      "turnover_yi": 531.76,
+      "turnover_share_pct": 8.47,
+      "baseline_hit_count": 12.25,
+      "hit_change": -0.25,
+      "today_pct": -0.93,
+      "recent_pct": 0.33,
+      "amplitude": 8.56,
+      "quote_available": true,
+      "related_sectors": [],
+      "representatives": [
+        {
+          "ts_code": "000725.SZ",
+          "name": "京东方A",
+          "in_top": true,
+          "pct_chg": -0.34,
+          "recent_pct": -1.33,
+          "amount_yi": 61.23
+        },
+        {
+          "ts_code": "600206.SH",
+          "name": "有研新材",
+          "in_top": true,
+          "pct_chg": -3.73,
+          "recent_pct": -4.78,
+          "amount_yi": 52.29
         },
         {
           "ts_code": "300433.SZ",
           "name": "蓝思科技",
           "in_top": true,
-          "pct_chg": 2.96,
-          "recent_pct": 7.94,
-          "amount_yi": 49.56
+          "pct_chg": -2.1,
+          "recent_pct": 2.8,
+          "amount_yi": 47.89
         },
         {
-          "ts_code": "300757.SZ",
-          "name": "罗博特科",
+          "ts_code": "601208.SH",
+          "name": "东材科技",
           "in_top": true,
-          "pct_chg": 7.47,
-          "recent_pct": 9.5,
-          "amount_yi": 46.21
+          "pct_chg": 4.44,
+          "recent_pct": 12.14,
+          "amount_yi": 47.29
+        },
+        {
+          "ts_code": "600330.SH",
+          "name": "天通股份",
+          "in_top": true,
+          "pct_chg": -0.72,
+          "recent_pct": 6.12,
+          "amount_yi": 46.38
         }
       ]
     },
     {
       "rank": 25,
-      "index_code": "700680.TI",
-      "name": "有色金属冶炼和压延加工业指数",
-      "sector_type": "I",
-      "type_label": "行业",
-      "hit_count": 9,
+      "index_code": "886073.TI",
+      "name": "铜缆高速连接",
+      "sector_type": "N",
+      "type_label": "概念",
+      "hit_count": 6,
       "hit_stocks": [
-        "湖南白银",
-        "江西铜业",
-        "白银有色",
-        "中钨高新",
-        "云南锗业",
-        "有研新材",
-        "光智科技",
-        "铜陵有色",
-        "诺德股份"
+        "中天科技",
+        "长飞光纤",
+        "立讯精密",
+        "远东股份",
+        "华工科技",
+        "太辰光"
       ],
-      "sector_size": 97,
-      "coverage_pct": 9.28,
-      "turnover_yi": 343.82,
-      "turnover_share_pct": 6.9,
-      "baseline_hit_count": 6.0,
-      "hit_change": 3.0,
-      "today_pct": 1.5,
-      "recent_pct": 1.05,
-      "amplitude": 4.11,
+      "sector_size": 47,
+      "coverage_pct": 12.77,
+      "turnover_yi": 382.61,
+      "turnover_share_pct": 6.09,
+      "baseline_hit_count": 6.75,
+      "hit_change": -0.75,
+      "today_pct": -1.31,
+      "recent_pct": 1.97,
+      "amplitude": 9.04,
       "quote_available": true,
-      "related_sectors": [
-        "有色金属冶炼和压延加工业指数"
-      ],
+      "related_sectors": [],
       "representatives": [
         {
-          "ts_code": "002716.SZ",
-          "name": "湖南白银",
+          "ts_code": "600522.SH",
+          "name": "中天科技",
           "in_top": true,
-          "pct_chg": 5.11,
-          "recent_pct": 24.4,
-          "amount_yi": 53.36
+          "pct_chg": -2.88,
+          "recent_pct": 4.82,
+          "amount_yi": 95.1
         },
         {
-          "ts_code": "600362.SH",
-          "name": "江西铜业",
+          "ts_code": "601869.SH",
+          "name": "长飞光纤",
           "in_top": true,
-          "pct_chg": 10.01,
-          "recent_pct": 10.34,
-          "amount_yi": 41.5
+          "pct_chg": -1.04,
+          "recent_pct": 16.16,
+          "amount_yi": 91.89
         },
         {
-          "ts_code": "601212.SH",
-          "name": "白银有色",
+          "ts_code": "002475.SZ",
+          "name": "立讯精密",
           "in_top": true,
-          "pct_chg": 10.03,
-          "recent_pct": 34.07,
-          "amount_yi": 40.32
+          "pct_chg": -1.01,
+          "recent_pct": 3.57,
+          "amount_yi": 62.43
         },
         {
-          "ts_code": "000657.SZ",
-          "name": "中钨高新",
+          "ts_code": "600869.SH",
+          "name": "远东股份",
           "in_top": true,
-          "pct_chg": -1.25,
-          "recent_pct": -4.76,
-          "amount_yi": 38.13
+          "pct_chg": 3.9,
+          "recent_pct": 10.22,
+          "amount_yi": 49.25
         },
         {
-          "ts_code": "002428.SZ",
-          "name": "云南锗业",
+          "ts_code": "000988.SZ",
+          "name": "华工科技",
           "in_top": true,
-          "pct_chg": -0.81,
-          "recent_pct": -10.73,
-          "amount_yi": 38.12
+          "pct_chg": -1.88,
+          "recent_pct": -3.61,
+          "amount_yi": 48.09
         }
       ]
     },
@@ -2058,27 +2079,27 @@
       "hit_count": 12,
       "hit_stocks": [
         "长飞光纤",
-        "北方华创",
-        "长电科技",
-        "士兰微",
-        "通富微电",
         "云南锗业",
-        "天通股份",
-        "光智科技",
+        "多氟多",
+        "长电科技",
+        "通富微电",
+        "赛微电子",
         "华工科技",
-        "金螳螂",
-        "江丰电子",
-        "多氟多"
+        "天通股份",
+        "麦格米特",
+        "士兰微",
+        "先导基电",
+        "北方华创"
       ],
       "sector_size": 181,
       "coverage_pct": 6.63,
-      "turnover_yi": 504.22,
-      "turnover_share_pct": 10.13,
+      "turnover_yi": 682.43,
+      "turnover_share_pct": 10.87,
       "baseline_hit_count": 12.75,
       "hit_change": -0.75,
-      "today_pct": -0.43,
-      "recent_pct": -0.59,
-      "amplitude": 6.45,
+      "today_pct": -1.14,
+      "recent_pct": 0.66,
+      "amplitude": 9.22,
       "quote_available": true,
       "related_sectors": [],
       "representatives": [
@@ -2086,71 +2107,71 @@
           "ts_code": "601869.SH",
           "name": "长飞光纤",
           "in_top": true,
-          "pct_chg": -1.64,
-          "recent_pct": 12.39,
-          "amount_yi": 75.05
+          "pct_chg": -1.04,
+          "recent_pct": 16.16,
+          "amount_yi": 91.89
         },
         {
-          "ts_code": "002371.SZ",
-          "name": "北方华创",
+          "ts_code": "002428.SZ",
+          "name": "云南锗业",
           "in_top": true,
-          "pct_chg": 0.04,
-          "recent_pct": -1.72,
-          "amount_yi": 68.24
+          "pct_chg": -1.68,
+          "recent_pct": -1.21,
+          "amount_yi": 76.85
+        },
+        {
+          "ts_code": "002407.SZ",
+          "name": "多氟多",
+          "in_top": true,
+          "pct_chg": 5.18,
+          "recent_pct": 2.19,
+          "amount_yi": 73.21
         },
         {
           "ts_code": "600584.SH",
           "name": "长电科技",
           "in_top": true,
-          "pct_chg": -0.58,
-          "recent_pct": -5.3,
-          "amount_yi": 49.57
-        },
-        {
-          "ts_code": "600460.SH",
-          "name": "士兰微",
-          "in_top": true,
-          "pct_chg": -3.64,
-          "recent_pct": -4.12,
-          "amount_yi": 46.83
+          "pct_chg": -2.1,
+          "recent_pct": -4.63,
+          "amount_yi": 68.09
         },
         {
           "ts_code": "002156.SZ",
           "name": "通富微电",
           "in_top": true,
-          "pct_chg": 0.57,
-          "recent_pct": -3.68,
-          "amount_yi": 38.42
+          "pct_chg": 0.03,
+          "recent_pct": -0.2,
+          "amount_yi": 59.06
         }
       ]
     },
     {
       "rank": 27,
-      "index_code": "885832.TI",
-      "name": "长三角一体化",
+      "index_code": "885730.TI",
+      "name": "量子科技",
       "sector_type": "N",
       "type_label": "概念",
       "hit_count": 9,
       "hit_stocks": [
         "亨通光电",
-        "东山精密",
-        "通鼎互联",
-        "永鼎股份",
-        "中国巨石",
-        "士兰微",
-        "协鑫能科",
+        "中天科技",
+        "长飞光纤",
+        "海光信息",
+        "光库科技",
+        "华工科技",
         "天通股份",
-        "金螳螂"
+        "光迅科技",
+        "腾景科技"
       ],
-      "sector_size": 131,
-      "coverage_pct": 6.87,
-      "turnover_yi": 584.29,
-      "turnover_share_pct": 11.73,
-      "baseline_hit_count": 7.75,
-      "hit_change": 1.25,
-      "today_pct": 0.32,
-      "recent_pct": 1.76,
-      "amplitude": 3.27,
+      "sector_size": 115,
+      "coverage_pct": 7.83,
+      "turnover_yi": 648.88,
+      "turnover_share_pct": 10.34,
+      "baseline_hit_count": 7.5,
+      "hit_change": 1.5,
+      "today_pct": -0.11,
+      "recent_pct": 2.68,
+      "amplitude": 6.99,
       "quote_available": true,
       "related_sectors": [],
       "representatives": [
@@ -2158,421 +2179,490 @@
           "ts_code": "600487.SH",
           "name": "亨通光电",
           "in_top": true,
-          "pct_chg": 0.36,
-          "recent_pct": 10.05,
-          "amount_yi": 136.78
+          "pct_chg": -3.65,
+          "recent_pct": 10.49,
+          "amount_yi": 183.23
         },
         {
-          "ts_code": "002384.SZ",
-          "name": "东山精密",
+          "ts_code": "600522.SH",
+          "name": "中天科技",
           "in_top": true,
-          "pct_chg": 1.84,
-          "recent_pct": -1.39,
-          "amount_yi": 123.7
-        },
-        {
-          "ts_code": "002491.SZ",
-          "name": "通鼎互联",
-          "in_top": true,
-          "pct_chg": 5.05,
-          "recent_pct": 28.31,
-          "amount_yi": 73.32
-        },
-        {
-          "ts_code": "600105.SH",
-          "name": "永鼎股份",
-          "in_top": true,
-          "pct_chg": 1.72,
-          "recent_pct": 3.16,
-          "amount_yi": 51.07
-        },
-        {
-          "ts_code": "600176.SH",
-          "name": "中国巨石",
-          "in_top": true,
-          "pct_chg": -0.73,
-          "recent_pct": -2.61,
-          "amount_yi": 50.71
-        }
-      ]
-    },
-    {
-      "rank": 28,
-      "index_code": "885738.TI",
-      "name": "OLED",
-      "sector_type": "N",
-      "type_label": "概念",
-      "hit_count": 11,
-      "hit_stocks": [
-        "北方华创",
-        "蓝思科技",
-        "中芯国际",
-        "士兰微",
-        "京东方A",
-        "有研新材",
-        "天通股份",
-        "利通电子",
-        "景旺电子",
-        "太极实业",
-        "江丰电子"
-      ],
-      "sector_size": 156,
-      "coverage_pct": 7.05,
-      "turnover_yi": 444.83,
-      "turnover_share_pct": 8.93,
-      "baseline_hit_count": 12.5,
-      "hit_change": -1.5,
-      "today_pct": -0.1,
-      "recent_pct": -0.24,
-      "amplitude": 6.4,
-      "quote_available": true,
-      "related_sectors": [],
-      "representatives": [
-        {
-          "ts_code": "002371.SZ",
-          "name": "北方华创",
-          "in_top": true,
-          "pct_chg": 0.04,
-          "recent_pct": -1.72,
-          "amount_yi": 68.24
-        },
-        {
-          "ts_code": "300433.SZ",
-          "name": "蓝思科技",
-          "in_top": true,
-          "pct_chg": 2.96,
-          "recent_pct": 7.94,
-          "amount_yi": 49.56
-        },
-        {
-          "ts_code": "688981.SH",
-          "name": "中芯国际",
-          "in_top": true,
-          "pct_chg": 3.46,
-          "recent_pct": -3.02,
-          "amount_yi": 49.32
-        },
-        {
-          "ts_code": "600460.SH",
-          "name": "士兰微",
-          "in_top": true,
-          "pct_chg": -3.64,
-          "recent_pct": -4.12,
-          "amount_yi": 46.83
-        },
-        {
-          "ts_code": "000725.SZ",
-          "name": "京东方A",
-          "in_top": true,
-          "pct_chg": -0.35,
-          "recent_pct": -4.83,
-          "amount_yi": 45.88
-        }
-      ]
-    },
-    {
-      "rank": 29,
-      "index_code": "885454.TI",
-      "name": "智能穿戴",
-      "sector_type": "N",
-      "type_label": "概念",
-      "hit_count": 13,
-      "hit_stocks": [
-        "东山精密",
-        "立讯精密",
-        "长电科技",
-        "蓝思科技",
-        "士兰微",
-        "京东方A",
-        "通富微电",
-        "天通股份",
-        "德明利",
-        "风华高科",
-        "佰维存储",
-        "歌尔股份",
-        "江波龙"
-      ],
-      "sector_size": 240,
-      "coverage_pct": 5.42,
-      "turnover_yi": 630.8,
-      "turnover_share_pct": 12.67,
-      "baseline_hit_count": 13.0,
-      "hit_change": 0.0,
-      "today_pct": -0.1,
-      "recent_pct": 1.71,
-      "amplitude": 4.58,
-      "quote_available": true,
-      "related_sectors": [
-        "AI眼镜"
-      ],
-      "representatives": [
-        {
-          "ts_code": "002384.SZ",
-          "name": "东山精密",
-          "in_top": true,
-          "pct_chg": 1.84,
-          "recent_pct": -1.39,
-          "amount_yi": 123.7
-        },
-        {
-          "ts_code": "002475.SZ",
-          "name": "立讯精密",
-          "in_top": true,
-          "pct_chg": 4.1,
-          "recent_pct": 6.75,
-          "amount_yi": 86.49
-        },
-        {
-          "ts_code": "600584.SH",
-          "name": "长电科技",
-          "in_top": true,
-          "pct_chg": -0.58,
-          "recent_pct": -5.3,
-          "amount_yi": 49.57
-        },
-        {
-          "ts_code": "300433.SZ",
-          "name": "蓝思科技",
-          "in_top": true,
-          "pct_chg": 2.96,
-          "recent_pct": 7.94,
-          "amount_yi": 49.56
-        },
-        {
-          "ts_code": "600460.SH",
-          "name": "士兰微",
-          "in_top": true,
-          "pct_chg": -3.64,
-          "recent_pct": -4.12,
-          "amount_yi": 46.83
-        }
-      ]
-    },
-    {
-      "rank": 30,
-      "index_code": "885957.TI",
-      "name": "东数西算(算力)",
-      "sector_type": "N",
-      "type_label": "概念",
-      "hit_count": 17,
-      "hit_stocks": [
-        "寒武纪",
-        "长飞光纤",
-        "英维克",
-        "胜宏科技",
-        "中天科技",
-        "永鼎股份",
-        "远东股份",
-        "海光信息",
-        "芯原股份",
-        "工业富联",
-        "协鑫能科",
-        "烽火通信",
-        "光迅科技",
-        "风华高科",
-        "紫光股份",
-        "华工科技",
-        "利通电子"
-      ],
-      "sector_size": 415,
-      "coverage_pct": 4.1,
-      "turnover_yi": 834.32,
-      "turnover_share_pct": 16.76,
-      "baseline_hit_count": 19.75,
-      "hit_change": -2.75,
-      "today_pct": 0.0,
-      "recent_pct": 0.84,
-      "amplitude": 3.84,
-      "quote_available": true,
-      "related_sectors": [
-        "阿里巴巴概念"
-      ],
-      "representatives": [
-        {
-          "ts_code": "688256.SH",
-          "name": "寒武纪",
-          "in_top": true,
-          "pct_chg": 0.94,
-          "recent_pct": -2.9,
-          "amount_yi": 99.53
+          "pct_chg": -2.88,
+          "recent_pct": 4.82,
+          "amount_yi": 95.1
         },
         {
           "ts_code": "601869.SH",
           "name": "长飞光纤",
           "in_top": true,
-          "pct_chg": -1.64,
-          "recent_pct": 12.39,
-          "amount_yi": 75.05
+          "pct_chg": -1.04,
+          "recent_pct": 16.16,
+          "amount_yi": 91.89
         },
         {
-          "ts_code": "002837.SZ",
-          "name": "英维克",
+          "ts_code": "688041.SH",
+          "name": "海光信息",
           "in_top": true,
-          "pct_chg": 3.06,
-          "recent_pct": 18.03,
-          "amount_yi": 71.43
+          "pct_chg": -0.2,
+          "recent_pct": -0.29,
+          "amount_yi": 57.28
         },
         {
-          "ts_code": "300476.SZ",
-          "name": "胜宏科技",
+          "ts_code": "300620.SZ",
+          "name": "光库科技",
           "in_top": true,
-          "pct_chg": 1.82,
-          "recent_pct": 1.65,
-          "amount_yi": 61.63
-        },
-        {
-          "ts_code": "600522.SH",
-          "name": "中天科技",
-          "in_top": true,
-          "pct_chg": -1.42,
-          "recent_pct": 4.34,
-          "amount_yi": 58.71
+          "pct_chg": 3.0,
+          "recent_pct": 1.61,
+          "amount_yi": 48.56
         }
       ]
     },
     {
-      "rank": 31,
-      "index_code": "886037.TI",
-      "name": "6G概念",
+      "rank": 28,
+      "index_code": "886112.TI",
+      "name": "MLCC概念",
+      "sector_type": "N",
+      "type_label": "概念",
+      "hit_count": 5,
+      "hit_stocks": [
+        "风华高科",
+        "三环集团",
+        "国瓷材料",
+        "东材科技",
+        "信维通信"
+      ],
+      "sector_size": 35,
+      "coverage_pct": 14.29,
+      "turnover_yi": 315.0,
+      "turnover_share_pct": 5.02,
+      "baseline_hit_count": 3.75,
+      "hit_change": 1.25,
+      "today_pct": -0.44,
+      "recent_pct": 0.06,
+      "amplitude": 10.29,
+      "quote_available": true,
+      "related_sectors": [],
+      "representatives": [
+        {
+          "ts_code": "000636.SZ",
+          "name": "风华高科",
+          "in_top": true,
+          "pct_chg": 2.48,
+          "recent_pct": 1.43,
+          "amount_yi": 90.87
+        },
+        {
+          "ts_code": "300408.SZ",
+          "name": "三环集团",
+          "in_top": true,
+          "pct_chg": -0.21,
+          "recent_pct": -1.46,
+          "amount_yi": 70.96
+        },
+        {
+          "ts_code": "300285.SZ",
+          "name": "国瓷材料",
+          "in_top": true,
+          "pct_chg": -1.59,
+          "recent_pct": 1.53,
+          "amount_yi": 68.7
+        },
+        {
+          "ts_code": "601208.SH",
+          "name": "东材科技",
+          "in_top": true,
+          "pct_chg": 4.44,
+          "recent_pct": 12.14,
+          "amount_yi": 47.29
+        },
+        {
+          "ts_code": "300136.SZ",
+          "name": "信维通信",
+          "in_top": true,
+          "pct_chg": -2.79,
+          "recent_pct": -1.02,
+          "amount_yi": 37.18
+        }
+      ]
+    },
+    {
+      "rank": 29,
+      "index_code": "885785.TI",
+      "name": "小米概念",
+      "sector_type": "N",
+      "type_label": "概念",
+      "hit_count": 16,
+      "hit_stocks": [
+        "胜宏科技",
+        "兆易创新",
+        "长鑫科技",
+        "东山精密",
+        "三环集团",
+        "京东方A",
+        "普冉股份",
+        "蓝思科技",
+        "协创数据",
+        "佰维存储",
+        "麦格米特",
+        "士兰微",
+        "麦捷科技",
+        "利通电子",
+        "江波龙",
+        "易点天下"
+      ],
+      "sector_size": 376,
+      "coverage_pct": 4.26,
+      "turnover_yi": 1104.25,
+      "turnover_share_pct": 17.59,
+      "baseline_hit_count": 15.0,
+      "hit_change": 1.0,
+      "today_pct": -0.48,
+      "recent_pct": 0.91,
+      "amplitude": 6.5,
+      "quote_available": true,
+      "related_sectors": [],
+      "representatives": [
+        {
+          "ts_code": "300476.SZ",
+          "name": "胜宏科技",
+          "in_top": true,
+          "pct_chg": -8.15,
+          "recent_pct": -4.78,
+          "amount_yi": 143.12
+        },
+        {
+          "ts_code": "603986.SH",
+          "name": "兆易创新",
+          "in_top": true,
+          "pct_chg": -3.5,
+          "recent_pct": -2.99,
+          "amount_yi": 142.09
+        },
+        {
+          "ts_code": "688825.SH",
+          "name": "长鑫科技",
+          "in_top": true,
+          "pct_chg": -0.88,
+          "recent_pct": 1.03,
+          "amount_yi": 132.91
+        },
+        {
+          "ts_code": "002384.SZ",
+          "name": "东山精密",
+          "in_top": true,
+          "pct_chg": -2.48,
+          "recent_pct": -2.72,
+          "amount_yi": 111.42
+        },
+        {
+          "ts_code": "300408.SZ",
+          "name": "三环集团",
+          "in_top": true,
+          "pct_chg": -0.21,
+          "recent_pct": -1.46,
+          "amount_yi": 70.96
+        }
+      ]
+    },
+    {
+      "rank": 30,
+      "index_code": "885897.TI",
+      "name": "中芯国际概念",
       "sector_type": "N",
       "type_label": "概念",
       "hit_count": 8,
       "hit_stocks": [
-        "亨通光电",
-        "中天科技",
-        "华正新材",
-        "烽火通信",
-        "光迅科技",
-        "紫光股份",
-        "华工科技",
-        "景旺电子"
-      ],
-      "sector_size": 98,
-      "coverage_pct": 8.16,
-      "turnover_yi": 403.64,
-      "turnover_share_pct": 8.11,
-      "baseline_hit_count": 8.75,
-      "hit_change": -0.75,
-      "today_pct": 0.15,
-      "recent_pct": 0.46,
-      "amplitude": 6.03,
-      "quote_available": true,
-      "related_sectors": [],
-      "representatives": [
-        {
-          "ts_code": "600487.SH",
-          "name": "亨通光电",
-          "in_top": true,
-          "pct_chg": 0.36,
-          "recent_pct": 10.05,
-          "amount_yi": 136.78
-        },
-        {
-          "ts_code": "600522.SH",
-          "name": "中天科技",
-          "in_top": true,
-          "pct_chg": -1.42,
-          "recent_pct": 4.34,
-          "amount_yi": 58.71
-        },
-        {
-          "ts_code": "603186.SH",
-          "name": "华正新材",
-          "in_top": true,
-          "pct_chg": 0.4,
-          "recent_pct": 0.2,
-          "amount_yi": 43.18
-        },
-        {
-          "ts_code": "600498.SH",
-          "name": "烽火通信",
-          "in_top": true,
-          "pct_chg": -2.68,
-          "recent_pct": 5.94,
-          "amount_yi": 35.28
-        },
-        {
-          "ts_code": "002281.SZ",
-          "name": "光迅科技",
-          "in_top": true,
-          "pct_chg": 0.33,
-          "recent_pct": -5.62,
-          "amount_yi": 35.07
-        }
-      ]
-    },
-    {
-      "rank": 32,
-      "index_code": "886071.TI",
-      "name": "AI PC",
-      "sector_type": "N",
-      "type_label": "概念",
-      "hit_count": 7,
-      "hit_stocks": [
-        "胜宏科技",
-        "京东方A",
-        "通富微电",
+        "澜起科技",
         "德明利",
-        "佰维存储",
-        "景旺电子",
-        "江波龙"
+        "多氟多",
+        "长电科技",
+        "有研新材",
+        "中微公司",
+        "北方华创",
+        "中芯国际"
       ],
-      "sector_size": 66,
-      "coverage_pct": 10.61,
-      "turnover_yi": 267.56,
-      "turnover_share_pct": 5.37,
-      "baseline_hit_count": 6.75,
-      "hit_change": 0.25,
-      "today_pct": -0.46,
-      "recent_pct": 0.93,
-      "amplitude": 4.64,
+      "sector_size": 90,
+      "coverage_pct": 8.89,
+      "turnover_yi": 485.88,
+      "turnover_share_pct": 7.74,
+      "baseline_hit_count": 11.0,
+      "hit_change": -3.0,
+      "today_pct": -1.55,
+      "recent_pct": 0.41,
+      "amplitude": 9.69,
       "quote_available": true,
       "related_sectors": [],
       "representatives": [
         {
-          "ts_code": "300476.SZ",
-          "name": "胜宏科技",
+          "ts_code": "688008.SH",
+          "name": "澜起科技",
           "in_top": true,
-          "pct_chg": 1.82,
-          "recent_pct": 1.65,
-          "amount_yi": 61.63
-        },
-        {
-          "ts_code": "000725.SZ",
-          "name": "京东方A",
-          "in_top": true,
-          "pct_chg": -0.35,
-          "recent_pct": -4.83,
-          "amount_yi": 45.88
-        },
-        {
-          "ts_code": "002156.SZ",
-          "name": "通富微电",
-          "in_top": true,
-          "pct_chg": 0.57,
-          "recent_pct": -3.68,
-          "amount_yi": 38.42
+          "pct_chg": -3.72,
+          "recent_pct": 6.21,
+          "amount_yi": 84.57
         },
         {
           "ts_code": "001309.SZ",
           "name": "德明利",
           "in_top": true,
-          "pct_chg": -1.6,
-          "recent_pct": -0.79,
-          "amount_yi": 34.05
+          "pct_chg": -0.17,
+          "recent_pct": 3.35,
+          "amount_yi": 83.89
         },
         {
-          "ts_code": "688525.SH",
-          "name": "佰维存储",
+          "ts_code": "002407.SZ",
+          "name": "多氟多",
           "in_top": true,
-          "pct_chg": -1.96,
-          "recent_pct": -3.6,
-          "amount_yi": 31.97
+          "pct_chg": 5.18,
+          "recent_pct": 2.19,
+          "amount_yi": 73.21
+        },
+        {
+          "ts_code": "600584.SH",
+          "name": "长电科技",
+          "in_top": true,
+          "pct_chg": -2.1,
+          "recent_pct": -4.63,
+          "amount_yi": 68.09
+        },
+        {
+          "ts_code": "600206.SH",
+          "name": "有研新材",
+          "in_top": true,
+          "pct_chg": -3.73,
+          "recent_pct": -4.78,
+          "amount_yi": 52.29
+        }
+      ]
+    },
+    {
+      "rank": 31,
+      "index_code": "886020.TI",
+      "name": "PET铜箔",
+      "sector_type": "N",
+      "type_label": "概念",
+      "hit_count": 6,
+      "hit_stocks": [
+        "中天科技",
+        "杭电股份",
+        "远东股份",
+        "东材科技",
+        "铜冠铜箔",
+        "德福科技"
+      ],
+      "sector_size": 50,
+      "coverage_pct": 12.0,
+      "turnover_yi": 345.72,
+      "turnover_share_pct": 5.51,
+      "baseline_hit_count": 3.5,
+      "hit_change": 2.5,
+      "today_pct": -0.83,
+      "recent_pct": 1.46,
+      "amplitude": 10.06,
+      "quote_available": true,
+      "related_sectors": [],
+      "representatives": [
+        {
+          "ts_code": "600522.SH",
+          "name": "中天科技",
+          "in_top": true,
+          "pct_chg": -2.88,
+          "recent_pct": 4.82,
+          "amount_yi": 95.1
+        },
+        {
+          "ts_code": "603618.SH",
+          "name": "杭电股份",
+          "in_top": true,
+          "pct_chg": 2.31,
+          "recent_pct": 25.9,
+          "amount_yi": 70.82
+        },
+        {
+          "ts_code": "600869.SH",
+          "name": "远东股份",
+          "in_top": true,
+          "pct_chg": 3.9,
+          "recent_pct": 10.22,
+          "amount_yi": 49.25
+        },
+        {
+          "ts_code": "601208.SH",
+          "name": "东材科技",
+          "in_top": true,
+          "pct_chg": 4.44,
+          "recent_pct": 12.14,
+          "amount_yi": 47.29
+        },
+        {
+          "ts_code": "301217.SZ",
+          "name": "铜冠铜箔",
+          "in_top": true,
+          "pct_chg": -0.12,
+          "recent_pct": -0.36,
+          "amount_yi": 43.6
+        }
+      ]
+    },
+    {
+      "rank": 32,
+      "index_code": "885425.TI",
+      "name": "特高压",
+      "sector_type": "N",
+      "type_label": "概念",
+      "hit_count": 9,
+      "hit_stocks": [
+        "亨通光电",
+        "中天科技",
+        "长飞光纤",
+        "杭电股份",
+        "思源电气",
+        "远东股份",
+        "国际复材",
+        "东材科技",
+        "烽火通信"
+      ],
+      "sector_size": 133,
+      "coverage_pct": 6.77,
+      "turnover_yi": 693.63,
+      "turnover_share_pct": 11.05,
+      "baseline_hit_count": 8.0,
+      "hit_change": 1.0,
+      "today_pct": -0.29,
+      "recent_pct": 1.63,
+      "amplitude": 5.21,
+      "quote_available": true,
+      "related_sectors": [
+        "智能电网"
+      ],
+      "representatives": [
+        {
+          "ts_code": "600487.SH",
+          "name": "亨通光电",
+          "in_top": true,
+          "pct_chg": -3.65,
+          "recent_pct": 10.49,
+          "amount_yi": 183.23
+        },
+        {
+          "ts_code": "600522.SH",
+          "name": "中天科技",
+          "in_top": true,
+          "pct_chg": -2.88,
+          "recent_pct": 4.82,
+          "amount_yi": 95.1
+        },
+        {
+          "ts_code": "601869.SH",
+          "name": "长飞光纤",
+          "in_top": true,
+          "pct_chg": -1.04,
+          "recent_pct": 16.16,
+          "amount_yi": 91.89
+        },
+        {
+          "ts_code": "603618.SH",
+          "name": "杭电股份",
+          "in_top": true,
+          "pct_chg": 2.31,
+          "recent_pct": 25.9,
+          "amount_yi": 70.82
+        },
+        {
+          "ts_code": "002028.SZ",
+          "name": "思源电气",
+          "in_top": true,
+          "pct_chg": -6.69,
+          "recent_pct": -18.97,
+          "amount_yi": 63.24
         }
       ]
     },
     {
       "rank": 33,
+      "index_code": "885552.TI",
+      "name": "小金属概念",
+      "sector_type": "N",
+      "type_label": "概念",
+      "hit_count": 11,
+      "hit_stocks": [
+        "风华高科",
+        "云南锗业",
+        "紫金矿业",
+        "中钨高新",
+        "湖南黄金",
+        "白银有色",
+        "湖南白银",
+        "天齐锂业",
+        "先导基电",
+        "洛阳钼业",
+        "江西铜业"
+      ],
+      "sector_size": 171,
+      "coverage_pct": 6.43,
+      "turnover_yi": 599.02,
+      "turnover_share_pct": 9.54,
+      "baseline_hit_count": 11.75,
+      "hit_change": -0.75,
+      "today_pct": 0.58,
+      "recent_pct": 2.61,
+      "amplitude": 5.34,
+      "quote_available": true,
+      "related_sectors": [
+        "有色金属冶炼和压延加工业指数",
+        "金属与采矿(A股)",
+        "黄金概念",
+        "金属铜",
+        "有色金属冶炼和压延加工业指数",
+        "原材料(A股)",
+        "原材料Ⅱ(A股)",
+        "多种金属与采矿(A股)"
+      ],
+      "representatives": [
+        {
+          "ts_code": "000636.SZ",
+          "name": "风华高科",
+          "in_top": true,
+          "pct_chg": 2.48,
+          "recent_pct": 1.43,
+          "amount_yi": 90.87
+        },
+        {
+          "ts_code": "002428.SZ",
+          "name": "云南锗业",
+          "in_top": true,
+          "pct_chg": -1.68,
+          "recent_pct": -1.21,
+          "amount_yi": 76.85
+        },
+        {
+          "ts_code": "601899.SH",
+          "name": "紫金矿业",
+          "in_top": true,
+          "pct_chg": 0.23,
+          "recent_pct": -0.26,
+          "amount_yi": 68.4
+        },
+        {
+          "ts_code": "000657.SZ",
+          "name": "中钨高新",
+          "in_top": true,
+          "pct_chg": -1.15,
+          "recent_pct": -2.03,
+          "amount_yi": 56.66
+        },
+        {
+          "ts_code": "002155.SZ",
+          "name": "湖南黄金",
+          "in_top": true,
+          "pct_chg": 7.03,
+          "recent_pct": 17.75,
+          "amount_yi": 53.31
+        }
+      ]
+    },
+    {
+      "rank": 34,
       "index_code": "885710.TI",
       "name": "锂电池概念",
       "sector_type": "N",
@@ -2580,35 +2670,35 @@
       "hit_count": 20,
       "hit_stocks": [
         "兆易创新",
-        "紫金矿业",
         "宁德时代",
-        "北方华创",
         "中天科技",
-        "国瓷材料",
-        "远东股份",
-        "华正新材",
-        "江西铜业",
-        "白银有色",
-        "西部矿业",
-        "协鑫能科",
-        "天通股份",
         "风华高科",
-        "铜陵有色",
+        "多氟多",
+        "杭电股份",
+        "国瓷材料",
+        "紫金矿业",
+        "潍柴动力",
+        "白银有色",
+        "华正新材",
+        "远东股份",
         "华工科技",
-        "诺德股份",
-        "红星发展",
+        "天通股份",
+        "天齐锂业",
+        "铜冠铜箔",
+        "北方华创",
+        "德福科技",
         "万华化学",
-        "多氟多"
+        "江西铜业"
       ],
       "sector_size": 608,
       "coverage_pct": 3.29,
-      "turnover_yi": 961.08,
-      "turnover_share_pct": 19.3,
-      "baseline_hit_count": 18.25,
-      "hit_change": 1.75,
-      "today_pct": 0.44,
-      "recent_pct": 2.23,
-      "amplitude": 3.68,
+      "turnover_yi": 1244.91,
+      "turnover_share_pct": 19.83,
+      "baseline_hit_count": 19.25,
+      "hit_change": 0.75,
+      "today_pct": 0.01,
+      "recent_pct": 1.83,
+      "amplitude": 5.16,
       "quote_available": true,
       "related_sectors": [],
       "representatives": [
@@ -2616,373 +2706,453 @@
           "ts_code": "603986.SH",
           "name": "兆易创新",
           "in_top": true,
-          "pct_chg": -0.76,
-          "recent_pct": -2.78,
-          "amount_yi": 111.59
-        },
-        {
-          "ts_code": "601899.SH",
-          "name": "紫金矿业",
-          "in_top": true,
-          "pct_chg": 2.35,
-          "recent_pct": 5.22,
-          "amount_yi": 109.24
+          "pct_chg": -3.5,
+          "recent_pct": -2.99,
+          "amount_yi": 142.09
         },
         {
           "ts_code": "300750.SZ",
           "name": "宁德时代",
           "in_top": true,
-          "pct_chg": 0.6,
-          "recent_pct": -2.57,
-          "amount_yi": 79.09
-        },
-        {
-          "ts_code": "002371.SZ",
-          "name": "北方华创",
-          "in_top": true,
-          "pct_chg": 0.04,
-          "recent_pct": -1.72,
-          "amount_yi": 68.24
+          "pct_chg": -1.21,
+          "recent_pct": -5.79,
+          "amount_yi": 97.07
         },
         {
           "ts_code": "600522.SH",
           "name": "中天科技",
           "in_top": true,
-          "pct_chg": -1.42,
-          "recent_pct": 4.34,
-          "amount_yi": 58.71
-        }
-      ]
-    },
-    {
-      "rank": 34,
-      "index_code": "885730.TI",
-      "name": "量子科技",
-      "sector_type": "N",
-      "type_label": "概念",
-      "hit_count": 8,
-      "hit_stocks": [
-        "亨通光电",
-        "长飞光纤",
-        "中天科技",
-        "罗博特科",
-        "海光信息",
-        "光迅科技",
-        "天通股份",
-        "华工科技"
-      ],
-      "sector_size": 115,
-      "coverage_pct": 6.96,
-      "turnover_yi": 464.66,
-      "turnover_share_pct": 9.33,
-      "baseline_hit_count": 7.5,
-      "hit_change": 0.5,
-      "today_pct": 0.4,
-      "recent_pct": 2.85,
-      "amplitude": 4.09,
-      "quote_available": true,
-      "related_sectors": [],
-      "representatives": [
-        {
-          "ts_code": "600487.SH",
-          "name": "亨通光电",
-          "in_top": true,
-          "pct_chg": 0.36,
-          "recent_pct": 10.05,
-          "amount_yi": 136.78
+          "pct_chg": -2.88,
+          "recent_pct": 4.82,
+          "amount_yi": 95.1
         },
         {
-          "ts_code": "601869.SH",
-          "name": "长飞光纤",
+          "ts_code": "000636.SZ",
+          "name": "风华高科",
           "in_top": true,
-          "pct_chg": -1.64,
-          "recent_pct": 12.39,
-          "amount_yi": 75.05
+          "pct_chg": 2.48,
+          "recent_pct": 1.43,
+          "amount_yi": 90.87
         },
         {
-          "ts_code": "600522.SH",
-          "name": "中天科技",
+          "ts_code": "002407.SZ",
+          "name": "多氟多",
           "in_top": true,
-          "pct_chg": -1.42,
-          "recent_pct": 4.34,
-          "amount_yi": 58.71
-        },
-        {
-          "ts_code": "300757.SZ",
-          "name": "罗博特科",
-          "in_top": true,
-          "pct_chg": 7.47,
-          "recent_pct": 9.5,
-          "amount_yi": 46.21
-        },
-        {
-          "ts_code": "688041.SH",
-          "name": "海光信息",
-          "in_top": true,
-          "pct_chg": -0.47,
-          "recent_pct": -11.08,
-          "amount_yi": 45.82
+          "pct_chg": 5.18,
+          "recent_pct": 2.19,
+          "amount_yi": 73.21
         }
       ]
     },
     {
       "rank": 35,
-      "index_code": "885800.TI",
-      "name": "消费电子概念",
+      "index_code": "885531.TI",
+      "name": "光伏概念",
       "sector_type": "N",
       "type_label": "概念",
-      "hit_count": 17,
+      "hit_count": 19,
       "hit_stocks": [
-        "东山精密",
-        "长鑫科技",
-        "立讯精密",
-        "澜起科技",
-        "华虹宏力",
+        "胜宏科技",
+        "兆易创新",
+        "中国巨石",
+        "中天科技",
+        "风华高科",
+        "云南锗业",
+        "杭电股份",
+        "京东方A",
+        "阳光电源",
+        "中钨高新",
+        "远东股份",
+        "国际复材",
         "蓝思科技",
-        "中芯国际",
+        "东材科技",
+        "天通股份",
+        "麦格米特",
         "士兰微",
-        "国瓷材料",
-        "华正新材",
-        "通富微电",
-        "佰维存储",
-        "三环集团",
-        "利通电子",
-        "歌尔股份",
-        "景旺电子",
-        "江波龙"
+        "先导基电",
+        "北方华创"
       ],
-      "sector_size": 506,
-      "coverage_pct": 3.36,
-      "turnover_yi": 891.24,
-      "turnover_share_pct": 17.9,
-      "baseline_hit_count": 20.5,
-      "hit_change": -3.5,
-      "today_pct": -0.17,
-      "recent_pct": 1.68,
-      "amplitude": 4.77,
+      "sector_size": 607,
+      "coverage_pct": 3.13,
+      "turnover_yi": 1304.75,
+      "turnover_share_pct": 20.78,
+      "baseline_hit_count": 18.25,
+      "hit_change": 0.75,
+      "today_pct": -0.09,
+      "recent_pct": 1.31,
+      "amplitude": 5.56,
       "quote_available": true,
       "related_sectors": [],
       "representatives": [
         {
-          "ts_code": "002384.SZ",
-          "name": "东山精密",
+          "ts_code": "300476.SZ",
+          "name": "胜宏科技",
           "in_top": true,
-          "pct_chg": 1.84,
-          "recent_pct": -1.39,
-          "amount_yi": 123.7
+          "pct_chg": -8.15,
+          "recent_pct": -4.78,
+          "amount_yi": 143.12
         },
         {
-          "ts_code": "688825.SH",
-          "name": "长鑫科技",
+          "ts_code": "603986.SH",
+          "name": "兆易创新",
           "in_top": true,
-          "pct_chg": -0.71,
-          "recent_pct": -2.52,
-          "amount_yi": 113.35
+          "pct_chg": -3.5,
+          "recent_pct": -2.99,
+          "amount_yi": 142.09
         },
         {
-          "ts_code": "002475.SZ",
-          "name": "立讯精密",
+          "ts_code": "600176.SH",
+          "name": "中国巨石",
           "in_top": true,
-          "pct_chg": 4.1,
-          "recent_pct": 6.75,
-          "amount_yi": 86.49
+          "pct_chg": 1.31,
+          "recent_pct": 2.76,
+          "amount_yi": 99.51
         },
         {
-          "ts_code": "688008.SH",
-          "name": "澜起科技",
+          "ts_code": "600522.SH",
+          "name": "中天科技",
           "in_top": true,
-          "pct_chg": 3.38,
-          "recent_pct": 0.5,
-          "amount_yi": 59.73
+          "pct_chg": -2.88,
+          "recent_pct": 4.82,
+          "amount_yi": 95.1
         },
         {
-          "ts_code": "688347.SH",
-          "name": "华虹宏力",
+          "ts_code": "000636.SZ",
+          "name": "风华高科",
           "in_top": true,
-          "pct_chg": 7.71,
-          "recent_pct": 4.73,
-          "amount_yi": 57.42
+          "pct_chg": 2.48,
+          "recent_pct": 1.43,
+          "amount_yi": 90.87
         }
       ]
     },
     {
       "rank": 36,
-      "index_code": "886111.TI",
-      "name": "玻璃基板",
+      "index_code": "885875.TI",
+      "name": "MiniLED",
       "sector_type": "N",
       "type_label": "概念",
-      "hit_count": 6,
+      "hit_count": 8,
       "hit_stocks": [
-        "长电科技",
-        "蓝思科技",
+        "生益科技",
+        "东山精密",
         "京东方A",
-        "通富微电",
+        "华正新材",
         "华工科技",
-        "红星发展"
+        "中微公司",
+        "士兰微",
+        "德福科技"
       ],
-      "sector_size": 57,
-      "coverage_pct": 10.53,
-      "turnover_yi": 243.02,
-      "turnover_share_pct": 4.88,
-      "baseline_hit_count": 6.75,
-      "hit_change": -0.75,
-      "today_pct": -0.51,
-      "recent_pct": -1.15,
-      "amplitude": 7.45,
+      "sector_size": 108,
+      "coverage_pct": 7.41,
+      "turnover_yi": 544.68,
+      "turnover_share_pct": 8.68,
+      "baseline_hit_count": 8.25,
+      "hit_change": -0.25,
+      "today_pct": -0.84,
+      "recent_pct": 0.8,
+      "amplitude": 8.42,
       "quote_available": true,
-      "related_sectors": [
-        "智能座舱"
-      ],
+      "related_sectors": [],
       "representatives": [
         {
-          "ts_code": "600584.SH",
-          "name": "长电科技",
+          "ts_code": "600183.SH",
+          "name": "生益科技",
           "in_top": true,
-          "pct_chg": -0.58,
-          "recent_pct": -5.3,
-          "amount_yi": 49.57
+          "pct_chg": 3.32,
+          "recent_pct": 9.68,
+          "amount_yi": 144.75
         },
         {
-          "ts_code": "300433.SZ",
-          "name": "蓝思科技",
+          "ts_code": "002384.SZ",
+          "name": "东山精密",
           "in_top": true,
-          "pct_chg": 2.96,
-          "recent_pct": 7.94,
-          "amount_yi": 49.56
+          "pct_chg": -2.48,
+          "recent_pct": -2.72,
+          "amount_yi": 111.42
         },
         {
           "ts_code": "000725.SZ",
           "name": "京东方A",
           "in_top": true,
-          "pct_chg": -0.35,
-          "recent_pct": -4.83,
-          "amount_yi": 45.88
-        },
-        {
-          "ts_code": "002156.SZ",
-          "name": "通富微电",
-          "in_top": true,
-          "pct_chg": 0.57,
-          "recent_pct": -3.68,
-          "amount_yi": 38.42
-        },
-        {
-          "ts_code": "000988.SZ",
-          "name": "华工科技",
-          "in_top": true,
-          "pct_chg": -1.4,
-          "recent_pct": 1.42,
-          "amount_yi": 32.32
-        }
-      ]
-    },
-    {
-      "rank": 37,
-      "index_code": "886035.TI",
-      "name": "毫米波雷达",
-      "sector_type": "N",
-      "type_label": "概念",
-      "hit_count": 8,
-      "hit_stocks": [
-        "立讯精密",
-        "生益科技",
-        "沪电股份",
-        "长电科技",
-        "华正新材",
-        "通富微电",
-        "天通股份",
-        "景旺电子"
-      ],
-      "sector_size": 127,
-      "coverage_pct": 6.3,
-      "turnover_yi": 427.46,
-      "turnover_share_pct": 8.58,
-      "baseline_hit_count": 10.0,
-      "hit_change": -2.0,
-      "today_pct": -0.04,
-      "recent_pct": 1.66,
-      "amplitude": 4.4,
-      "quote_available": true,
-      "related_sectors": [],
-      "representatives": [
-        {
-          "ts_code": "002475.SZ",
-          "name": "立讯精密",
-          "in_top": true,
-          "pct_chg": 4.1,
-          "recent_pct": 6.75,
-          "amount_yi": 86.49
-        },
-        {
-          "ts_code": "600183.SH",
-          "name": "生益科技",
-          "in_top": true,
-          "pct_chg": 0.78,
-          "recent_pct": 3.62,
-          "amount_yi": 75.32
-        },
-        {
-          "ts_code": "002463.SZ",
-          "name": "沪电股份",
-          "in_top": true,
-          "pct_chg": 4.31,
-          "recent_pct": 5.12,
-          "amount_yi": 70.9
-        },
-        {
-          "ts_code": "600584.SH",
-          "name": "长电科技",
-          "in_top": true,
-          "pct_chg": -0.58,
-          "recent_pct": -5.3,
-          "amount_yi": 49.57
+          "pct_chg": -0.34,
+          "recent_pct": -1.33,
+          "amount_yi": 61.23
         },
         {
           "ts_code": "603186.SH",
           "name": "华正新材",
           "in_top": true,
-          "pct_chg": 0.4,
-          "recent_pct": 0.2,
-          "amount_yi": 43.18
+          "pct_chg": 0.11,
+          "recent_pct": 6.52,
+          "amount_yi": 49.48
+        },
+        {
+          "ts_code": "000988.SZ",
+          "name": "华工科技",
+          "in_top": true,
+          "pct_chg": -1.88,
+          "recent_pct": -3.61,
+          "amount_yi": 48.09
+        }
+      ]
+    },
+    {
+      "rank": 37,
+      "index_code": "885376.TI",
+      "name": "苹果概念",
+      "sector_type": "N",
+      "type_label": "概念",
+      "hit_count": 9,
+      "hit_stocks": [
+        "东山精密",
+        "工业富联",
+        "长电科技",
+        "立讯精密",
+        "京东方A",
+        "华工科技",
+        "蓝思科技",
+        "东材科技",
+        "信维通信"
+      ],
+      "sector_size": 140,
+      "coverage_pct": 6.43,
+      "turnover_yi": 586.77,
+      "turnover_share_pct": 9.35,
+      "baseline_hit_count": 9.25,
+      "hit_change": -0.25,
+      "today_pct": -1.01,
+      "recent_pct": 0.79,
+      "amplitude": 7.66,
+      "quote_available": true,
+      "related_sectors": [
+        "柔性屏(折叠屏)"
+      ],
+      "representatives": [
+        {
+          "ts_code": "002384.SZ",
+          "name": "东山精密",
+          "in_top": true,
+          "pct_chg": -2.48,
+          "recent_pct": -2.72,
+          "amount_yi": 111.42
+        },
+        {
+          "ts_code": "601138.SH",
+          "name": "工业富联",
+          "in_top": true,
+          "pct_chg": 0.28,
+          "recent_pct": 1.91,
+          "amount_yi": 103.15
+        },
+        {
+          "ts_code": "600584.SH",
+          "name": "长电科技",
+          "in_top": true,
+          "pct_chg": -2.1,
+          "recent_pct": -4.63,
+          "amount_yi": 68.09
+        },
+        {
+          "ts_code": "002475.SZ",
+          "name": "立讯精密",
+          "in_top": true,
+          "pct_chg": -1.01,
+          "recent_pct": 3.57,
+          "amount_yi": 62.43
+        },
+        {
+          "ts_code": "000725.SZ",
+          "name": "京东方A",
+          "in_top": true,
+          "pct_chg": -0.34,
+          "recent_pct": -1.33,
+          "amount_yi": 61.23
         }
       ]
     },
     {
       "rank": 38,
-      "index_code": "885531.TI",
-      "name": "光伏概念",
+      "index_code": "885921.TI",
+      "name": "储能",
       "sector_type": "N",
       "type_label": "概念",
-      "hit_count": 18,
+      "hit_count": 23,
+      "hit_stocks": [
+        "胜宏科技",
+        "宁德时代",
+        "中天科技",
+        "风华高科",
+        "多氟多",
+        "杭电股份",
+        "思源电气",
+        "京东方A",
+        "阳光电源",
+        "紫光股份",
+        "通鼎互联",
+        "潍柴动力",
+        "英维克",
+        "华正新材",
+        "远东股份",
+        "华工科技",
+        "天通股份",
+        "麦格米特",
+        "士兰微",
+        "铜冠铜箔",
+        "麦捷科技",
+        "德福科技",
+        "飞龙股份"
+      ],
+      "sector_size": 896,
+      "coverage_pct": 2.57,
+      "turnover_yi": 1424.28,
+      "turnover_share_pct": 22.69,
+      "baseline_hit_count": 19.0,
+      "hit_change": 4.0,
+      "today_pct": -0.14,
+      "recent_pct": 1.51,
+      "amplitude": 4.7,
+      "quote_available": true,
+      "related_sectors": [],
+      "representatives": [
+        {
+          "ts_code": "300476.SZ",
+          "name": "胜宏科技",
+          "in_top": true,
+          "pct_chg": -8.15,
+          "recent_pct": -4.78,
+          "amount_yi": 143.12
+        },
+        {
+          "ts_code": "300750.SZ",
+          "name": "宁德时代",
+          "in_top": true,
+          "pct_chg": -1.21,
+          "recent_pct": -5.79,
+          "amount_yi": 97.07
+        },
+        {
+          "ts_code": "600522.SH",
+          "name": "中天科技",
+          "in_top": true,
+          "pct_chg": -2.88,
+          "recent_pct": 4.82,
+          "amount_yi": 95.1
+        },
+        {
+          "ts_code": "000636.SZ",
+          "name": "风华高科",
+          "in_top": true,
+          "pct_chg": 2.48,
+          "recent_pct": 1.43,
+          "amount_yi": 90.87
+        },
+        {
+          "ts_code": "002407.SZ",
+          "name": "多氟多",
+          "in_top": true,
+          "pct_chg": 5.18,
+          "recent_pct": 2.19,
+          "amount_yi": 73.21
+        }
+      ]
+    },
+    {
+      "rank": 39,
+      "index_code": "886071.TI",
+      "name": "AI PC",
+      "sector_type": "N",
+      "type_label": "概念",
+      "hit_count": 6,
+      "hit_stocks": [
+        "胜宏科技",
+        "德明利",
+        "京东方A",
+        "通富微电",
+        "佰维存储",
+        "江波龙"
+      ],
+      "sector_size": 66,
+      "coverage_pct": 9.09,
+      "turnover_yi": 435.15,
+      "turnover_share_pct": 6.93,
+      "baseline_hit_count": 7.0,
+      "hit_change": -1.0,
+      "today_pct": -1.06,
+      "recent_pct": 1.29,
+      "amplitude": 8.28,
+      "quote_available": true,
+      "related_sectors": [],
+      "representatives": [
+        {
+          "ts_code": "300476.SZ",
+          "name": "胜宏科技",
+          "in_top": true,
+          "pct_chg": -8.15,
+          "recent_pct": -4.78,
+          "amount_yi": 143.12
+        },
+        {
+          "ts_code": "001309.SZ",
+          "name": "德明利",
+          "in_top": true,
+          "pct_chg": -0.17,
+          "recent_pct": 3.35,
+          "amount_yi": 83.89
+        },
+        {
+          "ts_code": "000725.SZ",
+          "name": "京东方A",
+          "in_top": true,
+          "pct_chg": -0.34,
+          "recent_pct": -1.33,
+          "amount_yi": 61.23
+        },
+        {
+          "ts_code": "002156.SZ",
+          "name": "通富微电",
+          "in_top": true,
+          "pct_chg": 0.03,
+          "recent_pct": -0.2,
+          "amount_yi": 59.06
+        },
+        {
+          "ts_code": "688525.SH",
+          "name": "佰维存储",
+          "in_top": true,
+          "pct_chg": -3.15,
+          "recent_pct": -3.36,
+          "amount_yi": 44.75
+        }
+      ]
+    },
+    {
+      "rank": 40,
+      "index_code": "885945.TI",
+      "name": "汽车芯片",
+      "sector_type": "N",
+      "type_label": "概念",
+      "hit_count": 9,
       "hit_stocks": [
         "兆易创新",
-        "北方华创",
-        "胜宏科技",
-        "中天科技",
-        "中国巨石",
-        "蓝思科技",
+        "寒武纪",
+        "长电科技",
+        "通富微电",
+        "源杰科技",
+        "佰维存储",
         "士兰微",
-        "远东股份",
-        "罗博特科",
-        "京东方A",
-        "中钨高新",
-        "云南锗业",
-        "协鑫能科",
-        "天通股份",
-        "风华高科",
-        "阳光电源",
-        "江丰电子",
-        "杰普特"
+        "烽火通信",
+        "芯原股份"
       ],
-      "sector_size": 607,
-      "coverage_pct": 2.97,
-      "turnover_yi": 853.86,
-      "turnover_share_pct": 17.15,
-      "baseline_hit_count": 17.75,
-      "hit_change": 0.25,
-      "today_pct": 0.19,
-      "recent_pct": 1.58,
-      "amplitude": 3.66,
+      "sector_size": 144,
+      "coverage_pct": 6.25,
+      "turnover_yi": 610.16,
+      "turnover_share_pct": 9.72,
+      "baseline_hit_count": 10.25,
+      "hit_change": -1.25,
+      "today_pct": -1.11,
+      "recent_pct": 0.94,
+      "amplitude": 9.02,
       "quote_available": true,
       "related_sectors": [],
       "representatives": [
@@ -2990,185 +3160,41 @@
           "ts_code": "603986.SH",
           "name": "兆易创新",
           "in_top": true,
-          "pct_chg": -0.76,
-          "recent_pct": -2.78,
-          "amount_yi": 111.59
+          "pct_chg": -3.5,
+          "recent_pct": -2.99,
+          "amount_yi": 142.09
         },
         {
-          "ts_code": "002371.SZ",
-          "name": "北方华创",
+          "ts_code": "688256.SH",
+          "name": "寒武纪",
           "in_top": true,
-          "pct_chg": 0.04,
-          "recent_pct": -1.72,
-          "amount_yi": 68.24
+          "pct_chg": -0.13,
+          "recent_pct": 1.12,
+          "amount_yi": 116.37
         },
         {
-          "ts_code": "300476.SZ",
-          "name": "胜宏科技",
+          "ts_code": "600584.SH",
+          "name": "长电科技",
           "in_top": true,
-          "pct_chg": 1.82,
-          "recent_pct": 1.65,
-          "amount_yi": 61.63
+          "pct_chg": -2.1,
+          "recent_pct": -4.63,
+          "amount_yi": 68.09
         },
         {
-          "ts_code": "600522.SH",
-          "name": "中天科技",
+          "ts_code": "002156.SZ",
+          "name": "通富微电",
           "in_top": true,
-          "pct_chg": -1.42,
-          "recent_pct": 4.34,
-          "amount_yi": 58.71
+          "pct_chg": 0.03,
+          "recent_pct": -0.2,
+          "amount_yi": 59.06
         },
         {
-          "ts_code": "600176.SH",
-          "name": "中国巨石",
+          "ts_code": "688498.SH",
+          "name": "源杰科技",
           "in_top": true,
-          "pct_chg": -0.73,
-          "recent_pct": -2.61,
-          "amount_yi": 50.71
-        }
-      ]
-    },
-    {
-      "rank": 39,
-      "index_code": "885875.TI",
-      "name": "MiniLED",
-      "sector_type": "N",
-      "type_label": "概念",
-      "hit_count": 7,
-      "hit_stocks": [
-        "东山精密",
-        "生益科技",
-        "中微公司",
-        "士兰微",
-        "京东方A",
-        "华正新材",
-        "华工科技"
-      ],
-      "sector_size": 108,
-      "coverage_pct": 6.48,
-      "turnover_yi": 427.45,
-      "turnover_share_pct": 8.58,
-      "baseline_hit_count": 8.5,
-      "hit_change": -1.5,
-      "today_pct": -0.17,
-      "recent_pct": 1.32,
-      "amplitude": 5.51,
-      "quote_available": true,
-      "related_sectors": [],
-      "representatives": [
-        {
-          "ts_code": "002384.SZ",
-          "name": "东山精密",
-          "in_top": true,
-          "pct_chg": 1.84,
-          "recent_pct": -1.39,
-          "amount_yi": 123.7
-        },
-        {
-          "ts_code": "600183.SH",
-          "name": "生益科技",
-          "in_top": true,
-          "pct_chg": 0.78,
-          "recent_pct": 3.62,
-          "amount_yi": 75.32
-        },
-        {
-          "ts_code": "688012.SH",
-          "name": "中微公司",
-          "in_top": true,
-          "pct_chg": 3.97,
-          "recent_pct": -1.06,
-          "amount_yi": 60.22
-        },
-        {
-          "ts_code": "600460.SH",
-          "name": "士兰微",
-          "in_top": true,
-          "pct_chg": -3.64,
-          "recent_pct": -4.12,
-          "amount_yi": 46.83
-        },
-        {
-          "ts_code": "000725.SZ",
-          "name": "京东方A",
-          "in_top": true,
-          "pct_chg": -0.35,
-          "recent_pct": -4.83,
-          "amount_yi": 45.88
-        }
-      ]
-    },
-    {
-      "rank": 40,
-      "index_code": "885467.TI",
-      "name": "特斯拉概念",
-      "sector_type": "N",
-      "type_label": "概念",
-      "hit_count": 11,
-      "hit_stocks": [
-        "东山精密",
-        "宁德时代",
-        "胜宏科技",
-        "蓝思科技",
-        "远东股份",
-        "通富微电",
-        "华工科技",
-        "诺德股份",
-        "景旺电子",
-        "飞龙股份",
-        "多氟多"
-      ],
-      "sector_size": 250,
-      "coverage_pct": 4.4,
-      "turnover_yi": 545.27,
-      "turnover_share_pct": 10.95,
-      "baseline_hit_count": 11.0,
-      "hit_change": 0.0,
-      "today_pct": -0.07,
-      "recent_pct": 2.31,
-      "amplitude": 3.47,
-      "quote_available": true,
-      "related_sectors": [],
-      "representatives": [
-        {
-          "ts_code": "002384.SZ",
-          "name": "东山精密",
-          "in_top": true,
-          "pct_chg": 1.84,
-          "recent_pct": -1.39,
-          "amount_yi": 123.7
-        },
-        {
-          "ts_code": "300750.SZ",
-          "name": "宁德时代",
-          "in_top": true,
-          "pct_chg": 0.6,
-          "recent_pct": -2.57,
-          "amount_yi": 79.09
-        },
-        {
-          "ts_code": "300476.SZ",
-          "name": "胜宏科技",
-          "in_top": true,
-          "pct_chg": 1.82,
-          "recent_pct": 1.65,
-          "amount_yi": 61.63
-        },
-        {
-          "ts_code": "300433.SZ",
-          "name": "蓝思科技",
-          "in_top": true,
-          "pct_chg": 2.96,
-          "recent_pct": 7.94,
-          "amount_yi": 49.56
-        },
-        {
-          "ts_code": "600869.SH",
-          "name": "远东股份",
-          "in_top": true,
-          "pct_chg": 6.91,
-          "recent_pct": 12.47,
-          "amount_yi": 46.38
+          "pct_chg": -5.68,
+          "recent_pct": -3.07,
+          "amount_yi": 57.42
         }
       ]
     }
