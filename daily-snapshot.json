@@ -1,73 +1,73 @@
 {
   "task": "daily",
   "title": "全球市场日报",
-  "generated_at": "2026-09-01T15:54:33+00:00",
+  "generated_at": "2026-09-02T15:08:59+00:00",
   "period": {
     "task": "daily",
-    "start_date": "20260901",
-    "end_date": "20260901"
+    "start_date": "20260902",
+    "end_date": "20260902"
   },
   "summary": {
-    "trend": "偏强",
-    "positive_rows": 3387,
-    "negative_rows": 2040,
-    "flat_rows": 119,
-    "stock_count": 5546,
+    "trend": "偏弱",
+    "positive_rows": 1541,
+    "negative_rows": 3901,
+    "flat_rows": 105,
+    "stock_count": 5547,
     "breadth_basis": "a_share_daily",
-    "total_rows": 16426
+    "total_rows": 16429
   },
   "top_gainers": [
     {
       "dataset": "a_share_daily",
-      "label": "601123.SH",
-      "pct_change": 290.98
+      "label": "301688.SZ",
+      "pct_change": 104.41
     },
     {
       "dataset": "a_share_daily",
-      "label": "301697.SZ",
-      "pct_change": 196.69
+      "label": "920176.BJ",
+      "pct_change": 29.99
     },
     {
       "dataset": "a_share_daily",
-      "label": "920855.BJ",
-      "pct_change": 29.98
-    },
-    {
-      "dataset": "a_share_daily",
-      "label": "920895.BJ",
-      "pct_change": 29.98
-    },
-    {
-      "dataset": "a_share_daily",
-      "label": "920592.BJ",
+      "label": "920006.BJ",
       "pct_change": 29.96
+    },
+    {
+      "dataset": "a_share_daily",
+      "label": "920212.BJ",
+      "pct_change": 29.95
+    },
+    {
+      "dataset": "a_share_daily",
+      "label": "920748.BJ",
+      "pct_change": 21.64
     }
   ],
   "top_losers": [
     {
       "dataset": "a_share_daily",
-      "label": "688020.SH",
-      "pct_change": -11.06
+      "label": "601123.SH",
+      "pct_change": -23.0
     },
     {
       "dataset": "a_share_daily",
-      "label": "688308.SH",
-      "pct_change": -10.85
+      "label": "300189.SZ",
+      "pct_change": -11.39
     },
     {
       "dataset": "a_share_daily",
-      "label": "300870.SZ",
-      "pct_change": -10.0
+      "label": "300970.SZ",
+      "pct_change": -10.96
     },
     {
       "dataset": "a_share_daily",
-      "label": "001326.SZ",
-      "pct_change": -9.58
+      "label": "301697.SZ",
+      "pct_change": -10.64
     },
     {
       "dataset": "a_share_daily",
-      "label": "688551.SH",
-      "pct_change": -9.37
+      "label": "000545.SZ",
+      "pct_change": -10.13
     }
   ],
   "datasets": {
@@ -86,11 +86,11 @@
       "raw_rows": 90
     },
     "a_share_daily": {
-      "rows": 5546,
+      "rows": 5547,
       "label": "A股日行情",
       "source": "cache",
       "warning": null,
-      "raw_rows": 5546
+      "raw_rows": 5547
     },
     "fund_basics": {
       "rows": 2924,
@@ -100,46 +100,39 @@
       "raw_rows": 2924
     },
     "fund_dailies": {
-      "rows": 2105,
+      "rows": 2110,
       "label": "fund_dailies",
       "source": "tushare",
       "warning": null,
-      "raw_rows": 2105
+      "raw_rows": 2110
     },
     "individual_moneyflow": {
-      "rows": 5546,
+      "rows": 5547,
       "label": "individual_moneyflow",
       "source": "tushare",
       "warning": null,
-      "raw_rows": 5546
+      "raw_rows": 5547
     },
-    "members_881157.TI": {
-      "rows": 50,
-      "label": "members_881157.TI",
+    "members_881166.TI": {
+      "rows": 83,
+      "label": "members_881166.TI",
       "source": null,
       "warning": null,
-      "raw_rows": 50
+      "raw_rows": 83
     },
-    "members_881145.TI": {
-      "rows": 110,
-      "label": "members_881145.TI",
+    "members_881276.TI": {
+      "rows": 64,
+      "label": "members_881276.TI",
       "source": null,
       "warning": null,
-      "raw_rows": 110
+      "raw_rows": 64
     },
-    "members_881155.TI": {
-      "rows": 42,
-      "label": "members_881155.TI",
+    "members_881175.TI": {
+      "rows": 56,
+      "label": "members_881175.TI",
       "source": null,
       "warning": null,
-      "raw_rows": 42
-    },
-    "members_881156.TI": {
-      "rows": 5,
-      "label": "members_881156.TI",
-      "source": null,
-      "warning": null,
-      "raw_rows": 5
+      "raw_rows": 56
     }
   }
 }
