@@ -1,73 +1,73 @@
 {
   "task": "daily",
   "title": "全球市场日报",
-  "generated_at": "2026-09-02T15:08:59+00:00",
+  "generated_at": "2026-09-03T15:03:44+00:00",
   "period": {
     "task": "daily",
-    "start_date": "20260902",
-    "end_date": "20260902"
+    "start_date": "20260903",
+    "end_date": "20260903"
   },
   "summary": {
     "trend": "偏弱",
-    "positive_rows": 1541,
-    "negative_rows": 3901,
-    "flat_rows": 105,
-    "stock_count": 5547,
+    "positive_rows": 1846,
+    "negative_rows": 3570,
+    "flat_rows": 133,
+    "stock_count": 5549,
     "breadth_basis": "a_share_daily",
-    "total_rows": 16429
+    "total_rows": 16358
   },
   "top_gainers": [
     {
       "dataset": "a_share_daily",
-      "label": "301688.SZ",
-      "pct_change": 104.41
+      "label": "920071.BJ",
+      "pct_change": 149.28
     },
     {
       "dataset": "a_share_daily",
-      "label": "920176.BJ",
-      "pct_change": 29.99
+      "label": "301489.SZ",
+      "pct_change": 20.0
     },
     {
       "dataset": "a_share_daily",
-      "label": "920006.BJ",
-      "pct_change": 29.96
+      "label": "688622.SH",
+      "pct_change": 20.0
     },
     {
       "dataset": "a_share_daily",
-      "label": "920212.BJ",
-      "pct_change": 29.95
+      "label": "300830.SZ",
+      "pct_change": 19.98
     },
     {
       "dataset": "a_share_daily",
-      "label": "920748.BJ",
-      "pct_change": 21.64
+      "label": "301086.SZ",
+      "pct_change": 15.17
     }
   ],
   "top_losers": [
     {
       "dataset": "a_share_daily",
-      "label": "601123.SH",
-      "pct_change": -23.0
+      "label": "301688.SZ",
+      "pct_change": -17.02
     },
     {
       "dataset": "a_share_daily",
-      "label": "300189.SZ",
-      "pct_change": -11.39
+      "label": "301591.SZ",
+      "pct_change": -13.96
     },
     {
       "dataset": "a_share_daily",
-      "label": "300970.SZ",
-      "pct_change": -10.96
+      "label": "688137.SH",
+      "pct_change": -12.31
     },
     {
       "dataset": "a_share_daily",
-      "label": "301697.SZ",
-      "pct_change": -10.64
+      "label": "300078.SZ",
+      "pct_change": -11.36
     },
     {
       "dataset": "a_share_daily",
-      "label": "000545.SZ",
-      "pct_change": -10.13
+      "label": "300563.SZ",
+      "pct_change": -10.55
     }
   ],
   "datasets": {
@@ -86,53 +86,53 @@
       "raw_rows": 90
     },
     "a_share_daily": {
-      "rows": 5547,
+      "rows": 5549,
       "label": "A股日行情",
       "source": "cache",
       "warning": null,
-      "raw_rows": 5547
+      "raw_rows": 5549
     },
     "fund_basics": {
-      "rows": 2924,
+      "rows": 2938,
       "label": "fund_basics",
       "source": "tushare",
       "warning": null,
-      "raw_rows": 2924
+      "raw_rows": 2938
     },
     "fund_dailies": {
-      "rows": 2110,
+      "rows": 2113,
       "label": "fund_dailies",
       "source": "tushare",
       "warning": null,
-      "raw_rows": 2110
+      "raw_rows": 2113
     },
     "individual_moneyflow": {
-      "rows": 5547,
+      "rows": 5549,
       "label": "individual_moneyflow",
       "source": "tushare",
       "warning": null,
-      "raw_rows": 5547
+      "raw_rows": 5549
     },
-    "members_881166.TI": {
-      "rows": 83,
-      "label": "members_881166.TI",
+    "members_881157.TI": {
+      "rows": 50,
+      "label": "members_881157.TI",
       "source": null,
       "warning": null,
-      "raw_rows": 83
+      "raw_rows": 50
     },
-    "members_881276.TI": {
-      "rows": 64,
-      "label": "members_881276.TI",
-      "source": null,
-      "warning": null,
-      "raw_rows": 64
-    },
-    "members_881175.TI": {
+    "members_881168.TI": {
       "rows": 56,
-      "label": "members_881175.TI",
+      "label": "members_881168.TI",
       "source": null,
       "warning": null,
       "raw_rows": 56
+    },
+    "members_881156.TI": {
+      "rows": 5,
+      "label": "members_881156.TI",
+      "source": null,
+      "warning": null,
+      "raw_rows": 5
     }
   }
 }
