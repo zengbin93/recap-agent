@@ -1,5 +1,5 @@
 {
-  "min_amount": 3.0,
+  "min_amount": 1.0,
   "lower_pct": 0.0,
-  "upper_pct": 3.0
+  "upper_pct": 2.0
 }
