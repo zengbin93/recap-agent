@@ -15,7 +15,7 @@
         "tag": "div",
         "text": {
           "tag": "lark_md",
-          "content": "**区间**: 20260930\n**市场状态**: 偏弱\n**生成时间**: 2026-09-30T16:56:58+00:00"
+          "content": "**区间**: 20260930\n**市场状态**: 偏弱\n**生成时间**: 2026-10-01T17:20:43+00:00"
         }
       },
       {
@@ -35,7 +35,7 @@
         "tag": "div",
         "text": {
           "tag": "lark_md",
-          "content": "- 市场状态: 偏弱\n- A股上涨/下跌/平盘: 2567/2824/170\n- A股样本: 5561\n- 主要指数: 8 条，来源 tushare，原始返回 9241 条\n- 板块资金流: 90 条，来源 tushare\n- A股日行情: 5561 条，来源 cache\n- fund_basics: 2963 条，来源 tushare\n- fund_dailies: 2140 条，来源 tushare\n- individual_moneyflow: 5572 条，来源 tushare\n- members_881175.TI: 56 条，来源 unknown\n- members_881153.TI: 88 条，来源 unknown\n- members_881155.TI: 42 条，来源 unknown\n- members_881140.TI: 159 条，来源 unknown"
+          "content": "- 市场状态: 偏弱\n- A股上涨/下跌/平盘: 2567/2824/170\n- A股样本: 5561\n- 主要指数: 8 条，来源 tushare，原始返回 10000 条\n- 板块资金流: 90 条，来源 tushare\n- A股日行情: 5561 条，来源 cache\n- fund_basics: 2966 条，来源 tushare\n- fund_dailies: 2140 条，来源 tushare\n- individual_moneyflow: 5572 条，来源 tushare\n- members_881140.TI: 159 条，来源 unknown\n- members_881155.TI: 42 条，来源 unknown\n- members_881153.TI: 88 条，来源 unknown\n- members_881175.TI: 56 条，来源 unknown"
         }
       },
       {

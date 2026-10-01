@@ -1,7 +1,7 @@
 {
   "task": "daily",
   "title": "全球市场日报",
-  "generated_at": "2026-09-30T16:56:58+00:00",
+  "generated_at": "2026-10-01T17:20:43+00:00",
   "period": {
     "task": "daily",
     "start_date": "20260930",
@@ -14,7 +14,7 @@
     "flat_rows": 170,
     "stock_count": 5561,
     "breadth_basis": "a_share_daily",
-    "total_rows": 16679
+    "total_rows": 16682
   },
   "top_gainers": [
     {
@@ -76,7 +76,7 @@
       "label": "主要指数",
       "source": "tushare",
       "warning": null,
-      "raw_rows": 9241
+      "raw_rows": 10000
     },
     "hot_sectors": {
       "rows": 90,
@@ -93,11 +93,11 @@
       "raw_rows": 5561
     },
     "fund_basics": {
-      "rows": 2963,
+      "rows": 2966,
       "label": "fund_basics",
       "source": "tushare",
       "warning": null,
-      "raw_rows": 2963
+      "raw_rows": 2966
     },
     "fund_dailies": {
       "rows": 2140,
@@ -113,19 +113,12 @@
       "warning": null,
       "raw_rows": 5572
     },
-    "members_881175.TI": {
-      "rows": 56,
-      "label": "members_881175.TI",
+    "members_881140.TI": {
+      "rows": 159,
+      "label": "members_881140.TI",
       "source": null,
       "warning": null,
-      "raw_rows": 56
-    },
-    "members_881153.TI": {
-      "rows": 88,
-      "label": "members_881153.TI",
-      "source": null,
-      "warning": null,
-      "raw_rows": 88
+      "raw_rows": 159
     },
     "members_881155.TI": {
       "rows": 42,
@@ -134,12 +127,19 @@
       "warning": null,
       "raw_rows": 42
     },
-    "members_881140.TI": {
-      "rows": 159,
-      "label": "members_881140.TI",
+    "members_881153.TI": {
+      "rows": 88,
+      "label": "members_881153.TI",
       "source": null,
       "warning": null,
-      "raw_rows": 159
+      "raw_rows": 88
+    },
+    "members_881175.TI": {
+      "rows": 56,
+      "label": "members_881175.TI",
+      "source": null,
+      "warning": null,
+      "raw_rows": 56
     }
   }
 }
