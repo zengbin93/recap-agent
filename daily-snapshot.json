@@ -1,73 +1,73 @@
 {
   "task": "daily",
   "title": "全球市场日报",
-  "generated_at": "2026-11-09T21:22:33+00:00",
+  "generated_at": "2026-11-10T18:43:03+00:00",
   "period": {
     "task": "daily",
-    "start_date": "20261109",
-    "end_date": "20261109"
+    "start_date": "20261110",
+    "end_date": "20261110"
   },
   "summary": {
-    "trend": "偏弱",
-    "positive_rows": 2242,
-    "negative_rows": 3148,
-    "flat_rows": 183,
+    "trend": "偏强",
+    "positive_rows": 4273,
+    "negative_rows": 1149,
+    "flat_rows": 151,
     "stock_count": 5573,
     "breadth_basis": "a_share_daily",
-    "total_rows": 16649
+    "total_rows": 17138
   },
   "top_gainers": [
     {
       "dataset": "a_share_daily",
-      "label": "301010.SZ",
+      "label": "688827.SH",
+      "pct_change": 184.77
+    },
+    {
+      "dataset": "a_share_daily",
+      "label": "300264.SZ",
+      "pct_change": 20.07
+    },
+    {
+      "dataset": "a_share_daily",
+      "label": "300556.SZ",
       "pct_change": 20.01
     },
     {
       "dataset": "a_share_daily",
-      "label": "301226.SZ",
-      "pct_change": 20.0
+      "label": "300613.SZ",
+      "pct_change": 20.01
     },
     {
       "dataset": "a_share_daily",
-      "label": "301718.SZ",
-      "pct_change": 20.0
-    },
-    {
-      "dataset": "a_share_daily",
-      "label": "688585.SH",
-      "pct_change": 20.0
-    },
-    {
-      "dataset": "a_share_daily",
-      "label": "688801.SH",
-      "pct_change": 17.26
+      "label": "688611.SH",
+      "pct_change": 20.01
     }
   ],
   "top_losers": [
     {
       "dataset": "a_share_daily",
-      "label": "920085.BJ",
-      "pct_change": -18.73
+      "label": "002246.SZ",
+      "pct_change": -9.94
     },
     {
       "dataset": "a_share_daily",
-      "label": "300010.SZ",
-      "pct_change": -12.61
+      "label": "002827.SZ",
+      "pct_change": -9.71
     },
     {
       "dataset": "a_share_daily",
-      "label": "301096.SZ",
-      "pct_change": -11.27
+      "label": "601857.SH",
+      "pct_change": -6.34
     },
     {
       "dataset": "a_share_daily",
-      "label": "920007.BJ",
-      "pct_change": -11.1
+      "label": "000893.SZ",
+      "pct_change": -5.83
     },
     {
       "dataset": "a_share_daily",
-      "label": "000520.SZ",
-      "pct_change": -10.09
+      "label": "600026.SH",
+      "pct_change": -5.76
     }
   ],
   "datasets": {
@@ -76,7 +76,7 @@
       "label": "主要指数",
       "source": "tushare",
       "warning": null,
-      "raw_rows": 9326
+      "raw_rows": 9328
     },
     "hot_sectors": {
       "rows": 90,
@@ -100,32 +100,39 @@
       "raw_rows": 3017
     },
     "fund_dailies": {
-      "rows": 2184,
+      "rows": 2177,
       "label": "fund_dailies",
       "source": "tushare",
       "warning": null,
-      "raw_rows": 2184
+      "raw_rows": 2177
     },
     "individual_moneyflow": {
-      "rows": 5579,
+      "rows": 5580,
       "label": "individual_moneyflow",
       "source": "tushare",
       "warning": null,
-      "raw_rows": 5579
+      "raw_rows": 5580
     },
-    "members_881270.TI": {
-      "rows": 63,
-      "label": "members_881270.TI",
+    "members_881164.TI": {
+      "rows": 86,
+      "label": "members_881164.TI",
       "source": null,
       "warning": null,
-      "raw_rows": 63
+      "raw_rows": 86
     },
-    "members_881129.TI": {
-      "rows": 93,
-      "label": "members_881129.TI",
+    "members_881126.TI": {
+      "rows": 278,
+      "label": "members_881126.TI",
       "source": null,
       "warning": null,
-      "raw_rows": 93
+      "raw_rows": 278
+    },
+    "members_881121.TI": {
+      "rows": 190,
+      "label": "members_881121.TI",
+      "source": null,
+      "warning": null,
+      "raw_rows": 190
     },
     "members_881155.TI": {
       "rows": 42,
@@ -133,6 +140,13 @@
       "source": null,
       "warning": null,
       "raw_rows": 42
+    },
+    "members_881124.TI": {
+      "rows": 97,
+      "label": "members_881124.TI",
+      "source": null,
+      "warning": null,
+      "raw_rows": 97
     }
   }
 }
