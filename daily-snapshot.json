@@ -1,73 +1,73 @@
 {
   "task": "daily",
   "title": "全球市场日报",
-  "generated_at": "2026-11-23T22:30:49+00:00",
+  "generated_at": "2026-11-25T20:27:05+00:00",
   "period": {
     "task": "daily",
-    "start_date": "20261123",
-    "end_date": "20261123"
+    "start_date": "20261125",
+    "end_date": "20261125"
   },
   "summary": {
-    "trend": "偏强",
-    "positive_rows": 4658,
-    "negative_rows": 783,
-    "flat_rows": 129,
-    "stock_count": 5570,
+    "trend": "偏弱",
+    "positive_rows": 586,
+    "negative_rows": 4926,
+    "flat_rows": 61,
+    "stock_count": 5573,
     "breadth_basis": "a_share_daily",
-    "total_rows": 17199
+    "total_rows": 16573
   },
   "top_gainers": [
     {
       "dataset": "a_share_daily",
-      "label": "920067.BJ",
-      "pct_change": 66.24
-    },
-    {
-      "dataset": "a_share_daily",
-      "label": "920690.BJ",
-      "pct_change": 29.99
-    },
-    {
-      "dataset": "a_share_daily",
-      "label": "301030.SZ",
-      "pct_change": 20.06
-    },
-    {
-      "dataset": "a_share_daily",
-      "label": "300006.SZ",
+      "label": "300086.SZ",
       "pct_change": 20.05
     },
     {
       "dataset": "a_share_daily",
-      "label": "300007.SZ",
-      "pct_change": 20.01
+      "label": "300703.SZ",
+      "pct_change": 20.03
+    },
+    {
+      "dataset": "a_share_daily",
+      "label": "301089.SZ",
+      "pct_change": 20.02
+    },
+    {
+      "dataset": "a_share_daily",
+      "label": "300290.SZ",
+      "pct_change": 20.0
+    },
+    {
+      "dataset": "a_share_daily",
+      "label": "688066.SH",
+      "pct_change": 20.0
     }
   ],
   "top_losers": [
     {
       "dataset": "a_share_daily",
-      "label": "688066.SH",
-      "pct_change": -19.91
+      "label": "300550.SZ",
+      "pct_change": -20.0
     },
     {
       "dataset": "a_share_daily",
-      "label": "300872.SZ",
-      "pct_change": -15.96
+      "label": "688206.SH",
+      "pct_change": -17.57
     },
     {
       "dataset": "a_share_daily",
-      "label": "600759.SH",
-      "pct_change": -10.22
+      "label": "300844.SZ",
+      "pct_change": -16.34
     },
     {
       "dataset": "a_share_daily",
-      "label": "002620.SZ",
-      "pct_change": -10.02
+      "label": "301209.SZ",
+      "pct_change": -16.33
     },
     {
       "dataset": "a_share_daily",
-      "label": "603976.SH",
-      "pct_change": -10.0
+      "label": "688691.SH",
+      "pct_change": -14.63
     }
   ],
   "datasets": {
@@ -86,25 +86,25 @@
       "raw_rows": 90
     },
     "a_share_daily": {
-      "rows": 5570,
+      "rows": 5573,
       "label": "A股日行情",
       "source": "cache",
       "warning": null,
-      "raw_rows": 5570
+      "raw_rows": 5573
     },
     "fund_basics": {
-      "rows": 3041,
+      "rows": 3043,
       "label": "fund_basics",
       "source": "tushare",
       "warning": null,
-      "raw_rows": 3041
+      "raw_rows": 3043
     },
     "fund_dailies": {
-      "rows": 2215,
+      "rows": 2211,
       "label": "fund_dailies",
       "source": "tushare",
       "warning": null,
-      "raw_rows": 2215
+      "raw_rows": 2211
     },
     "individual_moneyflow": {
       "rows": 5581,
@@ -113,47 +113,26 @@
       "warning": null,
       "raw_rows": 5581
     },
-    "members_881140.TI": {
-      "rows": 162,
-      "label": "members_881140.TI",
+    "members_881273.TI": {
+      "rows": 20,
+      "label": "members_881273.TI",
       "source": null,
       "warning": null,
-      "raw_rows": 162
+      "raw_rows": 20
     },
-    "members_881270.TI": {
-      "rows": 63,
-      "label": "members_881270.TI",
+    "members_881156.TI": {
+      "rows": 5,
+      "label": "members_881156.TI",
       "source": null,
       "warning": null,
-      "raw_rows": 63
+      "raw_rows": 5
     },
-    "members_881121.TI": {
-      "rows": 190,
-      "label": "members_881121.TI",
+    "members_881155.TI": {
+      "rows": 42,
+      "label": "members_881155.TI",
       "source": null,
       "warning": null,
-      "raw_rows": 190
-    },
-    "members_881278.TI": {
-      "rows": 140,
-      "label": "members_881278.TI",
-      "source": null,
-      "warning": null,
-      "raw_rows": 140
-    },
-    "members_881129.TI": {
-      "rows": 93,
-      "label": "members_881129.TI",
-      "source": null,
-      "warning": null,
-      "raw_rows": 93
-    },
-    "members_881131.TI": {
-      "rows": 46,
-      "label": "members_881131.TI",
-      "source": null,
-      "warning": null,
-      "raw_rows": 46
+      "raw_rows": 42
     }
   }
 }
